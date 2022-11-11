@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 //        .enableAutoManage(this,null)
 //        .addApi(Auth.GOOGLE_SIGN_IN_API,gso)
 //        .build();
-
+// help pls
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
