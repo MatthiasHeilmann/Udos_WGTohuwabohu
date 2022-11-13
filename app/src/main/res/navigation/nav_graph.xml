@@ -25,4 +25,24 @@
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/LoginActivity"
+        android:name="com.example.udos_wg_tohuwabohu.LoginActivity"
+        android:label="Login Activity"
+        tools:layout="@layout/activity_login">
+
+        <action
+            android:id="@+id/action_LoginActivity_to_RegisterActivity"
+            app:destination="@id/RegisterActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/RegisterActivity"
+        android:name="com.example.udos_wg_tohuwabohu.RegisterActivity"
+        android:label="Register Activity"
+        tools:layout="@layout/activity_register">
+
+        <action
+            android:id="@+id/action_RegisterActivity_to_LoginActivity"
+            app:destination="@id/LoginActivity" />
+    </fragment>
 </navigation>
