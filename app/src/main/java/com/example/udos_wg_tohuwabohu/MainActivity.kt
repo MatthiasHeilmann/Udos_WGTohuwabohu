@@ -14,6 +14,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -47,5 +49,26 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
         }
+        replaceFragment(ChatFragment())
+        // navigation
+        binding.bottomNavigationView.setOnItemSelectedListener {
+            when(it.itemId){
+                R.id.nav_chat -> replaceFragment(ChatFragment())
+                R.id.nav_finance -> replaceFragment(FinanceFragment())
+                R.id.nav_task -> replaceFragment(TasksFragment())
+                R.id.nav_shopping -> replaceFragment(ShoppingFragment())
+                else -> {
+
+                }
+            }
+            true
+        }
+    }
+
+    private fun replaceFragment(fragment : Fragment){
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frame_layout,fragment)
+        fragmentTransaction.commit()
     }
 }

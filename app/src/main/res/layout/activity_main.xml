@@ -7,51 +7,54 @@
     tools:context=".MainActivity">
 
 
-    <Button
-        android:id="@+id/button_logout"
-        android:layout_width="wrap_content"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Logout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:menu="@menu/botton_nav_menu"/>
 
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="You are logged in successful"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/button_logout"
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.886" />
+        android:id="@+id/frame_layout">
 
-    <TextView
-        android:id="@+id/text_userID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:text="userID"
-        app:layout_constraintBottom_toTopOf="@+id/button_logout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.959" />
+        <Button
+            android:id="@+id/button_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:layout_marginTop="100dp"/>
 
-    <TextView
-        android:id="@+id/text_userEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="userEmail"
-        app:layout_constraintBottom_toTopOf="@+id/button_logout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.978" />
+        <TextView
+            android:id="@+id/text_userEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="userEmail"
+            android:layout_marginTop="85dp"/>
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="You are logged in successful"
+            android:textStyle="bold"
+            android:layout_marginTop="55dp"/>
+
+        <TextView
+            android:id="@+id/text_userID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="userID"
+            android:layout_marginTop="70dp"/>
+
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Chat"
+        android:icon="@drawable/ic_baseline_chat_24"
+        android:id="@+id/nav_chat"/>
+    <item android:title="Aufgaben"
+        android:icon="@drawable/ic_baseline_task_alt_24"
+        android:id="@+id/nav_task"/>
+    <item android:title="Finanzen"
+        android:icon="@drawable/ic_baseline_attach_money_24"
+        android:id="@+id/nav_finance"/>
+    <item android:title="Einkaufsliste"
+        android:icon="@drawable/ic_baseline_shopping_cart_24"
+        android:id="@+id/nav_shopping"/>
+</menu>
