@@ -5,6 +5,10 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    // UDO
     <color name="black">#FF222831</color>
     <color name="white">#FFDDDDDD</color>
+    <color name="udo_blue">#FF30475e</color>
+    <color name="udo_red">#FFf05454</color>
+    <color name="udo_orange">#FFe29e21</color>
 </resources>

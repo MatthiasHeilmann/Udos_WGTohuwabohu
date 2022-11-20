@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity() {
         // get user values and show
         val userID = intent.getStringExtra("user_id")
         val emailID = intent.getStringExtra("email_id")
-        binding.textUserEmail.text = "Email: $userID"
-        binding.textUserID.text = "User ID: $emailID"
+        binding.textUserID.text = "User ID: $userID"
+        binding.textUserEmail.text = "Email: $emailID"
 
         binding.buttonLogout.setOnClickListener{
             FirebaseAuth.getInstance().signOut()
@@ -50,13 +50,26 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
         replaceFragment(ChatFragment())
+        binding.textToolbar.text = "Chat"
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
-                R.id.nav_chat -> replaceFragment(ChatFragment())
-                R.id.nav_finance -> replaceFragment(FinanceFragment())
-                R.id.nav_task -> replaceFragment(TasksFragment())
-                R.id.nav_shopping -> replaceFragment(ShoppingFragment())
+                R.id.nav_chat -> {
+                    replaceFragment(ChatFragment())
+                    binding.textToolbar.text = "Chat"
+                }
+                R.id.nav_finance -> {
+                    replaceFragment(FinanceFragment())
+                    binding.textToolbar.text = "Finanzen"
+                }
+                R.id.nav_task -> {
+                    replaceFragment(TasksFragment())
+                    binding.textToolbar.text = "Aufgaben"
+                }
+                R.id.nav_shopping -> {
+                    replaceFragment(ShoppingFragment())
+                    binding.textToolbar.text = "Einkaufsliste"
+                }
                 else -> {
 
                 }
