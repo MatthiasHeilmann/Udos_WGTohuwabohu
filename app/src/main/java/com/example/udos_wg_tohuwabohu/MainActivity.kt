@@ -3,6 +3,7 @@ package com.example.udos_wg_tohuwabohu
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.IntentSender
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.snackbar.Snackbar
@@ -28,10 +29,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +80,17 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+        // database
+
+        db.collection("mitbewohner")
+            .get()
+            .addOnSuccessListener { result ->
+                println("Hello World!")
+                for (document in result) {
+                    Log.d(TAG, "${document.id} => ${document.data}")
+                    println("${document.id} => ${document.data}")
+                }
+            }
     }
 
     private fun replaceFragment(fragment : Fragment){
