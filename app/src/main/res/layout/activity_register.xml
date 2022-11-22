@@ -48,7 +48,7 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints" />
-
+<!-- TODO: andere EditTexts: Vorname, Nachname, Username -->
     <TextView
         android:id="@+id/text_register_email"
         android:layout_width="wrap_content"

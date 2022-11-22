@@ -18,6 +18,9 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.replace
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
+import com.example.udos_wg_tohuwabohu.dataclasses.Ansprechpartner
+import com.example.udos_wg_tohuwabohu.dataclasses.Mitbewohner
+import com.example.udos_wg_tohuwabohu.dataclasses.WG
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -28,6 +31,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -36,6 +40,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     val db = Firebase.firestore
+    val TAG = "[MainActivity]"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,14 +88,69 @@ class MainActivity : AppCompatActivity() {
         }
         // database
 
-        db.collection("mitbewohner")
+        Log.d(TAG, "connecting to database...")
+        db.collection("mitbewohner").document(userID.toString())
             .get()
             .addOnSuccessListener { result ->
-                println("Hello World!")
-                for (document in result) {
-                    Log.d(TAG, "${document.id} => ${document.data}")
-                    println("${document.id} => ${document.data}")
-                }
+                Log.d(TAG,"found results")
+                Log.d(TAG, "Mein Mitbewohner: ")
+                Log.d(TAG, "${result.id} => ${result.data}")
+
+                // wg reference
+                val wg = result.data?.get("wgID")
+                val docRef: DocumentReference = wg as DocumentReference
+
+                db.collection("wg").document(docRef.id)
+                    .get()
+                    .addOnSuccessListener { result2 ->
+                        Log.d(TAG, "Meine WG: ")
+                        Log.d(TAG, "${result2.id} => ${result2.data}")
+                        // ansprechpartner reference
+                        val ansprechpartner = result2["ansprechpartner"]
+                        val docRef2: DocumentReference = ansprechpartner as DocumentReference
+
+                        db.collection("ansprechpartner").document(docRef2.id)
+                            .get()
+                            .addOnSuccessListener { result3 ->
+                                val myAnsprechpartner: Ansprechpartner = Ansprechpartner(
+                                    docRef2.id,
+                                    result3["vorname"].toString(),
+                                    result3["nachname"].toString(),
+                                    result3["email"].toString(),
+                                    result3["IBAN"].toString(),
+                                    result3["tel_nr"].toString()
+                                )
+                                val myWG: WG = WG(
+                                    docRef.id,
+                                    result2["bezeichnung"].toString(),
+                                    myAnsprechpartner,
+                                    result2["einkaufsliste"] as Map<String, Boolean>
+                                )
+                                val mySelf: Mitbewohner = Mitbewohner(
+                                    result.id,
+                                    result["emailID"].toString(),
+                                    result["vorname"].toString(),
+                                    result["nachname"].toString(),
+                                    result["username"].toString(),
+                                    result["coin_count"] as Long,
+                                    result["guteNudel_count"] as Long,
+                                    result["kontostand"] as Double,
+                                    myWG
+                                )
+                                Log.d(TAG, mySelf.toString())
+                                Log.d(TAG, myWG.toString())
+                                Log.d(TAG, myAnsprechpartner.toString())
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.w(TAG, "Error getting Ansprechpartner Object.", exception)
+                            }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.w(TAG, "Error getting WG Object.", exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting Mitbewohner Object.", exception)
             }
     }
 

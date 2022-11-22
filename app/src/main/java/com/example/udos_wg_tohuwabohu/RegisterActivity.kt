@@ -40,6 +40,7 @@ class RegisterActivity : AppCompatActivity() {
                         "Please enter Password.",
                         Toast.LENGTH_SHORT
                     ).show()
+                    // TODO: restliche Felder
                 } else -> {
                     // get email and password
                     val email : String = binding.textfieldRegisterEmail.text.toString().trim{it<=' '}
@@ -61,6 +62,7 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     intent.putExtra("user_id",firebaseUser.uid)
                                     intent.putExtra("email_id",firebaseUser.email)
+                                    // TODO: create Mitbewohner in database
                                     startActivity(intent)
                                     finish()
                                 }else{
