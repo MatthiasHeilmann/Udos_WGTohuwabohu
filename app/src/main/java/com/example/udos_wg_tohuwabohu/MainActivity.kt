@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "${userRes.id} => ${userRes.data}")
 
                 // wg reference
-                val wgRef = userRes["wgID"] as DocumentReference
+                val wgRef = userRes["wg_id"] as DocumentReference
                 var wg: WG? = null
                 db.collection("wg").document(wgRef.id)
                     .get()
@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 
                                 // Find all mitbewohner for this wg
                                 db.collection("mitbewohner")
-                                    .whereEqualTo("wgID", wgRef)
+                                    .whereEqualTo("wg_id", wgRef)
                                     .get()
                                     .addOnSuccessListener { mRes ->
                                         mRes.forEach { m ->
