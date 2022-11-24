@@ -10,9 +10,9 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
         }
     }
 
-    fun addRoommate(vararg m: Roommate){
-        for (mitbewohner in m) {
-            roommateList[mitbewohner.docID] = mitbewohner
+    fun addRoommate(vararg roommates: Roommate){
+        for (r in roommates) {
+            roommateList[r.docID] = r
         }
     }
 

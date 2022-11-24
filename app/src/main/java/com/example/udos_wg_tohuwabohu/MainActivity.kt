@@ -135,10 +135,6 @@ class MainActivity : AppCompatActivity() {
                                                 val mySelf: Roommate = Roommate(userRes)
                                                 dataHandler.wg = wg
                                                 dataHandler.user = mySelf
-                                                Log.d(TAG, "Printing myself, wg and ansprechpartner")
-                                                Log.d(TAG, mySelf.toString())
-                                                Log.d(TAG, mySelf.wg.toString())
-                                                Log.d(TAG, dataHandler.wg?.contactPerson.toString())
                                             }
                                             .addOnFailureListener{ e->
                                                 Log.w(TAG, "Error getting Tasks objects.", e)
