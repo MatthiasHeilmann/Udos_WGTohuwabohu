@@ -74,28 +74,6 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    private fun testDB(userID: String){
-        db.collection("mitbewohner").document(userID)
-            .get()
-            .addOnSuccessListener { userRes ->
-                // wg reference
-                val wgRef = userRes["wgID"] as DocumentReference
-                db.collection("wg").document(wgRef.id)
-                    .get()
-                    .addOnSuccessListener { wgRes ->
-                        println(wgRes.id + " -> " + wgRes["bezeichnung"])
-                        db.collection("aufgaben")
-                            .whereEqualTo("wg_id", wgRef)
-                            .get()
-                            .addOnSuccessListener { afRes ->
-                                afRes.forEach { af ->
-                                    println("${af["bezeichnung"]} -> ${af["wg_id"]}")
-                                }
-                            }
-                    }
-            }
-    }
-
     private fun loadDatabase(userID: String){
         Log.d(TAG, "connecting to database...")
         db.collection("mitbewohner").document(userID)
@@ -152,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                                                 /*
                                                     All Mitbewohner and Tasks for this WG are loaded here
                                                     TODO: Versuche die scheiße synchron zu handeln damit nicht alles verschachtelt ist
-                                                    TODO: Alternativ: Warte bis die Realtime Database verbunden ist und überlege ob man dann noch die Objekte braucht
+                                                    TODO: Alternativ: Implementiere realtime updates
                                                  */
                                                 val mySelf: Mitbewohner = Mitbewohner(userRes, wg)
                                                 dataHandler.wg = wg
