@@ -2,13 +2,18 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import com.google.firebase.firestore.DocumentSnapshot
 
-data class ContactPerson(val docID: String, val forename: String, val surname: String, val email: String, val IBAN: String, val telNr: String){
+data class ContactPerson(val docID: String, var forename: String?, var surname: String?, var email: String?, var IBAN: String?, var telNr: String?){
     constructor(vals: DocumentSnapshot) :
-        this(vals.id,
-            vals["vorname"].toString(),
-            vals["nachname"].toString(),
-            vals["email"].toString(),
-            vals["IBAN"].toString(),
-            vals["tel_nr"].toString()
+        this(vals.id,null, null, null, null, null
         )
+    {
+            update(vals)
+        }
+    fun update(vals: DocumentSnapshot){
+        this.forename = vals["vorname"].toString()
+        this.surname = vals["nachname"].toString()
+        this.email = vals["email"].toString()
+        this.IBAN = vals["IBAN"].toString()
+        this.telNr = vals["tel_nr"].toString()
+    }
 }

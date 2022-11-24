@@ -4,14 +4,19 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import java.util.Date
 
-class Task(val docId: String, val name: String, val frequency: Int?, val dueDate: Date?, val points: Int?, val roommate: DocumentReference?, val wg: DocumentReference?) {
+class Task(val docId: String, var name: String?, var frequency: Int?, var dueDate: Date?, var points: Int?, var roommate: DocumentReference?, var wg: DocumentReference?) {
     constructor(vals: DocumentSnapshot): this(
-        vals.id,
-        vals["bezeichnung"].toString(),
-        vals.getLong("frequenz")?.toInt(),
-        vals.getTimestamp("frist")?.toDate(),
-        vals.getLong("punkte")?.toInt(),
-        vals.getDocumentReference("erlediger"),
-        vals.getDocumentReference("wg_id")
+        vals.id, null, null, null, null, null, null
     )
+    {
+        update(vals)
+    }
+    fun update(vals: DocumentSnapshot){
+        this.name = vals["bezeichnung"].toString()
+        this.frequency = vals.getLong("frequenz")?.toInt()
+        this.dueDate = vals.getTimestamp("frist")?.toDate()
+        this.points = vals.getLong("punkte")?.toInt()
+        this.roommate = vals.getDocumentReference("erlediger")
+        this.wg = vals.getDocumentReference("wg_id")
+    }
 }

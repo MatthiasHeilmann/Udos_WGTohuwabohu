@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                             .addOnSuccessListener { anRes ->
                                 an = ContactPerson(anRes)
                                 wg = WG(wgRes)
-
+                                dataHandler.contactPerson = an
                                 // Find all mitbewohner for this wg
                                 db.collection("mitbewohner")
                                     .whereEqualTo("wg_id", wgRef)
@@ -131,7 +131,6 @@ class MainActivity : AppCompatActivity() {
                                                 /*
                                                     All Mitbewohner and Tasks for this WG are loaded here
                                                     TODO: Versuche die scheiße synchron zu handeln damit nicht alles verschachtelt ist
-                                                    TODO: Alternativ: Implementiere realtime updates
                                                  */
                                                 val mySelf: Roommate = Roommate(userRes)
                                                 dataHandler.wg = wg
@@ -141,6 +140,9 @@ class MainActivity : AppCompatActivity() {
                                                 Log.d(TAG, mySelf.wg.toString())
                                                 Log.d(TAG, dataHandler.wg?.contactPerson.toString())
                                                 roommateSnapshotListener()
+                                                taskSnapshotListener()
+                                                wgSnapshotListener()
+                                                contactPersonSnapshotListener()
                                             }
                                             .addOnFailureListener{ e->
                                                 Log.w(TAG, "Error getting Tasks objects.", e)
@@ -173,18 +175,86 @@ class MainActivity : AppCompatActivity() {
                     }
                     // What happens if the database document gets changed
                     querySnapshot?.let {
-//                        dataHandler.addRoommate(Roommate(querySnapshot))
                         dataHandler.getRoommate(roommate.docID).update(querySnapshot)
+                        if(dataHandler.getRoommate(roommate.docID).equals(dataHandler.user!!.docID)){
+                            dataHandler.user!!.update(querySnapshot)
+                        }
                         Log.d(
                             TAG,
-                            "MitbewohnerList updated ${dataHandler.roommateList.toString()}"
+                            "RoommateList updated ${dataHandler.roommateList.toString()}"
                         )
                     }
                 }
             Log.d(
                 TAG,
-                "added snapshotlistener to ${roommate.docID}"
+                "added snapshotlistener to Roommate: ${roommate.docID}"
             )
         }
+    }
+    fun taskSnapshotListener(){
+        for (task in dataHandler.taskList.values) {
+            db.collection("aufgaben").document(task.docId)
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                        return@addSnapshotListener
+                    }
+                    // What happens if the database document gets changed
+                    querySnapshot?.let {
+                        dataHandler.getTask(task.docId).update(querySnapshot)
+                        Log.d(
+                            TAG,
+                            "taskList updated ${dataHandler.taskList.toString()}"
+                        )
+                    }
+                }
+            Log.d(
+                TAG,
+                "added snapshotlistener to task: ${task.docId}"
+            )
+        }
+    }
+    fun wgSnapshotListener(){
+        db.collection("wg").document(dataHandler.wg!!.docID)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                firebaseFirestoreException?.let {
+                    Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                    return@addSnapshotListener
+                }
+                // What happens if the database document gets changed
+                querySnapshot?.let {
+                    dataHandler.wg?.update(querySnapshot)
+                    Log.d(
+                        TAG,
+                        "wg updated ${dataHandler.wg.toString()}"
+                    )
+                }
+            }
+        Log.d(
+            TAG,
+            "added snapshotlistener to wg: ${dataHandler.wg.toString()}"
+        )
+
+    }
+    fun contactPersonSnapshotListener(){
+        db.collection("ansprechpartner").document(dataHandler.contactPerson!!.docID)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                firebaseFirestoreException?.let {
+                    Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                    return@addSnapshotListener
+                }
+                // What happens if the database document gets changed
+                querySnapshot?.let {
+                    dataHandler.contactPerson?.update(querySnapshot)
+                    Log.d(
+                        TAG,
+                        "contactPerson updated ${dataHandler.contactPerson.toString()}"
+                    )
+                }
+            }
+        Log.d(
+            TAG,
+            "added snapshotlistener to contactPerson: ${dataHandler.contactPerson.toString()}"
+        )
     }
 }
