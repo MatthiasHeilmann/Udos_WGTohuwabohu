@@ -27,6 +27,27 @@ class RegisterActivity : AppCompatActivity() {
         binding.buttonRegister.setOnClickListener{
             when{
                 // show errors if textfields are empty
+                TextUtils.isEmpty(binding.textfieldFirstName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter your Firstname.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                TextUtils.isEmpty(binding.textfieldLastName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter your Lastname.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                TextUtils.isEmpty(binding.textfieldUserName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter a Username.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 TextUtils.isEmpty(binding.textfieldRegisterEmail.text.toString().trim{it <= ' '}) -> {
                     Toast.makeText(
                         this@RegisterActivity,
@@ -40,11 +61,15 @@ class RegisterActivity : AppCompatActivity() {
                         "Please enter Password.",
                         Toast.LENGTH_SHORT
                     ).show()
-                    // TODO: restliche Felder
-                } else -> {
+                }
+                else -> {
                     // get email and password
                     val email : String = binding.textfieldRegisterEmail.text.toString().trim{it<=' '}
                     val password : String = binding.textfieldRegisterPassword.text.toString().trim{it<=' '}
+                    val firstName : String = binding.textfieldFirstName.text.toString().trim{it<=' '}
+                    val lastName : String = binding.textfieldLastName.text.toString().trim{it<=' '}
+                    val userName : String = binding.textfieldUserName.text.toString().trim{it<=' '}
+
                     // create firebase user
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(
@@ -63,6 +88,10 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.putExtra("user_id",firebaseUser.uid)
                                     intent.putExtra("email_id",firebaseUser.email)
                                     // TODO: create Mitbewohner in database
+
+
+
+
                                     startActivity(intent)
                                     finish()
                                 }else{
@@ -72,10 +101,10 @@ class RegisterActivity : AppCompatActivity() {
                                         task.exception!!.message.toString(),
                                         Toast.LENGTH_SHORT
                                         ).show()
+                                    }
                                 }
-                            }
-                        )
-                }
+                            )
+                        }
             }
         }
 
