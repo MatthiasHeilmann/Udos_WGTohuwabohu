@@ -1,7 +1,7 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
-data class DataHandler(var wg: WG?, var user: Mitbewohner?, var mitbewohnerList: HashMap<String, Mitbewohner>, var aufgabeList: HashMap<String, Aufgabe>) {
-    constructor(): this(null, null, HashMap(), HashMap())
+data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user: Roommate?, var roommateList: HashMap<String, Roommate>, var taskList: HashMap<String, Task>) {
+    constructor(): this(null, null, null, HashMap(), HashMap())
     companion object{
         private var instance: DataHandler? = null;
 
@@ -10,23 +10,23 @@ data class DataHandler(var wg: WG?, var user: Mitbewohner?, var mitbewohnerList:
         }
     }
 
-    fun addMitbewohner(vararg m: Mitbewohner){
+    fun addRoommate(vararg m: Roommate){
         for (mitbewohner in m) {
-            mitbewohnerList[mitbewohner.userID] = mitbewohner
+            roommateList[mitbewohner.docID] = mitbewohner
         }
     }
 
-    fun addAufgabe(vararg t: Aufgabe){
+    fun addTask(vararg t: Task){
         for (aufgabe in t) {
-            aufgabeList[aufgabe.docId] = aufgabe
+            taskList[aufgabe.docId] = aufgabe
         }
     }
     
-    fun getMitbewohner(uid: String): Mitbewohner{
-        return mitbewohnerList[uid]!!
+    fun getRoommate(uid: String): Roommate{
+        return roommateList[uid]!!
     }
     
-    fun getAufgabe(uid: String): Aufgabe{
-        return aufgabeList[uid]!!
+    fun getTask(uid: String): Task{
+        return taskList[uid]!!
     }
 }

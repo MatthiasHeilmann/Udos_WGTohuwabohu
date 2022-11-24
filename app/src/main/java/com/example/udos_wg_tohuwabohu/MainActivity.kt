@@ -92,13 +92,13 @@ class MainActivity : AppCompatActivity() {
 
                         // ansprechpartner reference
                         val anRef = wgRes["ansprechpartner"] as DocumentReference
-                        var an: Ansprechpartner? = null
+                        var an: ContactPerson? = null
 
                         db.collection("ansprechpartner").document(anRef.id)
                             .get()
                             .addOnSuccessListener { anRes ->
-                                an = Ansprechpartner(anRes)
-                                wg = WG(wgRes, an)
+                                an = ContactPerson(anRes)
+                                wg = WG(wgRes)
 
                                 // Find all mitbewohner for this wg
                                 db.collection("mitbewohner")
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                                     .get()
                                     .addOnSuccessListener { mRes ->
                                         mRes.forEach { m ->
-                                            dataHandler.addMitbewohner(Mitbewohner(m, dataHandler.wg))
+                                            dataHandler.addRoommate(Roommate(m))
                                         }
 
                                         // Find all tasks for this wg with all mitbewohner
@@ -123,22 +123,22 @@ class MainActivity : AppCompatActivity() {
                                                     println("Found erlediger id: ${af["erlediger"]}")
                                                     // Get assigned mitbewohner
                                                     var mId = (af["erlediger"] as DocumentReference).id
-                                                    val m = dataHandler.getMitbewohner(mId)
+                                                    val m = dataHandler.getRoommate(mId)
 
-                                                    dataHandler.addAufgabe(Aufgabe(af, m, dataHandler.wg))
+                                                    dataHandler.addTask(Task(af))
                                                 }
                                                 /*
                                                     All Mitbewohner and Tasks for this WG are loaded here
                                                     TODO: Versuche die scheiße synchron zu handeln damit nicht alles verschachtelt ist
                                                     TODO: Alternativ: Implementiere realtime updates
                                                  */
-                                                val mySelf: Mitbewohner = Mitbewohner(userRes, wg)
+                                                val mySelf: Roommate = Roommate(userRes)
                                                 dataHandler.wg = wg
                                                 dataHandler.user = mySelf
                                                 Log.d(TAG, "Printing myself, wg and ansprechpartner")
                                                 Log.d(TAG, mySelf.toString())
                                                 Log.d(TAG, mySelf.wg.toString())
-                                                Log.d(TAG, mySelf.wg?.ansprechpartner.toString())
+                                                Log.d(TAG, dataHandler.wg?.contactPerson.toString())
                                             }
                                             .addOnFailureListener{ e->
                                                 Log.w(TAG, "Error getting Tasks objects.", e)
