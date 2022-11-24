@@ -57,6 +57,10 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(ShoppingFragment())
                     binding.textToolbar.text = "Einkaufsliste"
                 }
+                R.id.nav_calender -> {
+                    replaceFragment(CalendarFragment())
+                    binding.textToolbar.text = "Kalender"
+                }
                 else -> {
 
                 }
