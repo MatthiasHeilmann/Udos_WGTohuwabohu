@@ -3,6 +3,7 @@ package com.example.udos_wg_tohuwabohu
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
@@ -135,6 +136,11 @@ class MainActivity : AppCompatActivity() {
                                                 val mySelf: Roommate = Roommate(userRes)
                                                 dataHandler.wg = wg
                                                 dataHandler.user = mySelf
+                                                Log.d(TAG, "Printing myself, wg and ansprechpartner")
+                                                Log.d(TAG, mySelf.toString())
+                                                Log.d(TAG, mySelf.wg.toString())
+                                                Log.d(TAG, dataHandler.wg?.contactPerson.toString())
+                                                roommateSnapshotListener()
                                             }
                                             .addOnFailureListener{ e->
                                                 Log.w(TAG, "Error getting Tasks objects.", e)
@@ -156,5 +162,29 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.w(TAG, "Error getting Mitbewohner Object.", exception)
             }
+    }
+    fun roommateSnapshotListener(){
+        for (roommate in dataHandler.roommateList.values) {
+            db.collection("mitbewohner").document(roommate.docID)
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                        return@addSnapshotListener
+                    }
+                    // What happens if the database document gets changed
+                    querySnapshot?.let {
+//                        dataHandler.addRoommate(Roommate(querySnapshot))
+                        dataHandler.getRoommate(roommate.docID).update(querySnapshot)
+                        Log.d(
+                            TAG,
+                            "MitbewohnerList updated ${dataHandler.roommateList.toString()}"
+                        )
+                    }
+                }
+            Log.d(
+                TAG,
+                "added snapshotlistener to ${roommate.docID}"
+            )
+        }
     }
 }

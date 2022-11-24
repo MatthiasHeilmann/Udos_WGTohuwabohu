@@ -15,4 +15,14 @@ data class Roommate(val docID: String, val email: String, val forename: String, 
         vals["kontostand"] as Double,
         vals.getDocumentReference("wg_id")
     )
+    fun update(vals: DocumentSnapshot){
+        vals["emailID"].toString()
+        vals["vorname"].toString()
+        vals["nachname"].toString()
+        vals["username"].toString()
+        vals["coin_count"] as Long
+        vals["guteNudel_count"] as Long
+        vals["kontostand"] as Double
+        vals.getDocumentReference("wg_id")
+    }
 }
