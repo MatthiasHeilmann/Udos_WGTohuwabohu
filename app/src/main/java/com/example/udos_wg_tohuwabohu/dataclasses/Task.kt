@@ -1,5 +1,6 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import java.util.Date
 
