@@ -13,6 +13,6 @@ data class Roommate(val docID: String, val email: String, val forename: String, 
         vals["coin_count"] as Long,
         vals["guteNudel_count"] as Long,
         vals["kontostand"] as Double,
-        vals.getDocumentReference("wgID")
+        vals.getDocumentReference("wg_id")
     )
 }

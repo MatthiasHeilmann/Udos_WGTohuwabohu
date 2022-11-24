@@ -12,6 +12,6 @@ class Task(val docId: String, val name: String, val frequency: Int?, val dueDate
         vals.getTimestamp("frist")?.toDate(),
         vals.getLong("punkte")?.toInt(),
         vals.getDocumentReference("erlediger"),
-        vals.getDocumentReference("wgID")
+        vals.getDocumentReference("wg_id")
     )
 }
