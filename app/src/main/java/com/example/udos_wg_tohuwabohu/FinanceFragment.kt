@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -52,5 +53,9 @@ class FinanceFragment : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+    fun createFinanceEntry(name: String, goenner: Roommate, price: Float, schnorrer: HashMap<String, Roommate>) {
+        //TODO neuen Finanzeintrag erstellen
+        //Mitbewohner > Kontostand -> muss angepasst werden
     }
 }

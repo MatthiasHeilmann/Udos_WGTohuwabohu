@@ -53,4 +53,10 @@ class ShoppingFragment : Fragment() {
                 }
             }
     }
+    fun addShoppinglistItem(item: String){
+        //TODO Item zur schoppinglist hinzufügen
+    }
+    fun checkShoppinglistItem(item: String){
+        //TODO Item in database abhaken
+    }
 }

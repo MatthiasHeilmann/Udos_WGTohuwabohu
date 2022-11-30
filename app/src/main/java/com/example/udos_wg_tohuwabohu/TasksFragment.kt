@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import java.util.*
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -52,5 +53,21 @@ class TasksFragment : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+    fun getErlediger(){
+        //TODO Wer muss die nächste Aufgabe erledigen? brauchen hierfür eine Regel
+        //evtl. der, der am wenigesten guteNudel punkte hat oder gerade am wenigsten aufgaben hat?
+    }
+    fun createTask(frist: Date, frequencyInDays: Int, name: String, points: Int){
+        //TODO neue Task erstellen
+        //getErlediger()
+    }
+    fun checkTask(name: String){
+        //TODO Aufgabe abhaken
+        //getErlediger()
+        //frist -> today + frequenz
+    }
+    fun deleteTask(name: String){
+        //TODO Aufgabe löschen
     }
 }
