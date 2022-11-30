@@ -14,6 +14,15 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 
 class MainActivity : AppCompatActivity() {
+    enum class Collection(val call: String){
+        Roommate("mitbewohner"),
+        WG("wg"),
+        ContactPerson("ansprechtpartner"),
+        Task("aufgabe");
+        override fun toString(): String {
+            return call
+        }
+    }
 
     private lateinit var binding: ActivityMainBinding
     val db = Firebase.firestore
@@ -79,96 +88,115 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
+    /**
+     * Fetches needed data for the currently logged in user and it's wg.
+     * Loaded object are then attached to the `dataHandler` singleton.
+     */
     private fun loadDatabase(userID: String){
         Log.d(TAG, "connecting to database...")
-        db.collection("mitbewohner").document(userID)
+        // TODO wait for the load to finish
+        loadUserData(userID)
+
+        // Then add snapshotListener
+        roommateSnapshotListener()
+        taskSnapshotListener()
+        wgSnapshotListener()
+        contactPersonSnapshotListener()
+    }
+
+    /**
+     * Fetches data for the currently logged in user form the firestore `db`.
+     * Calls `loadWGData, loadRoommatesData` and `loadTaskData` with that information
+     * @param {String} userID user id from the logged in user
+     */
+    fun loadUserData(userID: String){
+        db.collection(Collection.Roommate.call).document(userID)
             .get()
             .addOnSuccessListener { userRes ->
-                Log.d(TAG,"found results")
-                Log.d(TAG, "Mein Mitbewohner: ")
-                Log.d(TAG, "${userRes.id} => ${userRes.data}")
-
+                Log.d(TAG,"Current User is: ${userRes.id} => ${userRes.data}")
+                dataHandler.user = Roommate(userRes);
                 // wg reference
                 val wgRef = userRes["wg_id"] as DocumentReference
-                var wg: WG? = null
-                db.collection("wg").document(wgRef.id)
-                    .get()
-                    .addOnSuccessListener { wgRes ->
-
-                        // ansprechpartner reference
-                        val anRef = wgRes["ansprechpartner"] as DocumentReference
-                        var an: ContactPerson? = null
-
-                        db.collection("ansprechpartner").document(anRef.id)
-                            .get()
-                            .addOnSuccessListener { anRes ->
-                                an = ContactPerson(anRes)
-                                wg = WG(wgRes)
-                                dataHandler.contactPerson = an
-                                // Find all mitbewohner for this wg
-                                db.collection("mitbewohner")
-                                    .whereEqualTo("wg_id", wgRef)
-                                    .get()
-                                    .addOnSuccessListener { mRes ->
-                                        mRes.forEach { m ->
-                                            dataHandler.addRoommate(Roommate(m))
-                                        }
-
-                                        // Find all tasks for this wg with all mitbewohner
-                                        println("Searching for all tasks")
-                                        db.collection("aufgaben")
-                                            .whereEqualTo("wg_id", wgRef)
-                                            .get()
-                                            .addOnSuccessListener { afRes ->
-                                                println("got an answer for ${"/" + wgRef.path}")
-                                                println(afRes)
-                                                afRes.forEach { af ->
-                                                    println("Got a task")
-                                                    println(af)
-                                                    println("Found erlediger id: ${af["erlediger"]}")
-                                                    // Get assigned mitbewohner
-                                                    var mId = (af["erlediger"] as DocumentReference).id
-                                                    val m = dataHandler.getRoommate(mId)
-
-                                                    dataHandler.addTask(Task(af))
-                                                }
-                                                /*
-                                                    All Mitbewohner and Tasks for this WG are loaded here
-                                                    TODO: Versuche die scheiße synchron zu handeln damit nicht alles verschachtelt ist
-                                                 */
-                                                val mySelf: Roommate = Roommate(userRes)
-                                                dataHandler.wg = wg
-                                                dataHandler.user = mySelf
-                                                Log.d(TAG, "Printing myself, wg and ansprechpartner")
-                                                Log.d(TAG, mySelf.toString())
-                                                Log.d(TAG, mySelf.wg.toString())
-                                                Log.d(TAG, dataHandler.wg?.contactPerson.toString())
-                                                roommateSnapshotListener()
-                                                taskSnapshotListener()
-                                                wgSnapshotListener()
-                                                contactPersonSnapshotListener()
-                                            }
-                                            .addOnFailureListener{ e->
-                                                Log.w(TAG, "Error getting Tasks objects.", e)
-                                            }
-                                    }
-                                    .addOnFailureListener{ e ->
-                                        Log.w(TAG, "Error getting Mitbewohner objects.", e)
-                                    }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.w(TAG, "Error getting Ansprechpartner Object.", exception)
-                            }
-                        println(wg)
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.w(TAG, "Error getting WG Object.", exception)
-                    }
+                loadWGData(wgRef)
+                loadRoommatesData(wgRef)
+                loadTaskData(wgRef)
             }
             .addOnFailureListener { exception ->
-                Log.w(TAG, "Error getting Mitbewohner Object.", exception)
+                Log.w(TAG, "Error getting Roommate Object.", exception)
             }
     }
+
+    /**
+     * Fetches data for the current user's WG from firestore `db`.
+     * Call `loadContactPeronData` with that information
+     */
+    fun loadWGData(wgRef: DocumentReference){
+        var wg: WG? = null
+        db.collection(Collection.WG.call).document(wgRef.id)
+            .get()
+            .addOnSuccessListener { wgRes ->
+
+                wg = WG(wgRes)
+                dataHandler.wg = wg
+
+                // ansprechpartner reference
+                val anRef = wgRes["ansprechpartner"] as DocumentReference
+                println("Realted to WG: $wg")
+                loadContactPeronData(anRef)
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting WG Object.", exception)
+            }
+    }
+
+    fun loadContactPeronData(anRef: DocumentReference){
+        var an: ContactPerson?
+
+        db.collection(Collection.ContactPerson.call).document(anRef.id)
+            .get()
+            .addOnSuccessListener { anRes ->
+                an = ContactPerson(anRes)
+                dataHandler.contactPerson = an
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting Contact Person Object.", exception)
+            }
+    }
+
+    fun loadRoommatesData(wgRef: DocumentReference){
+        // Find all mitbewohner for this wg
+        db.collection(Collection.Roommate.call)
+            .whereEqualTo("wg_id", wgRef)
+            .get()
+            .addOnSuccessListener { rmRes ->
+                rmRes.forEach { rm ->
+                    dataHandler.addRoommate(Roommate(rm))
+                }
+            }
+            .addOnFailureListener{ e ->
+                Log.w(TAG, "Error getting Roommate objects.", e)
+            }
+    }
+
+    fun loadTaskData(wgRef: DocumentReference){
+        // Find all tasks for this wg with all roommates
+        db.collection(Collection.Task.call)
+            .whereEqualTo("wg_id", wgRef)
+            .get()
+            .addOnSuccessListener { afRes ->
+                afRes.forEach { af ->
+                    // Get assigned mitbewohner
+                    var mId = (af["erlediger"] as DocumentReference).id
+                    val m = dataHandler.getRoommate(mId)
+
+                    dataHandler.addTask(Task(af))
+                }
+            }
+            .addOnFailureListener{ e->
+                Log.w(TAG, "Error getting Tasks objects.", e)
+            }
+    }
+
     fun roommateSnapshotListener(){
         for (roommate in dataHandler.roommateList.values) {
             db.collection("mitbewohner").document(roommate.docID)
