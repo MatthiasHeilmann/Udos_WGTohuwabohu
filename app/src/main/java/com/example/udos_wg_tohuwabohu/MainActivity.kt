@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "${result.id} => ${result.data}")
 
                 // wg reference
-                val wg = result.data?.get("wgID")
+                val wg = result.data?.get("wg_id")
                 val docRef: DocumentReference = wg as DocumentReference
 
                 db.collection("wg").document(docRef.id)
