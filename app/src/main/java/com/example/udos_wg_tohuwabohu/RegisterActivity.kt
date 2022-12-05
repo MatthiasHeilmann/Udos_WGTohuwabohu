@@ -10,6 +10,7 @@ import com.example.udos_wg_tohuwabohu.databinding.ActivityRegisterBinding
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -87,10 +88,9 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     intent.putExtra("user_id",firebaseUser.uid)
                                     intent.putExtra("email_id",firebaseUser.email)
+
                                     // TODO: create Mitbewohner in database
-
-
-
+                                    saveUsertoDatabase(firstName, lastName, userName, email)
 
                                     startActivity(intent)
                                     finish()
@@ -101,14 +101,29 @@ class RegisterActivity : AppCompatActivity() {
                                         task.exception!!.message.toString(),
                                         Toast.LENGTH_SHORT
                                         ).show()
-                                    }
                                 }
-                            )
-                        }
+                            }
+                        )
+                }
             }
         }
-
-
-
     }
+    // upon registry create user in collection "mitbewohner"
+    fun saveUsertoDatabase(firstname: String, lastname: String, username: String, email: String){
+        val db = FirebaseFirestore.getInstance()
+        val user: MutableMap<String, Any> = HashMap()
+        user["vorname"] = firstname                         // ["feldbezeichnung aus collection"]
+        user["nachname"] = lastname
+        user["username"] = username
+        user["emailID"] = email
+        user["wg_id"] = ""                                  // evtl ändern wegen referenz
+        user["coin_count"] = 0
+        user["guteNudel_count"] = 0
+        user["kontostand"] = 0
+
+        db.collection("mitbewohner")
+            .add(user)
+    }
+
+
 }
