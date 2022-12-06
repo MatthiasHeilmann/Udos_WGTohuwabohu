@@ -1,12 +1,17 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View
+import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.example.udos_wg_tohuwabohu.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -15,15 +20,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // if the user is still signed in
-        val user = FirebaseAuth.getInstance().currentUser
-        if(user != null){
-            startMainActivity(
-                FirebaseAuth.getInstance().currentUser!!.uid,
-                FirebaseAuth.getInstance().currentUser!!.uid
-            )
-        }
 
         // go to register activity
         binding.linkGotoRegister.setOnClickListener {
@@ -62,10 +58,16 @@ class LoginActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 // go to main activity with uid and email
-                                startMainActivity(
-                                    FirebaseAuth.getInstance().currentUser!!.uid,
-                                    email
+                                val intent = Intent(this@LoginActivity, LonelyPageActivity::class.java)
+                                intent.flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                intent.putExtra(
+                                    "user_id",
+                                    FirebaseAuth.getInstance().currentUser!!.uid
                                 )
+                                intent.putExtra("email_id", email)
+                                startActivity(intent)
+                                finish()
                             } else {
                                 // if registration was not successful then show error message
                                 Toast.makeText(
@@ -79,21 +81,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-    private fun startMainActivity(userID: String, emailID: String) {
-        val intent = Intent(this@LoginActivity, MainActivity::class.java)
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        intent.putExtra(
-            "user_id",
-            userID
-        )
-        intent.putExtra(
-            "email_id",
-            emailID
-        )
-        startActivity(intent)
-        finish()
-    }
+
 
 
 }

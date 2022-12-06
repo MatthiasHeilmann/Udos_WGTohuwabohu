@@ -1,16 +1,39 @@
 package com.example.udos_wg_tohuwabohu
 
+import android.content.ContentValues.TAG
 import android.content.Intent
+import android.content.IntentSender
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Button
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.*
+import com.example.udos_wg_tohuwabohu.dataclasses.Ansprechpartner
+import com.example.udos_wg_tohuwabohu.dataclasses.Mitbewohner
+import com.example.udos_wg_tohuwabohu.dataclasses.WG
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 
 class MainActivity : AppCompatActivity() {
@@ -18,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     val db = Firebase.firestore
     val TAG = "[MainActivity]"
-    val dataHandler = DataHandler.getInstance();
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,10 +80,6 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(ShoppingFragment())
                     binding.textToolbar.text = "Einkaufsliste"
                 }
-                R.id.nav_calender -> {
-                    replaceFragment(CalendarFragment())
-                    binding.textToolbar.text = "Kalender"
-                }
                 else -> {
 
                 }
@@ -68,98 +87,63 @@ class MainActivity : AppCompatActivity() {
             true
         }
         // database
-        loadDatabase(userID!!)
 
-    }
-
-    private fun replaceFragment(fragment : Fragment){
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.frame_layout,fragment)
-        fragmentTransaction.commit()
-    }
-
-    private fun loadDatabase(userID: String){
         Log.d(TAG, "connecting to database...")
-        db.collection("mitbewohner").document(userID)
+        db.collection("mitbewohner").document(userID.toString())
             .get()
-            .addOnSuccessListener { userRes ->
+            .addOnSuccessListener { result ->
                 Log.d(TAG,"found results")
                 Log.d(TAG, "Mein Mitbewohner: ")
-                Log.d(TAG, "${userRes.id} => ${userRes.data}")
+                Log.d(TAG, "${result.id} => ${result.data}")
 
                 // wg reference
-                val wgRef = userRes["wg_id"] as DocumentReference
-                var wg: WG? = null
-                db.collection("wg").document(wgRef.id)
+                val wg = result.data?.get("wg_id")
+                val docRef: DocumentReference = wg as DocumentReference
+
+                db.collection("wg").document(docRef.id)
                     .get()
-                    .addOnSuccessListener { wgRes ->
-
+                    .addOnSuccessListener { result2 ->
+                        Log.d(TAG, "Meine WG: ")
+                        Log.d(TAG, "${result2.id} => ${result2.data}")
                         // ansprechpartner reference
-                        val anRef = wgRes["ansprechpartner"] as DocumentReference
-                        var an: ContactPerson? = null
+                        val ansprechpartner = result2["ansprechpartner"]
+                        val docRef2: DocumentReference = ansprechpartner as DocumentReference
 
-                        db.collection("ansprechpartner").document(anRef.id)
+                        db.collection("ansprechpartner").document(docRef2.id)
                             .get()
-                            .addOnSuccessListener { anRes ->
-                                an = ContactPerson(anRes)
-                                wg = WG(wgRes)
-                                dataHandler.contactPerson = an
-                                // Find all mitbewohner for this wg
-                                db.collection("mitbewohner")
-                                    .whereEqualTo("wg_id", wgRef)
-                                    .get()
-                                    .addOnSuccessListener { mRes ->
-                                        mRes.forEach { m ->
-                                            dataHandler.addRoommate(Roommate(m))
-                                        }
-
-                                        // Find all tasks for this wg with all mitbewohner
-                                        println("Searching for all tasks")
-                                        db.collection("aufgaben")
-                                            .whereEqualTo("wg_id", wgRef)
-                                            .get()
-                                            .addOnSuccessListener { afRes ->
-                                                println("got an answer for ${"/" + wgRef.path}")
-                                                println(afRes)
-                                                afRes.forEach { af ->
-                                                    println("Got a task")
-                                                    println(af)
-                                                    println("Found erlediger id: ${af["erlediger"]}")
-                                                    // Get assigned mitbewohner
-                                                    var mId = (af["erlediger"] as DocumentReference).id
-                                                    val m = dataHandler.getRoommate(mId)
-
-                                                    dataHandler.addTask(Task(af))
-                                                }
-                                                /*
-                                                    All Mitbewohner and Tasks for this WG are loaded here
-                                                    TODO: Versuche die scheiße synchron zu handeln damit nicht alles verschachtelt ist
-                                                 */
-                                                val mySelf: Roommate = Roommate(userRes)
-                                                dataHandler.wg = wg
-                                                dataHandler.user = mySelf
-                                                Log.d(TAG, "Printing myself, wg and ansprechpartner")
-                                                Log.d(TAG, mySelf.toString())
-                                                Log.d(TAG, mySelf.wg.toString())
-                                                Log.d(TAG, dataHandler.wg?.contactPerson.toString())
-                                                roommateSnapshotListener()
-                                                taskSnapshotListener()
-                                                wgSnapshotListener()
-                                                contactPersonSnapshotListener()
-                                            }
-                                            .addOnFailureListener{ e->
-                                                Log.w(TAG, "Error getting Tasks objects.", e)
-                                            }
-                                    }
-                                    .addOnFailureListener{ e ->
-                                        Log.w(TAG, "Error getting Mitbewohner objects.", e)
-                                    }
+                            .addOnSuccessListener { result3 ->
+                                val myAnsprechpartner: Ansprechpartner = Ansprechpartner(
+                                    docRef2.id,
+                                    result3["vorname"].toString(),
+                                    result3["nachname"].toString(),
+                                    result3["email"].toString(),
+                                    result3["IBAN"].toString(),
+                                    result3["tel_nr"].toString()
+                                )
+                                val myWG: WG = WG(
+                                    docRef.id,
+                                    result2["bezeichnung"].toString(),
+                                    myAnsprechpartner,
+                                    result2["einkaufsliste"] as Map<String, Boolean>
+                                )
+                                val mySelf: Mitbewohner = Mitbewohner(
+                                    result.id,
+                                    result["emailID"].toString(),
+                                    result["vorname"].toString(),
+                                    result["nachname"].toString(),
+                                    result["username"].toString(),
+                                    result["coin_count"] as Long,
+                                    result["guteNudel_count"] as Long,
+                                    result["kontostand"] as Double,
+                                    myWG
+                                )
+                                Log.d(TAG, mySelf.toString())
+                                Log.d(TAG, myWG.toString())
+                                Log.d(TAG, myAnsprechpartner.toString())
                             }
                             .addOnFailureListener { exception ->
                                 Log.w(TAG, "Error getting Ansprechpartner Object.", exception)
                             }
-                        println(wg)
                     }
                     .addOnFailureListener { exception ->
                         Log.w(TAG, "Error getting WG Object.", exception)
@@ -169,96 +153,11 @@ class MainActivity : AppCompatActivity() {
                 Log.w(TAG, "Error getting Mitbewohner Object.", exception)
             }
     }
-    fun roommateSnapshotListener(){
-        for (roommate in dataHandler.roommateList.values) {
-            db.collection("mitbewohner").document(roommate.docID)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
-                        return@addSnapshotListener
-                    }
-                    // What happens if the database document gets changed
-                    querySnapshot?.let {
-                        dataHandler.getRoommate(roommate.docID).update(querySnapshot)
-                        if(dataHandler.getRoommate(roommate.docID).equals(dataHandler.user!!.docID)){
-                            dataHandler.user!!.update(querySnapshot)
-                        }
-                        Log.d(
-                            TAG,
-                            "RoommateList updated ${dataHandler.roommateList.toString()}"
-                        )
-                    }
-                }
-            Log.d(
-                TAG,
-                "added snapshotlistener to Roommate: ${roommate.docID}"
-            )
-        }
-    }
-    fun taskSnapshotListener(){
-        for (task in dataHandler.taskList.values) {
-            db.collection("aufgaben").document(task.docId)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
-                        return@addSnapshotListener
-                    }
-                    // What happens if the database document gets changed
-                    querySnapshot?.let {
-                        dataHandler.getTask(task.docId).update(querySnapshot)
-                        Log.d(
-                            TAG,
-                            "taskList updated ${dataHandler.taskList.toString()}"
-                        )
-                    }
-                }
-            Log.d(
-                TAG,
-                "added snapshotlistener to task: ${task.docId}"
-            )
-        }
-    }
-    fun wgSnapshotListener(){
-        db.collection("wg").document(dataHandler.wg!!.docID)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                firebaseFirestoreException?.let {
-                    Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
-                    return@addSnapshotListener
-                }
-                // What happens if the database document gets changed
-                querySnapshot?.let {
-                    dataHandler.wg?.update(querySnapshot)
-                    Log.d(
-                        TAG,
-                        "wg updated ${dataHandler.wg.toString()}"
-                    )
-                }
-            }
-        Log.d(
-            TAG,
-            "added snapshotlistener to wg: ${dataHandler.wg.toString()}"
-        )
 
-    }
-    fun contactPersonSnapshotListener(){
-        db.collection("ansprechpartner").document(dataHandler.contactPerson!!.docID)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                firebaseFirestoreException?.let {
-                    Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
-                    return@addSnapshotListener
-                }
-                // What happens if the database document gets changed
-                querySnapshot?.let {
-                    dataHandler.contactPerson?.update(querySnapshot)
-                    Log.d(
-                        TAG,
-                        "contactPerson updated ${dataHandler.contactPerson.toString()}"
-                    )
-                }
-            }
-        Log.d(
-            TAG,
-            "added snapshotlistener to contactPerson: ${dataHandler.contactPerson.toString()}"
-        )
+    private fun replaceFragment(fragment : Fragment){
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frame_layout,fragment)
+        fragmentTransaction.commit()
     }
 }
