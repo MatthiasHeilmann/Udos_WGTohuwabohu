@@ -10,6 +10,7 @@ import com.example.udos_wg_tohuwabohu.databinding.ActivityRegisterBinding
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -27,6 +28,27 @@ class RegisterActivity : AppCompatActivity() {
         binding.buttonRegister.setOnClickListener{
             when{
                 // show errors if textfields are empty
+                TextUtils.isEmpty(binding.textfieldFirstName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter your Firstname.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                TextUtils.isEmpty(binding.textfieldLastName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter your Lastname.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                TextUtils.isEmpty(binding.textfieldUserName.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(
+                        this@RegisterActivity,
+                        "Please enter a Username.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 TextUtils.isEmpty(binding.textfieldRegisterEmail.text.toString().trim{it <= ' '}) -> {
                     Toast.makeText(
                         this@RegisterActivity,
@@ -40,11 +62,15 @@ class RegisterActivity : AppCompatActivity() {
                         "Please enter Password.",
                         Toast.LENGTH_SHORT
                     ).show()
-                    // TODO: restliche Felder
-                } else -> {
+                }
+                else -> {
                     // get email and password
                     val email : String = binding.textfieldRegisterEmail.text.toString().trim{it<=' '}
                     val password : String = binding.textfieldRegisterPassword.text.toString().trim{it<=' '}
+                    val firstName : String = binding.textfieldFirstName.text.toString().trim{it<=' '}
+                    val lastName : String = binding.textfieldLastName.text.toString().trim{it<=' '}
+                    val userName : String = binding.textfieldUserName.text.toString().trim{it<=' '}
+
                     // create firebase user
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(
@@ -62,7 +88,10 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     intent.putExtra("user_id",firebaseUser.uid)
                                     intent.putExtra("email_id",firebaseUser.email)
+
                                     // TODO: create Mitbewohner in database
+                                    saveUsertoDatabase(firstName, lastName, userName, email)
+
                                     startActivity(intent)
                                     finish()
                                 }else{
@@ -78,8 +107,23 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-
     }
+    // upon registry create user in collection "mitbewohner"
+    fun saveUsertoDatabase(firstname: String, lastname: String, username: String, email: String){
+        val db = FirebaseFirestore.getInstance()
+        val user: MutableMap<String, Any> = HashMap()
+        user["vorname"] = firstname                         // ["feldbezeichnung aus collection"]
+        user["nachname"] = lastname
+        user["username"] = username
+        user["emailID"] = email
+        user["wg_id"] = ""                                  // evtl ändern wegen referenz
+        user["coin_count"] = 0
+        user["guteNudel_count"] = 0
+        user["kontostand"] = 0
+
+        db.collection("mitbewohner")
+            .add(user)
+    }
+
+
 }
