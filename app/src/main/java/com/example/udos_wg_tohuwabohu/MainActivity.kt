@@ -95,7 +95,13 @@ class MainActivity : AppCompatActivity() {
     private fun loadDatabase(userID: String){
         Log.d(TAG, "connecting to database...")
         // TODO wait for the load to finish
-        loadUserData(userID)
+        loadUserData(userID){ wgRef ->
+            loadWGData(wgRef){ anRef ->
+                loadContactPeronData(anRef)
+            }
+            loadRoommatesData(wgRef)
+            loadTaskData(wgRef)
+        }
 
         // Then add snapshotListener
         roommateSnapshotListener()
@@ -109,7 +115,7 @@ class MainActivity : AppCompatActivity() {
      * Calls `loadWGData, loadRoommatesData` and `loadTaskData` with that information
      * @param {String} userID user id from the logged in user
      */
-    fun loadUserData(userID: String){
+    fun loadUserData(userID: String, callback: (wgRef: DocumentReference) -> Unit){
         db.collection(Collection.Roommate.call).document(userID)
             .get()
             .addOnSuccessListener { userRes ->
@@ -117,9 +123,7 @@ class MainActivity : AppCompatActivity() {
                 dataHandler.user = Roommate(userRes);
                 // wg reference
                 val wgRef = userRes["wg_id"] as DocumentReference
-                loadWGData(wgRef)
-                loadRoommatesData(wgRef)
-                loadTaskData(wgRef)
+                callback(wgRef)
             }
             .addOnFailureListener { exception ->
                 Log.w(TAG, "Error getting Roommate Object.", exception)
@@ -130,7 +134,7 @@ class MainActivity : AppCompatActivity() {
      * Fetches data for the current user's WG from firestore `db`.
      * Call `loadContactPeronData` with that information
      */
-    fun loadWGData(wgRef: DocumentReference){
+    fun loadWGData(wgRef: DocumentReference, callback: (anRef: DocumentReference) -> Unit){
         var wg: WG? = null
         db.collection(Collection.WG.call).document(wgRef.id)
             .get()
@@ -138,11 +142,11 @@ class MainActivity : AppCompatActivity() {
 
                 wg = WG(wgRes)
                 dataHandler.wg = wg
+                println("Realted to WG: $wg")
 
                 // ansprechpartner reference
                 val anRef = wgRes["ansprechpartner"] as DocumentReference
-                println("Realted to WG: $wg")
-                loadContactPeronData(anRef)
+                callback(anRef)
             }
             .addOnFailureListener { exception ->
                 Log.w(TAG, "Error getting WG Object.", exception)
