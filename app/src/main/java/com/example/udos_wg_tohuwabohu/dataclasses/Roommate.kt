@@ -17,7 +17,7 @@ data class Roommate(val docID: String, var email: String?, var forename: String?
         this.username = vals["username"].toString()
         this.coin_count = vals["coin_count"] as Long
         this.guteNudel_count = vals["guteNudel_count"] as Long
-        this.balance = vals["kontostand"] as Double
+        this.balance = vals.getDouble("kontostand")
         this.wg = vals.getDocumentReference("wg_id")
     }
 }
