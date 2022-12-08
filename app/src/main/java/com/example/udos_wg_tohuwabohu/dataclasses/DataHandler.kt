@@ -1,7 +1,7 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
 data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user: Roommate?, var roommateList: HashMap<String, Roommate>, var taskList: HashMap<String, Task>) {
-    constructor(): this(null, null, null, HashMap(), HashMap())
+    private constructor(): this(null, null, null, HashMap(), HashMap())
     companion object{
         private var instance: DataHandler? = null;
 
