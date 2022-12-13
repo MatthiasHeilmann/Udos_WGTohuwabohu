@@ -128,6 +128,7 @@ class RegisterActivity : AppCompatActivity() {
             .document(Firebase.auth.currentUser!!.uid)
             .set(user)
     }
+    // TODo: permission
 
 
 }
