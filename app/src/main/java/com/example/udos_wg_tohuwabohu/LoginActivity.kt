@@ -1,17 +1,12 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
-import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
+import androidx.appcompat.app.AppCompatActivity
 import com.example.udos_wg_tohuwabohu.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -20,6 +15,23 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // check if user is logged in
+        val user = FirebaseAuth.getInstance().currentUser
+        if( user != null){
+            val intent = Intent(this@LoginActivity, LonelyPageActivity::class.java)
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra(
+                "user_id",
+                user.uid
+            )
+            intent.putExtra(
+                "email_id",
+                user.email)
+            startActivity(intent)
+            finish()
+        }
 
         // go to register activity
         binding.linkGotoRegister.setOnClickListener {
