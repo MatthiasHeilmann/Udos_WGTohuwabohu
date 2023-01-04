@@ -1,5 +1,7 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import com.google.firebase.Timestamp
+
 data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user: Roommate?, var roommateList: HashMap<String, Roommate>, var taskList: HashMap<String, Task>) {
     private constructor(): this(null, null, null, HashMap(), HashMap())
     companion object{
@@ -28,5 +30,9 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
     
     fun getTask(uid: String): Task{
         return taskList[uid]!!
+    }
+
+    fun getCalendar(): ArrayList<HashMap<String, Timestamp>>? {
+        return wg!!.calendar
     }
 }
