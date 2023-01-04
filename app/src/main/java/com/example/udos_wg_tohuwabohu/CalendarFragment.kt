@@ -1,10 +1,23 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
+import androidx.cardview.widget.CardView
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
+
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -18,6 +31,7 @@ private const val ARG_PARAM2 = "param2"
 class CalendarFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
+    lateinit var composeView: ComposeView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,14 +39,31 @@ class CalendarFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        var _binding: FragmentCalendarBinding? = null
+
+        // This property is only valid between onCreateView and onDestroyView.
+        var v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+        // Dispose of the Composition when the view's LifecycleOwner
+        // is destroyed
+        //setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        composeView = v.findViewById(R.id.compose_view)
+        composeView.setContent{
+            // In  Compose world
+            CalendarCard(i = "  8  ", shape = MaterialTheme.shapes.large )
+            }
+        return v
+
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_calendar, container, false)
+        //return inflater.inflate(R.layout.fragment_calendar, container, false)
     }
 
     companion object {
@@ -55,3 +86,53 @@ class CalendarFragment : Fragment() {
             }
     }
 }
+
+@Composable
+fun CalendarCard(i: String, shape: Shape){
+    UdosTheme {
+        Card(colors= UdoCardTheme(),modifier = Modifier.requiredHeight(height = 40.dp)) {
+            Row {
+                Card(colors = UdoDateCardTheme()) {
+                    Text(text = i,style = MaterialTheme.typography.displayMedium)
+                }
+                Text(text = "  skrrt skrrt  ", style = MaterialTheme.typography.displayMedium) }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewCalendarCard(){
+            CalendarCard(i = "  8  ", shape = MaterialTheme.shapes.large)
+}
+
+/*@Composable
+fun UdosTheme(
+    colors: Colors,
+    typography: Typography = MaterialTheme.typography,
+    shapes: Shapes = MaterialTheme.shapes,
+    content: @Composable () -> Unit
+): Unit {
+    CalendarCard(i = "Hello World!")
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
