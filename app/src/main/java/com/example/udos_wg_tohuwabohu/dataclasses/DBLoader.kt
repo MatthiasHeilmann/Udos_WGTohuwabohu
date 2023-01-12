@@ -3,7 +3,6 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 import android.util.Log
 import android.widget.Toast
 import com.example.udos_wg_tohuwabohu.MainActivity
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
@@ -57,7 +56,7 @@ class DBLoader private constructor() {
         dataHandler.getChat().forEach { m ->
             Log.d(
                 TAG,
-                "${dataHandler.getRoommate(m.user!!.id).username} said: ${m.message} at ${m.timestamp}"
+                "${dataHandler.getRoommate(m.user!!.id)?.username} said: ${m.message} at ${m.timestamp}"
             )
         }
 
@@ -201,9 +200,9 @@ class DBLoader private constructor() {
                     }
                     // What happens if the database document gets changed
                     documentSnapshot?.let {
-                        dataHandler.getRoommate(roommate.docID).update(it)
+                        dataHandler.getRoommate(roommate.docID)?.update(it)
                         if (dataHandler.getRoommate(roommate.docID)
-                                .equals(dataHandler.user!!.docID)
+                                ?.equals(dataHandler.user!!.docID) == true
                         ) {
                             dataHandler.user!!.update(it)
                         }
