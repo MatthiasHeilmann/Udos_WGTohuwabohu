@@ -1,10 +1,10 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -53,4 +53,87 @@ class ChatFragment : Fragment() {
                 }
             }
     }
+/*
+    @Composable
+    fun MessageCard(msg: Message) {
+        Row(modifier = Modifier.padding(all = 8.dp)) {
+            Image(
+                painter = painterResource(R.drawable.funny),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondary, CircleShape)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    text = msg.author,
+                    color = MaterialTheme.colors.secondaryVariant,
+                    style = MaterialTheme.typography.subtitle2
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Surface(shape = MaterialTheme.shapes.medium, elevation = 1.dp) {
+                    Text(
+                        text = msg.body,
+                        modifier = Modifier.padding(all = 4.dp),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun GreetingBox(msg: Message){
+        Box(modifier = Modifier.wrapContentSize()){
+            Column(modifier = Modifier.wrapContentSize()){
+                if(true){
+
+                }
+                else{
+
+                }
+                Text(
+                    text = msg.author,
+                    color = MaterialTheme.colors.secondaryVariant,
+                    style = MaterialTheme.typography.subtitle2
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Surface(elevation = 10.dp) {
+                    Text(
+                        text = msg.body,
+                        modifier = Modifier.padding(all = 4.dp),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
+                Box(){
+                    Text(
+                        "20.02.2022",
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    )
+                    Text(
+                        "Leo",
+                        modifier = Modifier
+                            .padding(end = 150.dp)
+                    )
+                }
+            }
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingBoxPreview() {
+        TestComposeTheme {
+            GreetingBox(Message("Hello", "Was wenn man Text macht so"))
+        }
+    }
+ */
 }
