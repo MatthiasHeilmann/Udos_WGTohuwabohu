@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.snap
 import com.example.udos_wg_tohuwabohu.MainActivity
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -15,25 +16,26 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.asDeferred
 
 class DBLoader private constructor() {
-    companion object{
+    companion object {
         private var instance: DBLoader? = null;
 
-        fun getInstance(): DBLoader = instance ?: synchronized(this){
-            instance?: DBLoader().also { instance = it }
+        fun getInstance(): DBLoader = instance ?: synchronized(this) {
+            instance ?: DBLoader().also { instance = it }
         }
     }
 
     enum class Collection(val call: String) {
         Roommate("mitbewohner"),
         WG("wg"),
+        CHAT("chat_files"),
         ContactPerson("ansprechtpartner"),
-        Task("aufgaben");
+        Task("tasks");
         override fun toString(): String {
             return call
         }
     }
 
-    private var mainActivity : MainActivity? = null
+    private var mainActivity: MainActivity? = null
     private val db = Firebase.firestore
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[MainActivity]"
@@ -47,15 +49,25 @@ class DBLoader private constructor() {
         // Wait for the load to finish
         val wgRef = async { loadUserData(userID) }.await()
         val anRef = async { loadWGData(wgRef) }.await()
+        async { loadChatFilesData(wgRef) }.await()
         async { loadContactPeronData(anRef) }.await()
         async { loadRoommatesData(wgRef) }.await()
         async { loadTaskData(wgRef) }.await()
+
+        Log.d(TAG, "#################################################")
+        dataHandler.getChat().forEach { m ->
+            Log.d(
+                TAG,
+                "${dataHandler.getRoommate(m.user!!.id).username} said: ${m.message} at ${m.timestamp}"
+            )
+        }
 
         Log.d(TAG, "Loading Database succesfull")
 
         // Then add snapshotListener
         roommateSnapshotListener()
         taskSnapshotListener()
+        chatSnapshotListener()
         wgSnapshotListener()
         contactPersonSnapshotListener()
         addTaskCollectionSnapshotListener()
@@ -69,11 +81,11 @@ class DBLoader private constructor() {
     private suspend fun loadUserData(userID: String): DocumentReference {
         val wgRef: DocumentReference?
         var userRes: DocumentSnapshot? = null
-        try{
+        try {
             userRes = db.collection(Collection.Roommate.call).document(userID)
                 .get()
                 .asDeferred().await()
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             // TODO handle excpetion: Give toast and shutdown app
             e.printStackTrace()
         }
@@ -96,12 +108,13 @@ class DBLoader private constructor() {
             wgRes = db.collection(Collection.WG.call).document(wgRef.id)
                 .get()
                 .asDeferred().await()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             // Todo handle exception: give toast and shutdown
             e.printStackTrace()
         }
 
         wg = WG(wgRes!!)
+
         dataHandler.wg = wg
 
         // ansprechpartner reference
@@ -109,7 +122,7 @@ class DBLoader private constructor() {
         return anRef
     }
 
-    private suspend fun loadContactPeronData(anRef: DocumentReference){
+    private suspend fun loadContactPeronData(anRef: DocumentReference) {
         val an: ContactPerson?
         var anRes: DocumentSnapshot? = null
         try {
@@ -117,7 +130,7 @@ class DBLoader private constructor() {
             anRes = db.collection(Collection.ContactPerson.call).document(anRef.id)
                 .get()
                 .asDeferred().await()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             // TODO handle exception: Give toast and create default contact person
             e.printStackTrace()
         }
@@ -125,7 +138,23 @@ class DBLoader private constructor() {
         dataHandler.contactPerson = an
     }
 
-    private suspend fun loadRoommatesData(wgRef: DocumentReference){
+    private suspend fun loadChatFilesData(wgRef: DocumentReference) {
+        var chatRes: QuerySnapshot? = null
+        try {
+            chatRes = db.collection(Collection.WG.call)
+                .document(wgRef.id).collection(Collection.CHAT.call)
+                .orderBy("timestamp").limit(50)
+                .get().asDeferred().await()
+        } catch (e: Exception) {
+            // TODO handle exception: Give toast and empty chat object
+            e.printStackTrace()
+        }
+        chatRes?.forEach { msg ->
+            dataHandler.addChatMessage(ChatMessage(msg))
+        }
+    }
+
+    private suspend fun loadRoommatesData(wgRef: DocumentReference) {
         var rmRes: QuerySnapshot? = null
         // Find all mitbewohner for this wg
         try {
@@ -133,7 +162,7 @@ class DBLoader private constructor() {
                 .whereEqualTo("wg_id", wgRef)
                 .get()
                 .asDeferred().await()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             // TODO handle exception: Give toast and shutdown app
             e.printStackTrace()
         }
@@ -143,7 +172,7 @@ class DBLoader private constructor() {
         }
     }
 
-    private suspend fun loadTaskData(wgRef: DocumentReference){
+    private suspend fun loadTaskData(wgRef: DocumentReference) {
         var tasksRes: QuerySnapshot? = null
         try {
             tasksRes = db.collection(Collection.WG.call)
@@ -151,7 +180,7 @@ class DBLoader private constructor() {
                 .collection("tasks")
                 .get()
                 .asDeferred().await()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             // TODO handle exception: Give toast and shutdown app
             e.printStackTrace()
         }
@@ -163,19 +192,21 @@ class DBLoader private constructor() {
 
     }
 
-    private fun roommateSnapshotListener(){
+    private fun roommateSnapshotListener() {
         for (roommate in dataHandler.roommateList.values) {
-            db.collection("mitbewohner").document(roommate.docID)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+            db.collection(Collection.Roommate.call).document(roommate.docID)
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
                     // What happens if the database document gets changed
-                    querySnapshot?.let {
-                        dataHandler.getRoommate(roommate.docID).update(querySnapshot)
-                        if(dataHandler.getRoommate(roommate.docID).equals(dataHandler.user!!.docID)){
-                            dataHandler.user!!.update(querySnapshot)
+                    documentSnapshot?.let {
+                        dataHandler.getRoommate(roommate.docID).update(it)
+                        if (dataHandler.getRoommate(roommate.docID)
+                                .equals(dataHandler.user!!.docID)
+                        ) {
+                            dataHandler.user!!.update(it)
                         }
                         Log.d(
                             TAG,
@@ -215,15 +246,16 @@ class DBLoader private constructor() {
             )
         }
     }
-    /**
+
+/**
      * Listens to the whole collection tasks
      * adds new tasks to dataHandler
      * deletes deleted tasks from dataHandler
      */
     private fun addTaskCollectionSnapshotListener(){
-            db.collection("wg")
+            db.collection(Collection.WG.call)
             .document(dataHandler.wg!!.docID)
-            .collection("tasks")
+            .collection(Collection.Task.call)
                 // Listener for collection
             .addSnapshotListener{ snapshots,e ->
                 if(e != null){
@@ -258,8 +290,9 @@ class DBLoader private constructor() {
                 }
             }
     }
-    private fun wgSnapshotListener(){
-        db.collection("wg").document(dataHandler.wg!!.docID)
+    private fun chatSnapshotListener() {
+        db.collection(Collection.WG.call)
+            .document(dataHandler.wg!!.docID).collection(Collection.CHAT.call)
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 firebaseFirestoreException?.let {
                     Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -267,7 +300,28 @@ class DBLoader private constructor() {
                 }
                 // What happens if the database document gets changed
                 querySnapshot?.let {
-                    dataHandler.wg?.update(querySnapshot)
+                    it.forEach { msg ->
+                        dataHandler.addChatMessage(ChatMessage(msg))
+                    }
+                    Log.d(
+                        TAG,
+                        "chat updated $it"
+                    )
+                }
+            }
+        Log.d(TAG, "Added snapshotlistener to chat")
+    }
+
+    private fun wgSnapshotListener() {
+        db.collection(Collection.WG.call).document(dataHandler.wg!!.docID)
+            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                firebaseFirestoreException?.let {
+                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                    return@addSnapshotListener
+                }
+                // What happens if the database document gets changed
+                documentSnapshot?.let {
+                    dataHandler.wg?.update(it)
                     Log.d(
                         TAG,
                         "wg updated ${dataHandler.wg.toString()}"
@@ -280,16 +334,17 @@ class DBLoader private constructor() {
         )
 
     }
-    private fun contactPersonSnapshotListener(){
-        db.collection("ansprechpartner").document(dataHandler.contactPerson!!.docID)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+
+    private fun contactPersonSnapshotListener() {
+        db.collection(Collection.ContactPerson.call).document(dataHandler.contactPerson!!.docID)
+            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                 firebaseFirestoreException?.let {
                     Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                     return@addSnapshotListener
                 }
                 // What happens if the database document gets changed
-                querySnapshot?.let {
-                    dataHandler.contactPerson?.update(querySnapshot)
+                documentSnapshot?.let {
+                    dataHandler.contactPerson?.update(it)
                     Log.d(
                         TAG,
                         "contactPerson updated ${dataHandler.contactPerson.toString()}"
@@ -302,7 +357,7 @@ class DBLoader private constructor() {
         )
     }
 
-    fun setMainActivity(mainActivity: MainActivity){
+    fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
     }
 }
