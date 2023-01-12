@@ -1,5 +1,7 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import com.google.firebase.firestore.DocumentReference
+
 import com.google.firebase.Timestamp
 
 data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user: Roommate?, var roommateList: HashMap<String, Roommate>, var taskList: HashMap<String, Task>, var chat: ArrayList<ChatMessage>) {
@@ -35,8 +37,8 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
         return chat.toTypedArray()
     }
 
-    fun getRoommate(uid: String): Roommate{
-        return roommateList[uid]!!
+    fun getRoommate(uid: String?): Roommate?{
+        return roommateList[uid]
     }
     
     fun getTask(uid: String): Task{
