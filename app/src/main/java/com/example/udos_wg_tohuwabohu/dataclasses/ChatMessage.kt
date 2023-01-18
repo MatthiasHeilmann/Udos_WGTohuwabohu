@@ -2,7 +2,6 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import java.sql.Timestamp
 import java.util.Date
 
 class ChatMessage(val docId: String, var message: String?, var timestamp: Date?, var user: DocumentReference?) {
