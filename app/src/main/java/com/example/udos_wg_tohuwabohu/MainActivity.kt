@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val dbLoader = DBLoader.getInstance()
+    private val dataHandler = DataHandler.getInstance()
     val TAG = "[MainActivity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +28,11 @@ class MainActivity : AppCompatActivity() {
         // get user values and show
         val userID = intent.getStringExtra("user_id")
         val emailID = intent.getStringExtra("email_id")
+
+        // load database
+        dbLoader.setMainActivity(this)
+        dbLoader.loadDatabase(userID!!)
+
         binding.textUserID.text = "User ID: $userID"
         binding.textUserEmail.text = "Email: $emailID"
 
@@ -34,13 +41,16 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
         }
-        replaceFragment(ChatFragment())
+
+        var chatInstance = ChatFragment.newInstance(*dataHandler.getChat());
+
+        replaceFragment(chatInstance)
         binding.textToolbar.text = "Chat"
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
                 R.id.nav_chat -> {
-                    replaceFragment(ChatFragment())
+                    replaceFragment(chatInstance)
                     binding.textToolbar.text = "Chat"
                 }
                 R.id.nav_finance -> {
@@ -65,11 +75,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        // database
-        val dbLoader = DBLoader.getInstance()
-        dbLoader.setMainActivity(this)
-        dbLoader.loadDatabase(userID!!)
-
     }
 
     private fun replaceFragment(fragment : Fragment){
