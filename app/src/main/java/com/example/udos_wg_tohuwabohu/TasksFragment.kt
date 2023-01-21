@@ -21,23 +21,20 @@ import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
 /**
- * A simple [Fragment] subclass.
- * Use the [TasksFragment.newInstance] factory method to
- * create an instance of this fragment.
+ *
  */
 class TasksFragment : Fragment() {
     lateinit var composeView: ComposeView
-    val TAG: String = "[TASKS FRAGMENT]"
-    val dataHandler = DataHandler.getInstance()
-    var tasksData = dataHandler.getTasks()
-    val myFirestore = Firebase.firestore
-    val roommateCollection = DBLoader.Collection.Roommate.toString()
+    private val TAG: String = "[TASKS FRAGMENT]"
+    private val dataHandler = DataHandler.getInstance()
+    private var tasksData = dataHandler.getTasks()
+    private val myFirestore = Firebase.firestore
+    private val roommateCollection = DBLoader.Collection.Roommate.toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +44,11 @@ class TasksFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         Log.d("[TasksFragment]",tasksData.toString() )
         var _binding: FragmentTasksBinding? = null
         // This property is only valid between onCreateView and onDestroyView.
-        var v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
+        val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
         // Dispose of the Composition when the view's LifecycleOwner
         // is destroyed
         //setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -82,11 +79,12 @@ class TasksFragment : Fragment() {
                             roommate.username?.let { Text(text = it) }
                         }
                         Button(onClick = {
-                                var myTask: Task? = tasksData?.get(taskKey)
+                                val myTask: Task? = tasksData?.get(taskKey)
                                 myTask?.let { checkTask(it) }
                                 if (myTask != null) {
                                     myTask.points?.let { givePoints(roommate, it) }
                                 }
+//                                createTaskTest()
                                 Log.d(TAG,"Button clicked")
                             },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoGray),
@@ -116,7 +114,7 @@ class TasksFragment : Fragment() {
         val taskMonth = date.month+1
         val taskYear = date.year+1900
         
-        var taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
+        val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
         when{
             taskYear>currentYear -> return Pair("Am " + taskDate + " fällig",UdoRed)
             taskYear<currentYear -> return Pair("Am " + taskDate + " fällig",UdoGray)
@@ -129,7 +127,7 @@ class TasksFragment : Fragment() {
         }
         return Pair("Am " + taskDate + " fällig", UdoGray)
     }
-    fun formatNumber(n: Int): String {
+    private fun formatNumber(n: Int): String {
         return if (n > 9) "" + n else "0" + n
     }
 
@@ -176,18 +174,37 @@ class TasksFragment : Fragment() {
         }
         return worstMate
     }
+    fun createTaskTest(){createTask(Date(),7,"Klo putzen",6)}
     fun createTask(frist: Date, frequencyInDays: Int, name: String, points: Int){
-        //TODO neue Task erstellen
-        //getErlediger()
+        val wgDocRef = dataHandler.wg?.let {
+            myFirestore.collection(DBLoader.Collection.WG.toString()).document(
+                it.docID)
+        }
+        val completerDocRef = getCompleter()?.let {
+            myFirestore.collection("Mitbewohner").document(
+                it.docID)
+        }
+        val myTask: MutableMap<String, Any> = HashMap()
+        myTask["bezeichnung"] = name
+        myTask["completed"] = false
+        myTask["frequenz"] = frequencyInDays
+        myTask["frist"] = frist
+        myTask["punkte"] = points
+        myTask["wg_id"] = wgDocRef!!
+        myTask["erlediger"] = completerDocRef!!
+        myFirestore.collection(DBLoader.Collection.Task.toString())
+            .add(myTask)
     }
     fun checkTask(task: Task) {
         val newCompleter = getCompleter()
+        var newDate = Date()
         val c = Calendar.getInstance()
-        c.time = task.dueDate
+        c.time = newDate
         task.frequency?.let { c.add(Calendar.DATE, it) }
-        val newDate: Date = c.time
+        newDate = c.time
         if (newCompleter != null) {
-            myFirestore.collection(DBLoader.Collection.Task.toString()).document(task.docId).update(mapOf("frist" to newDate,"erlediger" to myFirestore.collection("Mitbewohner").document(newCompleter.docID)))
+            val newCompleterRef = myFirestore.collection("Mitbewohner").document(newCompleter.docID)
+            myFirestore.collection(DBLoader.Collection.Task.toString()).document(task.docId).update(mapOf("frist" to newDate,"erlediger" to newCompleterRef))
         }
     }
     fun deleteTask(name: String){
