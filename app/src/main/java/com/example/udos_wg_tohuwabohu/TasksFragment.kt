@@ -117,23 +117,17 @@ class TasksFragment : Fragment() {
         val taskYear = date.year+1900
         
         var taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
-//        if(taskYear!=currentYear) return "Am " + taskDate + " fällig"
-//        if(taskMonth!=currentMonth) return "Am " + taskDate + " fällig"
-//        if(taskDay == currentDay) return "Heute fällig"
-//        if(taskDay == currentDay+1) return "Morgen fällig"
-//        if(taskDay == currentDay-1) return "Gestern fällig"
         when{
             taskYear>currentYear -> return Pair("Am " + taskDate + " fällig",UdoRed)
             taskYear<currentYear -> return Pair("Am " + taskDate + " fällig",UdoGray)
-            taskMonth>taskYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskMonth<taskYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
             taskDay==currentDay-1 -> return Pair("Gestern fällig", UdoRed)
             taskDay<currentDay -> return Pair("Am " + taskDate + " fällig", UdoRed)
         }
         return Pair("Am " + taskDate + " fällig", UdoGray)
-//        return "Am " + taskDate + " fällig"
     }
     fun formatNumber(n: Int): String {
         return if (n > 9) "" + n else "0" + n
