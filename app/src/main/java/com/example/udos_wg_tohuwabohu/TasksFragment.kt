@@ -6,23 +6,21 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
-import com.google.firebase.Timestamp
+import com.google.android.material.tabs.TabLayout.TabGravity
 import java.util.*
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +36,7 @@ class TasksFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     lateinit var composeView: ComposeView
+    val TAG: String = "[TASKS FRAGMENT]"
     var tasksData = DataHandler.getInstance().getTasks()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,40 +68,66 @@ class TasksFragment : Fragment() {
     }
 
     @Composable
-    fun TaskCard(i: String, shape: Shape, cardText: String){
-        UdosTheme {
-            Card(colors= UdoCardTheme(),modifier = Modifier.requiredHeight(height = 80.dp)) {
-                Row {
-                    Card(colors = UdoDateCardTheme()) {
-                        Text(text = i,style = MaterialTheme.typography.displayMedium)
+    fun TaskCard(taskTitle:String, dueDate: String, frequency:String, roommate: Roommate?){
+//        UdosTheme {
+//            Card(colors= UdoCardTheme(),modifier = Modifier.requiredHeight(height = 80.dp)) {
+//                Row {
+//                    Card(colors = UdoDateCardTheme()) {
+//                        Text(text = i,style = MaterialTheme.typography.displayMedium)
+//                    }
+//                    Text(text = cardText, style = MaterialTheme.typography.displayMedium) }
+//            }
+//        }
+//        UdosTheme {
+            Card(colors = UdoCardTheme(), modifier = Modifier
+//                .requiredHeight(height = 100.dp)
+//                .requiredWidthIn(300.dp, 300.dp)
+                .padding(5.dp)){
+                Row(modifier = Modifier.padding(10.dp)){
+                    Column{
+                        Text(text = taskTitle)
+                        Text(text = dueDate)
+                        Text(text = frequency)
                     }
-                    Text(text = cardText, style = MaterialTheme.typography.displayMedium) }
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    Column(horizontalAlignment = Alignment.End)
+                        {
+                        Text(text = "Matthias Heilmann")
+                        Button(onClick = {
+                             // TODO button function
+                                 Log.d(TAG,"Button clicked")
+                             },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoGray),
+                            modifier = Modifier.absolutePadding(4.dp),
+                            shape = RoundedCornerShape(5)
+                        ) {
+                            Text(text = "Erledigt")
+                        }
+                    }
+                }
+
+
             }
-        }
     }
 
     @Preview
     @Composable
     fun PreviewTaskCard(){
-        TaskCard(i = "  8  ", shape = MaterialTheme.shapes.large, cardText = "Task Test")
+        TaskCard("Müll rausbringen","23.01.2023","Wöchentlich",null)
     }
 
     @Composable
     fun FullTasks(taskData: HashMap<String, Task>){
         Column {
-//            taskData.forEach { appointment: HashMap<String, Timestamp> ->
-//                TaskCard(
-//                    i = appointment.values.first().toDate().day.toString(),
-//                    shape = MaterialTheme.shapes.large,
-//                    cardText = appointment.keys.first()
-//                )
-//            }
             tasksData?.forEach { task ->
-                TaskCard(
-                    i = task.key,
-                    shape = MaterialTheme.shapes.large,
-                    cardText = task.value.name ?: "default"
-                )
+                task.value.name?.let {
+                    TaskCard(
+                        taskTitle = it,
+                        dueDate = task.value.dueDate.toString(),
+                        frequency = task.value.frequency.toString(),
+                        roommate = null
+                    )
+                }
             }
         }
     }

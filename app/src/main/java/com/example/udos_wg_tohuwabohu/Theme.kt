@@ -1,5 +1,7 @@
 package com.example.udos_wg_tohuwabohu
 
+import androidx.compose.material.ButtonColors
+import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.lightColors
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialogDefaults.containerColor
@@ -44,6 +46,11 @@ fun UdoCardTheme(): CardColors {
     val UdoCardColors= cardColors(containerColor= UdoDarkBlue, contentColor= UdoGray, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoCardColors
 }
+
+//@Composable
+//fun UdoButtonTheme(): androidx.compose.material3.ButtonColors {
+//
+//}
 
 @Composable
 fun UdoDateCardTheme(): CardColors {
