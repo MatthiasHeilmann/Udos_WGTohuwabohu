@@ -6,8 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -144,7 +149,10 @@ class TasksFragment : Fragment() {
 
     @Composable
     fun FullTasks(taskData: HashMap<String, Task>){
-        Column {
+        val scrollState = rememberScrollState()
+        Column (modifier = Modifier
+            .verticalScroll(rememberScrollState())
+        ){
             tasksData?.forEach { task ->
                 if(task.value.name == null || task.value.dueDate == null || task.value.frequency==null) return@forEach
                 val roommate: Roommate = dataHandler.getRoommate(task.value.roommate!!.id)
