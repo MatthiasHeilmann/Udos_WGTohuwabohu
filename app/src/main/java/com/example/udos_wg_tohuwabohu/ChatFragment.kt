@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -13,9 +14,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterEnd
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
@@ -107,17 +112,15 @@ class ChatFragment : Fragment() {
                     state = ScrollState(0),
                     reverseScrolling = true
                 )
-                .weight(10f, false)
+                .weight(1f, false)
             ) {
                 messages.forEach { msg ->
                     MessageCard(msg)
                 }
             }
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f, false),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .align(CenterHorizontally)
             ) {
                 MessageInput()
             }
@@ -128,21 +131,41 @@ class ChatFragment : Fragment() {
     fun MessageInput() {
         // TODO get input event and upload to database
         var text by remember { mutableStateOf(TextFieldValue("")) }
+        Box(){
+            TextField(
+                value = text,
+                onValueChange = {
+                    text = it
+                },
+                label = { Text(text = "Message") },
+                placeholder = { Text(text = "Type a message") },
+            )
 
-        TextField(
-            value = text,
-            onValueChange = {
-                text = it
-            },
-            label = { Text(text = "Message") },
-            placeholder = { Text(text = "Type a message") },
-            leadingIcon = {
+            Button(
+                modifier = Modifier.align(CenterEnd),
+                onClick = {
+                    Toast.makeText(
+                        activity,
+                        text.toString(),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                // Uses ButtonDefaults.ContentPadding by default
+                contentPadding = PaddingValues(
+                    start = 20.dp,
+                    top = 12.dp,
+                    end = 20.dp,
+                    bottom = 12.dp
+                )
+            ) {
+                // Inner content including an icon and a text label
                 Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = "sendIcon"
+                    Icons.Filled.Send,
+                    contentDescription = "Send Message",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
             }
-        )
+        }
     }
 
     @Composable
@@ -202,9 +225,15 @@ class ChatFragment : Fragment() {
             ChatMessage("", "Jo was geht", Date(), null),
             ChatMessage("", "Jo was geht", Date(), null),
             ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
+            ChatMessage("", "Jo was geht", Date(), null),
             ChatMessage("", "Hello there", Date(), null),
             ChatMessage("", "Hello there", Date(), null),
             ChatMessage("", "Hello there", Date(), null),
