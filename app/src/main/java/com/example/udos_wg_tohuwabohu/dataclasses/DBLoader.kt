@@ -2,7 +2,9 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.snap
 import com.example.udos_wg_tohuwabohu.MainActivity
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
@@ -56,6 +58,7 @@ class DBLoader private constructor() {
         taskSnapshotListener()
         wgSnapshotListener()
         contactPersonSnapshotListener()
+        addTaskCollectionSnapshotListener()
     }
 
     /**
@@ -186,7 +189,7 @@ class DBLoader private constructor() {
             )
         }
     }
-    private fun taskSnapshotListener(){
+    private fun taskSnapshotListener() {
         for (task in dataHandler.taskList.values) {
             db.collection("wg")
                 .document(dataHandler.wg!!.docID)
@@ -211,6 +214,49 @@ class DBLoader private constructor() {
                 "added snapshotlistener to task: ${task.docId}"
             )
         }
+    }
+    /**
+     * Listens to the whole collection tasks
+     * adds new tasks to dataHandler
+     * deletes deleted tasks from dataHandler
+     */
+    private fun addTaskCollectionSnapshotListener(){
+            db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .collection("tasks")
+                // Listener for collection
+            .addSnapshotListener{ snapshots,e ->
+                if(e != null){
+                    Log.d(TAG,"listen:error",e)
+                    return@addSnapshotListener
+                }
+                for(dc in snapshots!!.documentChanges){
+                    // for new documents
+                    if(dc.type == DocumentChange.Type.ADDED){
+                        Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
+                        try{
+                            // get new document as DocumentSnapshot and add to dataHandler
+                            db.collection("wg")
+                                .document(dataHandler.wg!!.docID)
+                                .collection("tasks")
+                                .document(dc.document.id)
+                                .get()
+                                .addOnSuccessListener { document ->
+                                    dataHandler.addTask(Task(document))
+                                    //TODO refresh fragment if active
+                                }
+                        }catch (e: Exception){
+                            Log.d(TAG, "Error getting new task")
+                            //TODO Exception
+                        }
+                        // for deleted documents
+                    }else if(dc.type == DocumentChange.Type.REMOVED){
+                        Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
+                        dataHandler.taskList.remove(dc.document.id)
+                        //TODO refresh fragment if active
+                    }
+                }
+            }
     }
     private fun wgSnapshotListener(){
         db.collection("wg").document(dataHandler.wg!!.docID)
