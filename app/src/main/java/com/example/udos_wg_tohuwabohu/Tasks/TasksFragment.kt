@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -48,7 +49,7 @@ class TasksFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         Log.d("[TasksFragment]",tasksData.toString() )
-        var _binding: FragmentTasksBinding? = null
+        var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)
         val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
@@ -56,7 +57,6 @@ class TasksFragment : Fragment() {
         }
         return v
     }
-
     @Composable
     fun TaskCard(taskTitle:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
             Card(colors = UdoCardTheme(), modifier = Modifier
@@ -117,10 +117,10 @@ class TasksFragment : Fragment() {
         
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
         when{
-            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
-            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
             taskDay==currentDay-1 -> return Pair("Gestern fällig", UdoRed)
@@ -176,32 +176,7 @@ class TasksFragment : Fragment() {
         }
         return worstMate
     }
-    fun createTaskTest(){createTask(Date(),7,"Klo putzen",6)}
-
-    /**
-     * creates a new task for the wg in the database
-     * gets the completer with getCompleter()
-     */
-    fun createTask(frist: Date, frequencyInDays: Int, name: String, points: Int){
-        val wgDocRef = dataHandler.wg?.let {
-            myFirestore.collection(DBLoader.Collection.WG.toString()).document(
-                it.docID)
-        }
-        val completerDocRef = getCompleter()?.let {
-            myFirestore.collection("Mitbewohner").document(
-                it.docID)
-        }
-        val myTask: MutableMap<String, Any> = HashMap()
-        myTask["bezeichnung"] = name
-        myTask["completed"] = false
-        myTask["frequenz"] = frequencyInDays
-        myTask["frist"] = frist
-        myTask["punkte"] = points
-        myTask["wg_id"] = wgDocRef!!
-        myTask["erlediger"] = completerDocRef!!
-        myFirestore.collection(DBLoader.Collection.Task.toString())
-            .add(myTask)
-    }
+//    fun createTaskTest(){createTask(Date(),7,"Klo putzen",6)}
 
     /**
      * checks the task in the database,

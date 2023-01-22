@@ -2,8 +2,11 @@ package com.example.udos_wg_tohuwabohu
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
@@ -74,5 +77,9 @@ class MainActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
+    }
+    fun openCreateTaskFragment(view: View){
+        replaceFragment(CreateTaskFragment())
+        binding.textToolbar.text = "Neue Aufgabe erstellen"
     }
 }
