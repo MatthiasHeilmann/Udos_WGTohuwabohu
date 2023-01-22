@@ -19,8 +19,8 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
     }
 
     fun addTask(vararg t: Task){
-        for (aufgabe in t) {
-            taskList[aufgabe.docId] = aufgabe
+        for (task in t) {
+            taskList[task.docId] = task
         }
     }
     
@@ -30,6 +30,10 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
     
     fun getTask(uid: String): Task{
         return taskList[uid]!!
+    }
+
+    fun getTasks(): HashMap<String, Task>?{
+        return taskList
     }
 
     fun getCalendar(): ArrayList<HashMap<String, Timestamp>>? {

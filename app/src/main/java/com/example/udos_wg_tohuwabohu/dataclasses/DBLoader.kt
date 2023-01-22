@@ -25,7 +25,7 @@ class DBLoader private constructor() {
         Roommate("mitbewohner"),
         WG("wg"),
         ContactPerson("ansprechtpartner"),
-        Task("aufgabe");
+        Task("aufgaben");
         override fun toString(): String {
             return call
         }
