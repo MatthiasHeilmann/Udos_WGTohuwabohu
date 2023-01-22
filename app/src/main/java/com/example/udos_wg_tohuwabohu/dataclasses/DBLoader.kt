@@ -143,10 +143,9 @@ class DBLoader private constructor() {
     private suspend fun loadTaskData(wgRef: DocumentReference){
         var tasksRes: QuerySnapshot? = null
         try {
-
-            // Find all tasks for this wg with all roommates
-            tasksRes = db.collection(Collection.Task.call)
-                .whereEqualTo("wg_id", wgRef)
+            tasksRes = db.collection(Collection.WG.call)
+                .document(wgRef.id)
+                .collection("tasks")
                 .get()
                 .asDeferred().await()
         }catch (e: Exception){
@@ -189,7 +188,10 @@ class DBLoader private constructor() {
     }
     private fun taskSnapshotListener(){
         for (task in dataHandler.taskList.values) {
-            db.collection("aufgaben").document(task.docId)
+            db.collection("wg")
+                .document(dataHandler.wg!!.docID)
+                .collection("tasks")
+                .document(task.docId)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()

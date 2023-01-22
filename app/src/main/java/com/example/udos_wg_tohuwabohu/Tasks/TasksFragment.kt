@@ -32,6 +32,7 @@ import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  *
@@ -53,7 +54,6 @@ class TasksFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("[TasksFragment]",tasksData.toString() )
         var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)
         val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
         composeView = v.findViewById(R.id.compose_view)
@@ -150,19 +150,24 @@ class TasksFragment : Fragment() {
     @Composable
     fun FullTasks(taskData: HashMap<String, Task>){
         val scrollState = rememberScrollState()
+        val unSortedTaskList: ArrayList<Task> = ArrayList()
+        taskData.forEach{task ->
+            unSortedTaskList.add(task.value)
+        }
+        var sortedTaskList = unSortedTaskList.sortedWith(compareBy { it.dueDate })
         Column (modifier = Modifier
             .verticalScroll(rememberScrollState())
         ){
-            tasksData?.forEach { task ->
-                if(task.value.name == null || task.value.dueDate == null || task.value.frequency==null) return@forEach
-                val roommate: Roommate = dataHandler.getRoommate(task.value.roommate!!.id)
+            sortedTaskList.forEach { task ->
+                if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
+                val roommate: Roommate = dataHandler.getRoommate(task.roommate!!.id)
 
                 TaskCard(
-                    taskTitle = task.value.name!!,
-                    dueDate = getTaskDate(task.value.dueDate!!),
-                    frequency = getTaskFrequency(task.value.frequency!!),
+                    taskTitle = task.name!!,
+                    dueDate = getTaskDate(task.dueDate!!),
+                    frequency = getTaskFrequency(task.frequency!!),
                     roommate = roommate,
-                    taskKey = task.key
+                    taskKey = task.docId
                 )
             }
         }
@@ -199,8 +204,15 @@ class TasksFragment : Fragment() {
         task.frequency?.let { c.add(Calendar.DATE, it) }
         newDate = c.time
         if (newCompleter != null) {
-            val newCompleterRef = myFirestore.collection("Mitbewohner").document(newCompleter.docID)
-            myFirestore.collection(DBLoader.Collection.Task.toString()).document(task.docId).update(mapOf("frist" to newDate,"erlediger" to newCompleterRef))
+            val newCompleterRef = myFirestore.collection("mitbewohner").document(newCompleter.docID)
+            myFirestore.collection("wg")
+                .document(dataHandler.wg!!.docID)
+                .collection("tasks")
+                .document(task.docId)
+                .update(mapOf(
+                    "frist" to newDate,
+                    "erlediger" to newCompleterRef
+                ))
         }
     }
 

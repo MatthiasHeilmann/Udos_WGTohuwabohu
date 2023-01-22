@@ -90,7 +90,9 @@ class CreateTaskFragment : Fragment() {
         myTask["punkte"] = points
         myTask["wg_id"] = wgDocRef!!
         myTask["erlediger"] = completerDocRef!!
-        myFirestore.collection(DBLoader.Collection.Task.toString())
+        myFirestore.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .collection("tasks")
             .add(myTask)
     }
     /**
@@ -100,8 +102,12 @@ class CreateTaskFragment : Fragment() {
     fun getCompleter(): Roommate? {
         val roommateList = dataHandler.roommateList
         var worstMate: Roommate? = null
-        var worstCount: Long = 0
+        var worstCount: Long = -1
+        Log.d(TAG, roommateList.size.toString())
         roommateList.forEach{ mate ->
+            if(worstCount== (-1).toLong()){
+                worstCount = mate.value.coin_count!!
+            }
             if (mate.value.coin_count!! <= worstCount) {
                 worstMate = dataHandler.getRoommate(mate.key)
                 worstCount = mate.value.coin_count!!
