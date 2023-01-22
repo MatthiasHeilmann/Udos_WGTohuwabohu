@@ -1,4 +1,4 @@
-package com.example.udos_wg_tohuwabohu
+package com.example.udos_wg_tohuwabohu.Tasks
 
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.*
+import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -115,8 +117,8 @@ class TasksFragment : Fragment() {
         
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
         when{
-            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig",UdoRed)
-            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig",UdoGray)
+            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
             taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
             taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
@@ -126,6 +128,10 @@ class TasksFragment : Fragment() {
         }
         return Pair("Am " + taskDate + " fällig", UdoGray)
     }
+
+    /**
+     * formats date numbers
+     */
     private fun formatNumber(n: Int): String {
         return if (n > 9) "" + n else "0" + n
     }
