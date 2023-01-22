@@ -157,43 +157,56 @@ class CalendarFragment : Fragment() {
 @Composable
 fun CalendarPopup(){
     var descriptionText by remember { mutableStateOf("Hello") }
-    //val keyboardController = LocalSoftwareKeyboardController.current
-        Card(colors = UdoPopupCardTheme(),
-            modifier = Modifier.requiredHeight(height = 450.dp),
-            border = BorderStroke(2.dp, UdoDarkBlue)) {
-            Column {
-                Text(text = "Termin Hinzufügen", style = MaterialTheme.typography.popupLabel)
-                Text(text = "Termin Beschreibung", style = MaterialTheme.typography.popupLabel)
-                OutlinedTextField(value = descriptionText,
-                    onValueChange = {text: String -> descriptionText = text},
-                    modifier = Modifier.requiredHeight(height = 100.dp),
-                    enabled=true,
-                    readOnly=false,
-                    colors = UdoPopupTextfieldColors(),
-                    keyboardOptions = UdoKeyboardOptions(),
-                    //keyboardActions = KeyboardActions(
-                        //onDone = { keyboardController?.hide() })
-                )
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Card(colors = UdoPopupCardTheme(),
+        modifier = Modifier
+            .requiredHeight(height = 450.dp)
+            .requiredWidth(width = 300.dp),
+        border = BorderStroke(2.dp, UdoDarkBlue)) {
+        Column {
+            Text(text = "Termin Hinzufügen", style = MaterialTheme.typography.popupLabel)
+            Text(text = "Termin Beschreibung", style = MaterialTheme.typography.popupLabel)
+            OutlinedTextField(value = descriptionText,
+                onValueChange = {text: String -> descriptionText = text},
+                modifier = Modifier
+                    .requiredHeight(height = 100.dp)
+                    .requiredWidth(width = 300.dp),
+                enabled=true,
+                readOnly=false,
+                colors = UdoPopupTextfieldColors(),
+                keyboardOptions = UdoKeyboardOptions(),
+                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+            )
+            Row {
                 Text(text = "Termin Start", style = MaterialTheme.typography.popupLabel)
+                //Button(onClick = { DatePickerPopup() }) {
 
-                TextField(
-                    value = "",
-                    onValueChange = { s: String -> Unit },
-                    modifier = Modifier.clickable { },
-                    enabled = false
-                )
-                //DatePickerDialog(LocalContext.current)
+                }
             }
+            TextField(
+                value = "",
+                onValueChange = { s: String -> Unit },
+                modifier = Modifier
+                    .requiredHeight(height = 100.dp)
+                    .requiredWidth(width = 300.dp),
+                enabled = false
+            )
+            //DatePickerDialog(LocalContext.current)
         }
+        }
+
+
+@Composable
+fun DatePickerPopup(){
+
 }
 
 @Composable
 fun CalendarFAB(){
     var popupActive by remember { mutableStateOf(false) }
     if(popupActive){
-
         UdosTheme {
-            Popup(alignment = Alignment.Center,onDismissRequest = { popupActive = false }) {
+            Popup(alignment = Alignment.Center,onDismissRequest = { popupActive = false }, properties = UdoPopupProperties()) {
                 CalendarPopup()
             }
         }

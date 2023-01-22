@@ -89,9 +89,10 @@ fun UdoKeyboardOptions(): KeyboardOptions {
     return UdoKeyboardOptions
 }
 
-//fun UdoPopupProperties(): PopupProperties{
-  //  val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true)
-//}
+fun UdoPopupProperties(): PopupProperties{
+  val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
+    return UdoPopupProperties
+}
 
 
 
