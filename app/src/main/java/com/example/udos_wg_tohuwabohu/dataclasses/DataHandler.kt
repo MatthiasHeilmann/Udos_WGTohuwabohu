@@ -13,9 +13,9 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
     }
 
     fun addChatMessage(vararg messages: ChatMessage){
-        messages.forEach { msg ->
-            if(!chat.contains(msg))
-                chat.add(msg)
+        for(m in messages){
+            if(!chat.contains(m))
+                chat.add(m)
         }
     }
 
