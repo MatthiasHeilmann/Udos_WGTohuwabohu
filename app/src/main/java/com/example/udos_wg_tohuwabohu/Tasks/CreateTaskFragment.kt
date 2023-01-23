@@ -15,6 +15,7 @@ import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCreateTaskBinding
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.google.firebase.firestore.ktx.firestore
@@ -24,7 +25,7 @@ import java.util.*
 
 class CreateTaskFragment : Fragment() {
     val TAG = "[CREATE TASK FRAGMENT]"
-    val myFirestore = Firebase.firestore
+    val dbWriter = DBWriter.getInstance()
     val dataHandler = DataHandler.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,44 +58,13 @@ class CreateTaskFragment : Fragment() {
                 }
             val frequency: Int = Integer.parseInt(frequencyOfTask.text.toString())
             val points: Int = Integer.parseInt(pointsOfTask.text.toString())
-            createTask(frequency,nameOfTask.text.toString(),points)
+
+            dbWriter.createTask(frequency,nameOfTask.text.toString(),points, getCompleter())
         }
         return view
     }
 
-    /**
-     * creates a new task for the wg in the database
-     * gets the completer with getCompleter()
-     */
-    fun createTask(frequencyInDays: Int, name: String, points: Int){
-        // first duedate
-        var newDate = Date()
-        val c = Calendar.getInstance()
-        c.time = newDate
-        c.add(Calendar.DATE, frequencyInDays)
-        newDate = c.time
 
-        val wgDocRef = dataHandler.wg?.let {
-            myFirestore.collection(DBLoader.Collection.WG.toString()).document(
-                it.docID)
-        }
-        val completerDocRef = getCompleter()?.let {
-            myFirestore.collection("Mitbewohner").document(
-                it.docID)
-        }
-        val myTask: MutableMap<String, Any> = HashMap()
-        myTask["bezeichnung"] = name
-        myTask["completed"] = false
-        myTask["frequenz"] = frequencyInDays
-        myTask["frist"] = newDate
-        myTask["punkte"] = points
-        myTask["wg_id"] = wgDocRef!!
-        myTask["erlediger"] = completerDocRef!!
-        myFirestore.collection("wg")
-            .document(dataHandler.wg!!.docID)
-            .collection("tasks")
-            .add(myTask)
-    }
     /**
      * finds the new completer, which has the lowest coin_count
      * @return roommate with the lowest coin_count
