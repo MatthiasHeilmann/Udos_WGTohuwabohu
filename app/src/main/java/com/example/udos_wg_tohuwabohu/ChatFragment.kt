@@ -53,16 +53,6 @@ class ChatFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     private var chatList: Array<ChatMessage>? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,12 +63,6 @@ class ChatFragment : Fragment() {
                 ChatBox()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        println("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-        println(viewLifecycleOwnerLiveData)
     }
 
     companion object {
@@ -107,9 +91,6 @@ class ChatFragment : Fragment() {
     @Composable
     fun ChatBox() {
         var messages by remember { mutableStateOf(dataHandler.getChat()) }
-        println("Updated Messages:")
-        messages.forEach { msg -> println(msg.docID + ", " + msg.message) }
-
 
         Column(
             modifier = Modifier
