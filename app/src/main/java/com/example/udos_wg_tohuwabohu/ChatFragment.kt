@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -35,12 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
-import kotlin.collections.ArrayList
+import androidx.compose.ui.graphics.Color as ComposeColor
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_CHAT_LIST = "chatList"
@@ -98,7 +96,7 @@ class ChatFragment : Fragment() {
     fun ChatBox() {
         var messages by remember { mutableStateOf(dataHandler.getChat()) }
         println("Updated Messages:")
-        messages.forEach { msg -> println(msg.message) }
+        messages.forEach { msg -> println(msg.docID + ", " + msg.message) }
 
 
         Column(
@@ -135,7 +133,7 @@ class ChatFragment : Fragment() {
         // TODO get input event and upload to database
         var text by remember { mutableStateOf(TextFieldValue("")) }
 
-        var backgroundColor: Color = com.google.android.material.R.attr.colorOnSecondary.toColor();
+        var backgroundColor: Int = Color.GRAY;
 
         Box(){
             TextField(
@@ -145,7 +143,7 @@ class ChatFragment : Fragment() {
                 },
                 label = { Text(text = "Message") },
                 placeholder = { Text(text = "Type a message") },
-                modifier = Modifier.background(ComposeColor(backgroundColor.toArgb()))
+                modifier = Modifier.background(ComposeColor(backgroundColor))
             )
 
             Button(
@@ -227,32 +225,28 @@ class ChatFragment : Fragment() {
     @Preview(showBackground = true)
     @Composable
     fun GreetingBoxPreview() {
+        val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        fun randomString() = List(10) { charPool.random() }.joinToString("")
         val msgArr = arrayOf(
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Jo was geht", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null),
-            ChatMessage("", "Hello there", Date(), null)
+            ChatMessage(randomString(), "Hello there", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Jo was geht", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
+            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
         )
 
         dataHandler.addChatMessage(*msgArr)
