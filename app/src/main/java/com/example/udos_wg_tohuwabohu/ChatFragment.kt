@@ -55,6 +55,12 @@ class ChatFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -67,6 +73,12 @@ class ChatFragment : Fragment() {
                 ChatBox()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        println("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+        println(viewLifecycleOwnerLiveData)
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.util.Log
 import com.google.firebase.firestore.DocumentReference
 
 import com.google.firebase.Timestamp
@@ -16,8 +17,10 @@ data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user:
 
     fun addChatMessage(vararg messages: ChatMessage){
         for(m in messages){
-            if(!chat.contains(m))
+            if(!chat.contains(m)){
+                Log.d("MainActivity", "Adding message: ${m.message}")
                 chat.add(m)
+            }
         }
     }
 

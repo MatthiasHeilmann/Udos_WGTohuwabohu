@@ -3,6 +3,7 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import java.util.Date
+import kotlin.reflect.typeOf
 
 class ChatMessage(val docID: String, var message: String?, var timestamp: Date?, var user: DocumentReference?) {
     constructor(vals: DocumentSnapshot): this(
@@ -15,6 +16,11 @@ class ChatMessage(val docID: String, var message: String?, var timestamp: Date?,
         this.message = vals.getString("message")
         this.timestamp = vals.getTimestamp("timestamp")?.toDate()
         this.user = vals.getDocumentReference("user")
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return if(other is ChatMessage) equals(other as ChatMessage)
+        else super.equals(other)
     }
 
     fun equals(other: ChatMessage?): Boolean {
