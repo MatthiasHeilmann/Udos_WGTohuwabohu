@@ -38,15 +38,14 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        var chatInstance = ChatFragment.newInstance(*dataHandler.getChat());
 
-        replaceFragment(chatInstance)
+        replaceFragment(ChatFragment())
         binding.textToolbar.text = "Chat"
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
                 R.id.nav_chat -> {
-                    replaceFragment(chatInstance)
+                    replaceFragment(ChatFragment())
                     binding.textToolbar.text = "Chat"
                 }
                 R.id.nav_finance -> {

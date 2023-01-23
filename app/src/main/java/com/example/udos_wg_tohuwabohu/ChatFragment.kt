@@ -54,14 +54,9 @@ class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
     private var chatList: Array<ChatMessage>? = null
-    private var messageList by remember { mutableStateOf(ArrayList<ChatMessage>()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            // TODO Somehow get an array from the arguments
-            chatList = it.getSerializable(ARG_CHAT_LIST) as Array<ChatMessage>?
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -71,10 +66,7 @@ class ChatFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                println("Got Chat list")
-                println(chatList)
-                chatList?.forEach { msg -> println(msg.message) }
-                chatList?.let { ChatBox(messages = it) }
+                ChatBox()
             }
         }
     }
@@ -88,12 +80,8 @@ class ChatFragment : Fragment() {
          * @return A new instance of fragment ChatFragment.
          */
         @JvmStatic
-        fun newInstance(vararg chatMessages: ChatMessage): Fragment {
-            return ChatFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(ARG_CHAT_LIST, chatMessages)
-                }
-            }
+        fun newInstance(): Fragment {
+            return ChatFragment()
         }
     }
 
@@ -107,7 +95,12 @@ class ChatFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ChatBox(vararg messages: ChatMessage) {
+    fun ChatBox() {
+        var messages by remember { mutableStateOf(dataHandler.getChat()) }
+        println("Updated Messages:")
+        messages.forEach { msg -> println(msg.message) }
+
+
         Column(
             modifier = Modifier
                 .fillMaxHeight(),
@@ -262,6 +255,8 @@ class ChatFragment : Fragment() {
             ChatMessage("", "Hello there", Date(), null)
         )
 
-        ChatBox(*msgArr)
+        dataHandler.addChatMessage(*msgArr)
+
+        ChatBox()
     }
 }
