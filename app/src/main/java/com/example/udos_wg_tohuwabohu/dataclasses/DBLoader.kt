@@ -2,9 +2,7 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.core.snap
 import com.example.udos_wg_tohuwabohu.MainActivity
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -21,17 +19,6 @@ class DBLoader private constructor() {
 
         fun getInstance(): DBLoader = instance ?: synchronized(this) {
             instance ?: DBLoader().also { instance = it }
-        }
-    }
-
-    enum class Collection(val call: String) {
-        Roommate("mitbewohner"),
-        WG("wg"),
-        CHAT("chat_files"),
-        ContactPerson("ansprechtpartner"),
-        Task("tasks");
-        override fun toString(): String {
-            return call
         }
     }
 
@@ -82,7 +69,7 @@ class DBLoader private constructor() {
         val wgRef: DocumentReference?
         var userRes: DocumentSnapshot? = null
         try {
-            userRes = db.collection(Collection.Roommate.call).document(userID)
+            userRes = db.collection(Collections.Roommate.call).document(userID)
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
@@ -105,7 +92,7 @@ class DBLoader private constructor() {
         val wg: WG
         var wgRes: DocumentSnapshot? = null
         try {
-            wgRes = db.collection(Collection.WG.call).document(wgRef.id)
+            wgRes = db.collection(Collections.WG.call).document(wgRef.id)
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
@@ -127,7 +114,7 @@ class DBLoader private constructor() {
         var anRes: DocumentSnapshot? = null
         try {
 
-            anRes = db.collection(Collection.ContactPerson.call).document(anRef.id)
+            anRes = db.collection(Collections.ContactPerson.call).document(anRef.id)
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
@@ -141,8 +128,8 @@ class DBLoader private constructor() {
     private suspend fun loadChatFilesData(wgRef: DocumentReference) {
         var chatRes: QuerySnapshot? = null
         try {
-            chatRes = db.collection(Collection.WG.call)
-                .document(wgRef.id).collection(Collection.CHAT.call)
+            chatRes = db.collection(Collections.WG.call)
+                .document(wgRef.id).collection(Collections.CHAT.call)
                 .orderBy("timestamp").limit(50)
                 .get().asDeferred().await()
         } catch (e: Exception) {
@@ -158,7 +145,7 @@ class DBLoader private constructor() {
         var rmRes: QuerySnapshot? = null
         // Find all mitbewohner for this wg
         try {
-            rmRes = db.collection(Collection.Roommate.call)
+            rmRes = db.collection(Collections.Roommate.call)
                 .whereEqualTo("wg_id", wgRef)
                 .get()
                 .asDeferred().await()
@@ -175,7 +162,7 @@ class DBLoader private constructor() {
     private suspend fun loadTaskData(wgRef: DocumentReference) {
         var tasksRes: QuerySnapshot? = null
         try {
-            tasksRes = db.collection(Collection.WG.call)
+            tasksRes = db.collection(Collections.WG.call)
                 .document(wgRef.id)
                 .collection("tasks")
                 .get()
@@ -194,7 +181,7 @@ class DBLoader private constructor() {
 
     private fun roommateSnapshotListener() {
         for (roommate in dataHandler.roommateList.values) {
-            db.collection(Collection.Roommate.call).document(roommate.docID)
+            db.collection(Collections.Roommate.call).document(roommate.docID)
                 .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -223,7 +210,7 @@ class DBLoader private constructor() {
 
     private fun taskSnapshotListener() {
         for (task in dataHandler.taskList.values) {
-            db.collection(Collection.Task.call).document(task.docId)
+            db.collection(Collections.Task.call).document(task.docId)
                 .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -251,9 +238,9 @@ class DBLoader private constructor() {
      * deletes deleted tasks from dataHandler
      */
     private fun addTaskCollectionSnapshotListener(){
-            db.collection(Collection.WG.call)
+            db.collection(Collections.WG.call)
             .document(dataHandler.wg!!.docID)
-            .collection(Collection.Task.call)
+            .collection(Collections.Task.call)
                 // Listener for collection
             .addSnapshotListener{ snapshots,e ->
                 if(e != null){
@@ -290,8 +277,8 @@ class DBLoader private constructor() {
     }
 
     private fun chatSnapshotListener() {
-        db.collection(Collection.WG.call)
-            .document(dataHandler.wg!!.docID).collection(Collection.CHAT.call)
+        db.collection(Collections.WG.call)
+            .document(dataHandler.wg!!.docID).collection(Collections.CHAT.call)
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 firebaseFirestoreException?.let {
                     Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -312,7 +299,7 @@ class DBLoader private constructor() {
     }
 
     private fun wgSnapshotListener() {
-        db.collection(Collection.WG.call).document(dataHandler.wg!!.docID)
+        db.collection(Collections.WG.call).document(dataHandler.wg!!.docID)
             .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                 firebaseFirestoreException?.let {
                     Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -335,7 +322,7 @@ class DBLoader private constructor() {
     }
 
     private fun contactPersonSnapshotListener() {
-        db.collection(Collection.ContactPerson.call).document(dataHandler.contactPerson!!.docID)
+        db.collection(Collections.ContactPerson.call).document(dataHandler.contactPerson!!.docID)
             .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                 firebaseFirestoreException?.let {
                     Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()

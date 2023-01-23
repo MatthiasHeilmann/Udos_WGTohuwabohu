@@ -1,14 +1,9 @@
 package com.example.udos_wg_tohuwabohu.Tasks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,12 +22,12 @@ import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import com.example.udos_wg_tohuwabohu.dataclasses.Collections
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  *
@@ -43,7 +38,7 @@ class TasksFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     private var tasksData = dataHandler.getTasks()
     private val myFirestore = Firebase.firestore
-    private val roommateCollection = DBLoader.Collection.Roommate.toString()
+    private val roommateCollection = Collections.Roommate.toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -220,7 +215,7 @@ class TasksFragment : Fragment() {
      * deletes a task in the database
      */
     fun deleteTask(docId: String){
-        myFirestore.collection(DBLoader.Collection.Task.toString()).document(docId).delete()
+        myFirestore.collection(Collections.Task.toString()).document(docId).delete()
     }
 
     /**
