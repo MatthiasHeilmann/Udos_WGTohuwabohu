@@ -1,10 +1,13 @@
 package com.example.udos_wg_tohuwabohu
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +26,7 @@ import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -31,10 +35,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
+import kotlin.collections.ArrayList
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_CHAT_LIST = "chatList"
@@ -48,6 +54,7 @@ class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
     private var chatList: Array<ChatMessage>? = null
+    private var messageList by remember { mutableStateOf(ArrayList<ChatMessage>()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +64,7 @@ class ChatFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -97,6 +105,7 @@ class ChatFragment : Fragment() {
         return if (n > 9) "" + n else "0" + n
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox(vararg messages: ChatMessage) {
         Column(
@@ -127,10 +136,14 @@ class ChatFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MessageInput() {
         // TODO get input event and upload to database
         var text by remember { mutableStateOf(TextFieldValue("")) }
+
+        var backgroundColor: Color = com.google.android.material.R.attr.colorOnSecondary.toColor();
+
         Box(){
             TextField(
                 value = text,
@@ -139,6 +152,7 @@ class ChatFragment : Fragment() {
                 },
                 label = { Text(text = "Message") },
                 placeholder = { Text(text = "Type a message") },
+                modifier = Modifier.background(ComposeColor(backgroundColor.toArgb()))
             )
 
             Button(
@@ -146,7 +160,7 @@ class ChatFragment : Fragment() {
                 onClick = {
                     Toast.makeText(
                         activity,
-                        text.toString(),
+                        text.text,
                         Toast.LENGTH_SHORT
                     ).show()
                 },
@@ -216,6 +230,7 @@ class ChatFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
     @Composable
     fun GreetingBoxPreview() {
@@ -249,5 +264,4 @@ class ChatFragment : Fragment() {
 
         ChatBox(*msgArr)
     }
-
 }
