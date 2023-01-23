@@ -220,23 +220,21 @@ class DBLoader private constructor() {
             )
         }
     }
+
     private fun taskSnapshotListener() {
         for (task in dataHandler.taskList.values) {
-            db.collection("wg")
-                .document(dataHandler.wg!!.docID)
-                .collection("tasks")
-                .document(task.docId)
-                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+            db.collection(Collection.Task.call).document(task.docId)
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
                     // What happens if the database document gets changed
-                    querySnapshot?.let {
-                        dataHandler.getTask(task.docId).update(querySnapshot)
+                    documentSnapshot?.let {
+                        dataHandler.getTask(task.docId).update(it)
                         Log.d(
                             TAG,
-                            "taskList updated ${dataHandler.taskList.toString()}"
+                            "task updated ${dataHandler.getTask(it.id)}"
                         )
                     }
                 }
@@ -290,6 +288,7 @@ class DBLoader private constructor() {
                 }
             }
     }
+
     private fun chatSnapshotListener() {
         db.collection(Collection.WG.call)
             .document(dataHandler.wg!!.docID).collection(Collection.CHAT.call)
