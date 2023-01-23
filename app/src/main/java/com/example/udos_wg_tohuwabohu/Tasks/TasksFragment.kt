@@ -160,7 +160,7 @@ class TasksFragment : Fragment() {
         ){
             sortedTaskList.forEach { task ->
                 if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
-                val roommate: Roommate = dataHandler.getRoommate(task.roommate!!.id)
+                val roommate: Roommate? = dataHandler.getRoommate(task.roommate!!.id)
 
                 TaskCard(
                     taskTitle = task.name!!,
