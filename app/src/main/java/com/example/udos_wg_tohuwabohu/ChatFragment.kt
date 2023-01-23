@@ -29,7 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,6 +37,7 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
+import kotlin.collections.ArrayList
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -90,26 +90,31 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox() {
-        var messages by remember { mutableStateOf(dataHandler.getChat()) }
+        var messages by remember { mutableStateOf(dataHandler.chat) }
+
+        println("Got bound Messages")
+        println(messages.toString())
 
         Column(
             modifier = Modifier
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .verticalScroll(
-                    enabled = true,
-                    state = ScrollState(0),
-                    reverseScrolling = true
-                )
-                .weight(1f, false)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .verticalScroll(
+                        enabled = true,
+                        state = ScrollState(0),
+                        reverseScrolling = true
+                    )
+                    .weight(1f, false)
             ) {
                 messages.forEach { msg ->
                     MessageCard(msg)
                 }
+                MessageCard(msg = ChatMessage("", messages.joinToString { it.message + "\n" }, Date(), null))
             }
             Box(
                 modifier = Modifier
@@ -124,15 +129,16 @@ class ChatFragment : Fragment() {
     @Composable
     fun MessageInput() {
         // TODO get input event and upload to database
-        var text by remember { mutableStateOf(TextFieldValue("")) }
+        var textFieldValue by remember { mutableStateOf("") }
+        var test by remember{ mutableStateOf(ArrayList<String>())}
 
         var backgroundColor: Int = Color.GRAY;
 
-        Box(){
+        Box() {
             TextField(
-                value = text,
+                value = textFieldValue,
                 onValueChange = {
-                    text = it
+                    textFieldValue = it
                 },
                 label = { Text(text = "Message") },
                 placeholder = { Text(text = "Type a message") },
@@ -144,9 +150,10 @@ class ChatFragment : Fragment() {
                 onClick = {
                     Toast.makeText(
                         activity,
-                        text.text,
+                        textFieldValue,
                         Toast.LENGTH_SHORT
                     ).show()
+                    uploadMessage(textFieldValue)
                 },
                 // Uses ButtonDefaults.ContentPadding by default
                 contentPadding = PaddingValues(
@@ -185,14 +192,18 @@ class ChatFragment : Fragment() {
 
             Column(modifier = Modifier.width(IntrinsicSize.Max)) {
                 Text(
-                    text = dataHandler.getRoommate(msg.user.toString())?.username ?: "unknown",
+                    text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
                     color = MaterialTheme.colors.secondaryVariant,
                     style = MaterialTheme.typography.subtitle2
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Surface(shape = MaterialTheme.shapes.medium, elevation = 5.dp) {
+                Surface(
+                    modifier= Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    elevation = 5.dp
+                ) {
                     Text(
                         text = msg.message ?: "",
                         modifier = Modifier.padding(all = 4.dp),
@@ -205,6 +216,7 @@ class ChatFragment : Fragment() {
                 Text(
                     text = formatDate(msg.timestamp!!),
                     modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colors.error,
                     style = TextStyle(
                         textAlign = TextAlign.Right,
                         fontSize = 12.sp
@@ -214,11 +226,15 @@ class ChatFragment : Fragment() {
         }
     }
 
+    fun uploadMessage(text: String) {
+
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
     @Composable
     fun GreetingBoxPreview() {
-        val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         fun randomString() = List(10) { charPool.random() }.joinToString("")
         val msgArr = arrayOf(
             ChatMessage(randomString(), "Hello there", Date(), null),
