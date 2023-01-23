@@ -5,50 +5,58 @@ import com.google.firebase.firestore.DocumentReference
 
 import com.google.firebase.Timestamp
 
-data class DataHandler(var wg: WG?, var contactPerson: ContactPerson?, var user: Roommate?, var roommateList: HashMap<String, Roommate>, var taskList: HashMap<String, Task>, var chat: ArrayList<ChatMessage>) {
-    private constructor(): this(null, null, null, HashMap(), HashMap(), ArrayList<ChatMessage>())
-    companion object{
+data class DataHandler(
+    var wg: WG?,
+    var contactPerson: ContactPerson?,
+    var user: Roommate?,
+    var roommateList: HashMap<String, Roommate>,
+    var taskList: HashMap<String, Task>,
+    var chat: ArrayList<ChatMessage>
+) {
+    private constructor() : this(null, null, null, HashMap(), HashMap(), ArrayList<ChatMessage>())
+
+    companion object {
         private var instance: DataHandler? = null;
 
-        fun getInstance(): DataHandler = instance ?: synchronized(this){
-            instance?: DataHandler().also { instance = it }
+        fun getInstance(): DataHandler = instance ?: synchronized(this) {
+            instance ?: DataHandler().also { instance = it }
         }
     }
 
-    fun addChatMessage(vararg messages: ChatMessage){
-        for(m in messages){
-            if(!chat.contains(m)){
-                Log.d("MainActivity", "Adding message: ${m.message}")
+    fun addChatMessage(vararg messages: ChatMessage) {
+        for (m in messages) {
+            if (!chat.contains(m)) {
+                Log.d("DataHandler", "Adding message: ${m.message}")
                 chat.add(m)
             }
         }
     }
 
-    fun addRoommate(vararg roommates: Roommate){
+    fun addRoommate(vararg roommates: Roommate) {
         for (r in roommates) {
             roommateList[r.docID] = r
         }
     }
 
-    fun addTask(vararg tasks: Task){
+    fun addTask(vararg tasks: Task) {
         for (t in tasks) {
             taskList[t.docId] = t
         }
     }
 
-    fun getChat(): Array<ChatMessage>{
+    fun getChat(): Array<ChatMessage> {
         return chat.toTypedArray()
     }
 
-    fun getRoommate(uid: String?): Roommate?{
+    fun getRoommate(uid: String?): Roommate? {
         return roommateList[uid]
     }
-    
-    fun getTask(uid: String): Task{
+
+    fun getTask(uid: String): Task {
         return taskList[uid]!!
     }
 
-    fun getTasks(): HashMap<String, Task>?{
+    fun getTasks(): HashMap<String, Task>? {
         return taskList
     }
 
