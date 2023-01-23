@@ -5,9 +5,9 @@
     android:layout_height="match_parent"
     tools:context=".ShoppingFragment">
 
-    <TextView
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Shopping fragment" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>
