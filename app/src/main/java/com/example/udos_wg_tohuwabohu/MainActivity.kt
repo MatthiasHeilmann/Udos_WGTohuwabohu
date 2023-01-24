@@ -33,14 +33,14 @@ class MainActivity : AppCompatActivity() {
         dbLoader.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
 
-        binding.textUserID.text = "User ID: $userID"
+        /*binding.textUserID.text = "User ID: $userID"
         binding.textUserEmail.text = "Email: $emailID"
 
         binding.buttonLogout.setOnClickListener{
             FirebaseAuth.getInstance().signOut()
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
-        }
+        }*/
 
 
         replaceFragment(ChatFragment())

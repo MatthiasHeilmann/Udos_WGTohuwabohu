@@ -1,33 +1,45 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.Toast
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.util.HashMap
+import java.util.*
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -44,8 +56,9 @@ class ShoppingFragment : Fragment() {
 
     lateinit var composeView: ComposeView
     private val TAG: String = "[SHOPPING FRAGMENT]"
-    /*private val db = Firebase.firestore*/
+    private val db = Firebase.firestore
 
+    val dataHandler = DataHandler.getInstance()
     var shoppingList = DataHandler.getInstance().wg?.shoppingList
 
 
@@ -62,9 +75,50 @@ class ShoppingFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        val v: View = inflater.inflate(R.layout.fragment_shopping, container, false)
         Log.d(TAG,shoppingList.toString() )
         /*var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)*/
-        val v: View = inflater.inflate(R.layout.fragment_shopping, container, false)
+
+        val addItemButton:FloatingActionButton = v.findViewById(R.id.button_add_item)
+        val deleteItemsButton:FloatingActionButton = v.findViewById(R.id.button_delete_items)
+        val createInvoiceButton:FloatingActionButton = v.findViewById(R.id.button_create_invoice)
+
+        val entryField:EditText = v.findViewById(R.id.addItemEntryField)
+
+        // Button Item hinzufügen
+        addItemButton.setOnClickListener { v ->
+            Log.d(TAG,"Button geklickt")
+            if(TextUtils.isEmpty(entryField.text.toString().trim{it <= ' '})
+                ){
+                Log.d(TAG, "Nicht alles eingegeben")
+                Toast.makeText(
+                    requireActivity(),
+                    "Bitte Artikel eintragen.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+            // addItem(entryField, false)
+        }
+
+        // Button Items löschen
+        deleteItemsButton.setOnClickListener { v ->
+            Log.d(TAG,"Items gelöscht")
+
+            // deleteItems()
+        }
+
+        // Button Items löschen
+        createInvoiceButton.setOnClickListener { v ->
+            Log.d(TAG,"Rechnung erstellt.")
+
+            // deleteItems()
+        }
+
+
+
+
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
             shoppingList?.let {showShoppingList(shoppingList = (it))}
@@ -91,37 +145,72 @@ class ShoppingFragment : Fragment() {
             }
     }
 
+    // TODO: add Item
+    /*fun addItem(name: String, checked: Boolean){
 
-    }
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .add(item)
+
+        // update list
+    }*/
+
+    // TODO: delete Items
+    /*fun deleteItems(){
+        // Frage: "markierte Items löschen?" ja/nein
+        // ja -> every item with item.value = true will be deleted from db
+
+        // update list
+    }*/
+
+    // TODO: Invoice
+    /*fun createInvoice(){
+
+        // every item with item.value = true will be deleted from db
+
+        // update list
+    }*/
+
+}
+
+
+@Composable
+fun itemCheckBox() {
+    val checkedState = remember { mutableStateOf(false) }
+    Checkbox(
+        checked = checkedState.value,
+        onCheckedChange = { checkedState.value = it },
+        Modifier.size(30.dp)
+    )
+}
 
 @Composable
 fun showShoppingList(shoppingList: HashMap<String,Boolean>){
-    Column {
+    Column(modifier = Modifier
+        .fillMaxSize()
+    ){
         shoppingList.forEach { item ->
-            Text(text = item.key + " " + item.value.toString());
+            Row {
+                itemCheckBox();
+                Text(
+                    text = item.key + " " + item.value.toString(),
+                    style = TextStyle(
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        background = Color.LightGray
+                    )
+                );
+            }
           }
     }
 
+    // TODO: add checkbox behaviour
+    // click on row -> checked
 
-    // TODO: add item to shoppingList
-    /*@Composable
-    fun addItem(item: String, checked: Boolean){
-        // open popup with entry field
-            // save button -> submit to db, close popup and update list in fragment
-            // cancel button -> close popup
-    }*/
-
-    // TODO: check item in shoppingList (set false)
     /*fun checkShoppinglistItem(item: String){
         // make items checkable
         // click -> box gets checked ->
             // item.value = true
-    }*/
-
-    // TODO: delete item(s) from shoppingList
-    /*fun deleteItem() {
-        // trash button -> click ->
-            // every item with item.value = true will be deleted from db
     }*/
 
     // TODO: create bill with checked items
@@ -139,7 +228,7 @@ fun showShoppingList(shoppingList: HashMap<String,Boolean>){
                     // refuse:
                 // on finished confirmation ->
                     // user.balance + price
-                    // every checked roommate+user -> balance - (price/#ofBegünstigt)
+                    // every checked roommate -> balance - (price/#ofBegünstigt)
             // cancel button -> close popup
     }*/
 }

@@ -50,18 +50,20 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        android:background="@color/black"
+        >
 
-        <Button
+<!--        <Button
             android:id="@+id/button_logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
             android:backgroundTint="@color/udo_blue"
             android:text="Logout"
-            android:textColor="@color/white" />
+            android:textColor="@color/white" />-->
 
-        <TextView
+<!--        <TextView
             android:id="@+id/text_userID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="70dp"
             android:layout_marginBottom="24dp"
-            android:text="userEmail" />
+            android:text="userEmail" />-->
 
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
