@@ -1,7 +1,8 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
-import com.google.firebase.firestore.DocumentReference
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
 import com.google.firebase.Timestamp
 
@@ -11,9 +12,9 @@ data class DataHandler(
     var user: Roommate?,
     var roommateList: HashMap<String, Roommate>,
     var taskList: HashMap<String, Task>,
-    var chat: ArrayList<ChatMessage>
+    var chat: SnapshotStateList<ChatMessage>
 ) {
-    private constructor() : this(null, null, null, HashMap(), HashMap(), ArrayList<ChatMessage>())
+    private constructor() : this(null, null, null, HashMap(), HashMap(), mutableStateListOf<ChatMessage>() )
 
     companion object {
         private var instance: DataHandler? = null;

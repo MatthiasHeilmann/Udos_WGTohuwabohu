@@ -90,10 +90,10 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox() {
-        var messages by remember { mutableStateOf(dataHandler.chat) }
 
         println("Got bound Messages")
-        println(messages.toString())
+        println("ADASDASD")
+        println(dataHandler.chat.joinToString { it.message + ", " })
 
         Column(
             modifier = Modifier
@@ -111,10 +111,10 @@ class ChatFragment : Fragment() {
                     )
                     .weight(1f, false)
             ) {
-                messages.forEach { msg ->
+                dataHandler.chat.forEach { msg ->
                     MessageCard(msg)
                 }
-                MessageCard(msg = ChatMessage("", messages.joinToString { it.message + "\n" }, Date(), null))
+                MessageCard(msg = ChatMessage("", dataHandler.chat.joinToString { it.message + "\n" }, Date(), null))
             }
             Box(
                 modifier = Modifier
