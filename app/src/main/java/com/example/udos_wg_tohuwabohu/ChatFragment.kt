@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
-import kotlin.collections.ArrayList
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -51,7 +51,7 @@ private const val ARG_CHAT_LIST = "chatList"
 class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
-    private var chatList: Array<ChatMessage>? = null
+    private val dbWriter = DBWriter.getInstance()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -92,8 +92,7 @@ class ChatFragment : Fragment() {
     fun ChatBox() {
 
         println("Got bound Messages")
-        println("ADASDASD")
-        println(dataHandler.chat.joinToString { it.message + ", " })
+        println(dataHandler.chat.joinToString { it.message + ", " + it.timestamp?.toString() + ", " + it.user.toString() + "\n\t" })
 
         Column(
             modifier = Modifier
@@ -114,7 +113,6 @@ class ChatFragment : Fragment() {
                 dataHandler.chat.forEach { msg ->
                     MessageCard(msg)
                 }
-                MessageCard(msg = ChatMessage("", dataHandler.chat.joinToString { it.message + "\n" }, Date(), null))
             }
             Box(
                 modifier = Modifier
@@ -130,11 +128,11 @@ class ChatFragment : Fragment() {
     fun MessageInput() {
         // TODO get input event and upload to database
         var textFieldValue by remember { mutableStateOf("") }
-        var test by remember{ mutableStateOf(ArrayList<String>())}
+        var test by remember { mutableStateOf(ArrayList<String>()) }
 
         var backgroundColor: Int = Color.GRAY;
 
-        Box() {
+        Box {
             TextField(
                 value = textFieldValue,
                 onValueChange = {
@@ -148,12 +146,16 @@ class ChatFragment : Fragment() {
             Button(
                 modifier = Modifier.align(CenterEnd),
                 onClick = {
-                    Toast.makeText(
-                        activity,
-                        textFieldValue,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    uploadMessage(textFieldValue)
+                    if (textFieldValue.trim() != "") {
+                        uploadMessage(textFieldValue)
+                    } else {
+                        Toast.makeText(
+                            activity,
+                            "Pls insert a valid Message",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    textFieldValue = ""
                 },
                 // Uses ButtonDefaults.ContentPadding by default
                 contentPadding = PaddingValues(
@@ -227,7 +229,7 @@ class ChatFragment : Fragment() {
     }
 
     fun uploadMessage(text: String) {
-
+        dbWriter.createChatMessage(text, Date(), dataHandler.user)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
