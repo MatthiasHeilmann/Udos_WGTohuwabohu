@@ -179,6 +179,7 @@ class ChatFragment : Fragment() {
 
     @Composable
     fun MessageCard(msg: ChatMessage) {
+        // TODO correct Theme and Get colors for own Messages
         val thisUser = msg.user?.id == dataHandler.user?.docID
         val layoutDirection = if (thisUser) LayoutDirection.Rtl else LayoutDirection.Ltr
         val alignment = if(thisUser) Alignment.CenterEnd else Alignment.CenterStart
