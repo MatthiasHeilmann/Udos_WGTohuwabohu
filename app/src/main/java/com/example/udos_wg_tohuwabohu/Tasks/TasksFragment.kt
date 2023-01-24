@@ -1,14 +1,9 @@
 package com.example.udos_wg_tohuwabohu.Tasks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +22,7 @@ import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import com.example.udos_wg_tohuwabohu.dataclasses.Collections
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.firestore.ktx.firestore
@@ -42,7 +38,7 @@ class TasksFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     private var tasksData = dataHandler.getTasks()
     private val myFirestore = Firebase.firestore
-    private val roommateCollection = DBLoader.Collection.Roommate.toString()
+    private val roommateCollection = Collections.Roommate.toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +49,6 @@ class TasksFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("[TasksFragment]",tasksData.toString() )
         var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)
         val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
         composeView = v.findViewById(R.id.compose_view)
@@ -150,19 +145,24 @@ class TasksFragment : Fragment() {
     @Composable
     fun FullTasks(taskData: HashMap<String, Task>){
         val scrollState = rememberScrollState()
+        val unSortedTaskList: ArrayList<Task> = ArrayList()
+        taskData.forEach{task ->
+            unSortedTaskList.add(task.value)
+        }
+        var sortedTaskList = unSortedTaskList.sortedWith(compareBy { it.dueDate })
         Column (modifier = Modifier
             .verticalScroll(rememberScrollState())
         ){
-            tasksData?.forEach { task ->
-                if(task.value.name == null || task.value.dueDate == null || task.value.frequency==null) return@forEach
-                val roommate: Roommate = dataHandler.getRoommate(task.value.roommate!!.id)
+            sortedTaskList.forEach { task ->
+                if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
+                val roommate: Roommate? = dataHandler.getRoommate(task.roommate!!.id)
 
                 TaskCard(
-                    taskTitle = task.value.name!!,
-                    dueDate = getTaskDate(task.value.dueDate!!),
-                    frequency = getTaskFrequency(task.value.frequency!!),
+                    taskTitle = task.name!!,
+                    dueDate = getTaskDate(task.dueDate!!),
+                    frequency = getTaskFrequency(task.frequency!!),
                     roommate = roommate,
-                    taskKey = task.key
+                    taskKey = task.docId
                 )
             }
         }
@@ -199,8 +199,15 @@ class TasksFragment : Fragment() {
         task.frequency?.let { c.add(Calendar.DATE, it) }
         newDate = c.time
         if (newCompleter != null) {
-            val newCompleterRef = myFirestore.collection("Mitbewohner").document(newCompleter.docID)
-            myFirestore.collection(DBLoader.Collection.Task.toString()).document(task.docId).update(mapOf("frist" to newDate,"erlediger" to newCompleterRef))
+            val newCompleterRef = myFirestore.collection("mitbewohner").document(newCompleter.docID)
+            myFirestore.collection("wg")
+                .document(dataHandler.wg!!.docID)
+                .collection("tasks")
+                .document(task.docId)
+                .update(mapOf(
+                    "frist" to newDate,
+                    "erlediger" to newCompleterRef
+                ))
         }
     }
 
@@ -208,7 +215,7 @@ class TasksFragment : Fragment() {
      * deletes a task in the database
      */
     fun deleteTask(docId: String){
-        myFirestore.collection(DBLoader.Collection.Task.toString()).document(docId).delete()
+        myFirestore.collection(Collections.Task.toString()).document(docId).delete()
     }
 
     /**
