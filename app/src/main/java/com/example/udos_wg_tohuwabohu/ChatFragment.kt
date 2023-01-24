@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -177,53 +179,53 @@ class ChatFragment : Fragment() {
 
     @Composable
     fun MessageCard(msg: ChatMessage) {
-        Row(
-            modifier = Modifier.padding(all = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondary, CircleShape)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-                Text(
-                    text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
-                    color = MaterialTheme.colors.secondaryVariant,
-                    style = MaterialTheme.typography.subtitle2
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Surface(
-                    modifier= Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    elevation = 5.dp
+        val thisUser = msg.user?.id == dataHandler.user?.docID
+        val layoutDirection = if (thisUser) LayoutDirection.Rtl else LayoutDirection.Ltr
+        val alignment = if(thisUser) Alignment.CenterEnd else Alignment.CenterStart
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                Row(
+                    modifier = Modifier
+                        .align(alignment)
+                        .padding(all = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = msg.message ?: "",
-                        modifier = Modifier.padding(all = 4.dp),
-                        style = MaterialTheme.typography.body2
-                    )
+
+
+                    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                        Text(
+                            text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
+                            color = MaterialTheme.colors.secondaryVariant,
+                            style = MaterialTheme.typography.subtitle2,
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.medium,
+                            elevation = 5.dp
+                        ) {
+                            Text(
+                                text = msg.message ?: "",
+                                modifier = Modifier.padding(all = 4.dp),
+                                style = MaterialTheme.typography.body2
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(1.dp))
+
+                        Text(
+                            text = formatDate(msg.timestamp!!),
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colors.secondary,
+                            style = TextStyle(
+                                textAlign = TextAlign.Right,
+                                fontSize = 12.sp
+                            )
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = formatDate(msg.timestamp!!),
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colors.error,
-                    style = TextStyle(
-                        textAlign = TextAlign.Right,
-                        fontSize = 12.sp
-                    )
-                )
             }
         }
     }
