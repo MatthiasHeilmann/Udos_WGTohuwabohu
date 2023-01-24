@@ -91,7 +91,7 @@ class ShoppingFragment : Fragment() {
             Log.d(TAG,"Button geklickt")
             if(TextUtils.isEmpty(entryField.text.toString().trim{it <= ' '})
                 ){
-                Log.d(TAG, "Nicht alles eingegeben")
+                Log.d(TAG, "Eingabefeld war leer")
                 Toast.makeText(
                     requireActivity(),
                     "Bitte Artikel eintragen.",
