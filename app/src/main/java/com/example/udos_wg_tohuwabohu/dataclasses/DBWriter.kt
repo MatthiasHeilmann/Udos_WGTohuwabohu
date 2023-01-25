@@ -34,12 +34,12 @@ class DBWriter private constructor() {
         val wgDocRef = dataHandler.wg?.let {
             db.collection(Collections.WG.toString()).document(
                 it.docID)
-        }
+        } ?: return
 
         val completerDocRef = completer?.let {
             db.collection("Mitbewohner").document(
                 it.docID)
-        }
+        } ?: return
 
         val myTask: MutableMap<String, Any> = HashMap()
         myTask["bezeichnung"] = name
@@ -47,11 +47,28 @@ class DBWriter private constructor() {
         myTask["frequenz"] = frequencyInDays
         myTask["frist"] = newDate
         myTask["punkte"] = points
-        myTask["wg_id"] = wgDocRef!!
-        myTask["erlediger"] = completerDocRef!!
+        myTask["wg_id"] = wgDocRef
+        myTask["erlediger"] = completerDocRef
         db.collection("wg")
             .document(dataHandler.wg!!.docID)
             .collection("tasks")
             .add(myTask)
+    }
+
+    fun createChatMessage(message: String, timestamp: Date, user: Roommate?){
+        val userDocRef = user?.let {
+            db.collection("Mitbewohner").document(
+                it.docID)
+        } ?: return
+
+        val cmMap: MutableMap<String, Any> = HashMap()
+        cmMap["message"] = message
+        cmMap["timestamp"] = timestamp
+        cmMap["user"] = userDocRef
+
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .collection("chat_files")
+            .add(cmMap)
     }
 }

@@ -27,17 +27,19 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
-import kotlin.collections.ArrayList
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -51,7 +53,7 @@ private const val ARG_CHAT_LIST = "chatList"
 class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
-    private var chatList: Array<ChatMessage>? = null
+    private val dbWriter = DBWriter.getInstance()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -90,10 +92,9 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox() {
-        var messages by remember { mutableStateOf(dataHandler.chat) }
 
         println("Got bound Messages")
-        println(messages.toString())
+        println(dataHandler.chat.joinToString { it.message + ", " + it.timestamp?.toString() + ", " + it.user.toString() + "\n\t" })
 
         Column(
             modifier = Modifier
@@ -111,10 +112,9 @@ class ChatFragment : Fragment() {
                     )
                     .weight(1f, false)
             ) {
-                messages.forEach { msg ->
+                dataHandler.chat.forEach { msg ->
                     MessageCard(msg)
                 }
-                MessageCard(msg = ChatMessage("", messages.joinToString { it.message + "\n" }, Date(), null))
             }
             Box(
                 modifier = Modifier
@@ -130,11 +130,11 @@ class ChatFragment : Fragment() {
     fun MessageInput() {
         // TODO get input event and upload to database
         var textFieldValue by remember { mutableStateOf("") }
-        var test by remember{ mutableStateOf(ArrayList<String>())}
+        var test by remember { mutableStateOf(ArrayList<String>()) }
 
         var backgroundColor: Int = Color.GRAY;
 
-        Box() {
+        Box {
             TextField(
                 value = textFieldValue,
                 onValueChange = {
@@ -148,12 +148,16 @@ class ChatFragment : Fragment() {
             Button(
                 modifier = Modifier.align(CenterEnd),
                 onClick = {
-                    Toast.makeText(
-                        activity,
-                        textFieldValue,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    uploadMessage(textFieldValue)
+                    if (textFieldValue.trim() != "") {
+                        uploadMessage(textFieldValue)
+                    } else {
+                        Toast.makeText(
+                            activity,
+                            "Pls insert a valid Message",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    textFieldValue = ""
                 },
                 // Uses ButtonDefaults.ContentPadding by default
                 contentPadding = PaddingValues(
@@ -175,59 +179,60 @@ class ChatFragment : Fragment() {
 
     @Composable
     fun MessageCard(msg: ChatMessage) {
-        Row(
-            modifier = Modifier.padding(all = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondary, CircleShape)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-                Text(
-                    text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
-                    color = MaterialTheme.colors.secondaryVariant,
-                    style = MaterialTheme.typography.subtitle2
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Surface(
-                    modifier= Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    elevation = 5.dp
+        // TODO correct Theme and Get colors for own Messages
+        val thisUser = msg.user?.id == dataHandler.user?.docID
+        val layoutDirection = if (thisUser) LayoutDirection.Rtl else LayoutDirection.Ltr
+        val alignment = if(thisUser) Alignment.CenterEnd else Alignment.CenterStart
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                Row(
+                    modifier = Modifier
+                        .align(alignment)
+                        .padding(all = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = msg.message ?: "",
-                        modifier = Modifier.padding(all = 4.dp),
-                        style = MaterialTheme.typography.body2
-                    )
+
+
+                    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                        Text(
+                            text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
+                            color = MaterialTheme.colors.secondaryVariant,
+                            style = MaterialTheme.typography.subtitle2,
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.medium,
+                            elevation = 5.dp
+                        ) {
+                            Text(
+                                text = msg.message ?: "",
+                                modifier = Modifier.padding(all = 4.dp),
+                                style = MaterialTheme.typography.body2
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(1.dp))
+
+                        Text(
+                            text = formatDate(msg.timestamp!!),
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colors.secondary,
+                            style = TextStyle(
+                                textAlign = TextAlign.Right,
+                                fontSize = 12.sp
+                            )
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = formatDate(msg.timestamp!!),
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colors.error,
-                    style = TextStyle(
-                        textAlign = TextAlign.Right,
-                        fontSize = 12.sp
-                    )
-                )
             }
         }
     }
 
     fun uploadMessage(text: String) {
-
+        dbWriter.createChatMessage(text, Date(), dataHandler.user)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
