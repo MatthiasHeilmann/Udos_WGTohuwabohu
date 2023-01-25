@@ -36,10 +36,13 @@ import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.HashMap
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -58,8 +61,13 @@ class ShoppingFragment : Fragment() {
     private val TAG: String = "[SHOPPING FRAGMENT]"
     private val db = Firebase.firestore
 
-    val dataHandler = DataHandler.getInstance()
-    var shoppingList = DataHandler.getInstance().wg?.shoppingList
+    val dh = DataHandler.getInstance()
+    var shoppingList = dh.wg?.shoppingList
+
+    // testing
+    /*var roomateList = dh.roommateList
+    var docId = dh.wg?.docID
+    var user = dh.user*/
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,18 +85,18 @@ class ShoppingFragment : Fragment() {
     ): View? {
 
         val v: View = inflater.inflate(R.layout.fragment_shopping, container, false)
-        Log.d(TAG,shoppingList.toString() )
-        /*var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)*/
 
         val addItemButton:FloatingActionButton = v.findViewById(R.id.button_add_item)
         val deleteItemsButton:FloatingActionButton = v.findViewById(R.id.button_delete_items)
         val createInvoiceButton:FloatingActionButton = v.findViewById(R.id.button_create_invoice)
-
         val entryField:EditText = v.findViewById(R.id.addItemEntryField)
 
-        // Button Item hinzufügen
+         // Button Item hinzufügen
         addItemButton.setOnClickListener { v ->
+            // test logs
             Log.d(TAG,"Button geklickt")
+            Log.d(TAG,shoppingList.toString() )
+
             if(TextUtils.isEmpty(entryField.text.toString().trim{it <= ' '})
                 ){
                 Log.d(TAG, "Eingabefeld war leer")
@@ -98,27 +106,26 @@ class ShoppingFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
+            } else {
+                val entryItem = entryField.text.toString()
+                Log.d(TAG,"${entryItem} hinzugefügt.")
+                addItem(entryItem)
             }
-            // addItem(entryField, false)
         }
 
         // Button Items löschen
         deleteItemsButton.setOnClickListener { v ->
             Log.d(TAG,"Items gelöscht")
-
             // deleteItems()
         }
 
         // Button Items löschen
         createInvoiceButton.setOnClickListener { v ->
             Log.d(TAG,"Rechnung erstellt.")
-
             // deleteItems()
         }
 
-
-
-
+        // compose Komponente
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
             shoppingList?.let {showShoppingList(shoppingList = (it))}
@@ -145,21 +152,18 @@ class ShoppingFragment : Fragment() {
             }
     }
 
-    // TODO: add Item
-    /*fun addItem(name: String, checked: Boolean){
-
+    fun addItem(item: String) {
         db.collection("wg")
-            .document(dataHandler.wg!!.docID)
-            .add(item)
-
-        // update list
-    }*/
+            .document(dh.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item}" to false,
+            ))
+    }
 
     // TODO: delete Items
     /*fun deleteItems(){
-        // Frage: "markierte Items löschen?" ja/nein
-        // ja -> every item with item.value = true will be deleted from db
-
+        // (optional Frage: "markierte Items löschen?" ja/nein)
+        // every item with item.value = true will be deleted from db
         // update list
     }*/
 
@@ -173,7 +177,6 @@ class ShoppingFragment : Fragment() {
 
 }
 
-
 @Composable
 fun itemCheckBox() {
     val checkedState = remember { mutableStateOf(false) }
@@ -185,10 +188,11 @@ fun itemCheckBox() {
 }
 
 @Composable
-fun showShoppingList(shoppingList: HashMap<String,Boolean>){
-    Column(modifier = Modifier
-        .fillMaxSize()
-    ){
+fun showShoppingList(shoppingList: HashMap<String,Boolean>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         shoppingList.forEach { item ->
             Row {
                 itemCheckBox();
@@ -197,38 +201,38 @@ fun showShoppingList(shoppingList: HashMap<String,Boolean>){
                     style = TextStyle(
                         color = Color.White,
                         fontSize = 20.sp,
-                        background = Color.LightGray
+                        /*background = Color.LightGray*/
                     )
                 );
             }
-          }
+        }
     }
-
-    // TODO: add checkbox behaviour
-    // click on row -> checked
-
-    /*fun checkShoppinglistItem(item: String){
-        // make items checkable
-        // click -> box gets checked ->
-            // item.value = true
-    }*/
-
-    // TODO: create bill with checked items
-    /*fun createBill() {
-        // bill button -> click -> open popup ->
-            // every item with item.value = true will be shown
-                // (optional: can add more items manually)
-            // entryfield for price
-            // every roommmate from users wg will be shown (user included)
-                // checkable boxes
-            // send button ->
-                // ?? checked users (excluding self) will get notification
-                // notification: confirm/refuse
-                    // confirm:
-                    // refuse:
-                // on finished confirmation ->
-                    // user.balance + price
-                    // every checked roommate -> balance - (price/#ofBegünstigt)
-            // cancel button -> close popup
-    }*/
 }
+
+// TODO: add checkbox behaviour
+// click on row -> checked
+
+/*fun checkShoppinglistItem(item: String){
+    // make items checkable
+    // click -> box gets checked ->
+        // item.value = true
+}*/
+
+// TODO: create bill with checked items
+/*fun createBill() {
+    // bill button -> click -> open popup ->
+        // every item with item.value = true will be shown
+            // (optional: can add more items manually)
+        // entryfield for price
+        // every roommmate from users wg will be shown (user included)
+            // checkable boxes
+        // send button ->
+            // ?? checked users (excluding self) will get notification
+            // notification: confirm/refuse
+                // confirm:
+                // refuse:
+            // on finished confirmation ->
+                // user.balance + price
+                // every checked roommate -> balance - (price/#ofBegünstigt)
+        // cancel button -> close popup
+}*/
