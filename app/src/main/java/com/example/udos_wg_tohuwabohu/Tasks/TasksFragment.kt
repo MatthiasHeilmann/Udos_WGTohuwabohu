@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,13 +70,27 @@ class TasksFragment : Fragment() {
     fun TaskCard(taskTitle:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
         val myTask: Task? = tasksData?.get(taskKey)
         val showCheckDialog = remember { mutableStateOf(false) }
+        val showDeleteDialog = remember { mutableStateOf(false) }
         if(showCheckDialog.value){
             CheckConfirmationDialog(showCheckDialog = showCheckDialog.value,
                 onDismiss = {showCheckDialog.value = it},
                 myTask = myTask)
         }
+        if(showDeleteDialog.value){
+            DeleteConfirmationDialog(showDeleteDialog = showDeleteDialog.value,
+                onDismiss = {showDeleteDialog.value = it},
+                myTask = myTask)
+        }
             Card(colors = UdoCardTheme(), modifier = Modifier
-                .padding(5.dp)){
+                .padding(5.dp)
+                .pointerInput(Unit){
+                    detectTapGestures(
+                        onLongPress = {
+                            showDeleteDialog.value = true
+                        }
+                    )
+                })
+            {
                 Row(modifier = Modifier.padding(10.dp)){
                     Column{
                         Text(text = taskTitle, color = dueDate.second)
@@ -200,10 +216,39 @@ class TasksFragment : Fragment() {
                         onDismiss(false)
                     }
                         , shape = RoundedCornerShape(4.dp))
-                    { Text(text = "Ja, sicher!") }
+                    { Text(text = "Ich bin sicher") }
                 },
                 title = { Text(text = "Bestätigen") },
                 text = { Text(text = "Sicher, dass du die Aufgabe erledigt hast?") }
+            )
+        }
+    }
+    @Composable
+    fun DeleteConfirmationDialog(showDeleteDialog: Boolean,
+                                onDismiss: (Boolean) -> Unit,
+                                myTask: Task?){
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = {onDismiss(false)},
+                dismissButton = {
+                    TextButton(onClick = {onDismiss(false)})
+                    { Text(text = "Abbrechen") }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        Log.d(TAG,"LÖSCHEN")
+                        if(myTask!=null){
+                            deleteTask(myTask.docId)
+                        }else{
+                            Log.d(TAG,"No task to delete")
+                        }
+                        onDismiss(false)
+                    }
+                        , shape = RoundedCornerShape(4.dp))
+                    { Text(text = "Ja, sicher!", color = UdoRed) }
+                },
+                title = { Text(text = "Bestätigen") },
+                text = { Text(text = "Sicher, dass du die Aufgabe löschen möchtest?") }
             )
         }
     }
@@ -254,7 +299,11 @@ class TasksFragment : Fragment() {
      * deletes a task in the database
      */
     fun deleteTask(docId: String){
-        myFirestore.collection(Collections.Task.toString()).document(docId).delete()
+        myFirestore.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .collection("tasks")
+            .document(docId)
+            .delete()
     }
 
     /**
