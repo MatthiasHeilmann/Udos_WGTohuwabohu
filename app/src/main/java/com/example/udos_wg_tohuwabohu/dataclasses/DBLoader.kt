@@ -25,7 +25,7 @@ class DBLoader private constructor() {
     private var mainActivity: MainActivity? = null
     private val db = Firebase.firestore
     private val dataHandler = DataHandler.getInstance()
-    private val TAG = "[MainActivity]"
+    private val TAG = "[DBLoader]"
 
     /**
      * Fetches needed data for the currently logged in user and it's wg.
@@ -53,7 +53,6 @@ class DBLoader private constructor() {
 
         // Then add snapshotListener
         roommateSnapshotListener()
-        taskSnapshotListener()
         chatSnapshotListener()
         wgSnapshotListener()
         contactPersonSnapshotListener()
@@ -232,7 +231,7 @@ class DBLoader private constructor() {
         }
     }
 
-/**
+    /**
      * Listens to the whole collection tasks
      * adds new tasks to dataHandler
      * deletes deleted tasks from dataHandler
@@ -271,6 +270,22 @@ class DBLoader private constructor() {
                         Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
                         dataHandler.taskList.remove(dc.document.id)
                         //TODO refresh fragment if active
+                    }else if(dc.type == DocumentChange.Type.MODIFIED) {
+                        try{
+                            // get new document as DocumentSnapshot and add to dataHandler
+                            db.collection("wg")
+                                .document(dataHandler.wg!!.docID)
+                                .collection("tasks")
+                                .document(dc.document.id)
+                                .get()
+                                .addOnSuccessListener { document ->
+                                    dataHandler.getTask(document.id).update(document)
+                                    //TODO refresh fragment if active
+                                }
+                        }catch (e: Exception){
+                            Log.d(TAG, "Error updating new task")
+                            //TODO Exception
+                        }
                     }
                 }
             }

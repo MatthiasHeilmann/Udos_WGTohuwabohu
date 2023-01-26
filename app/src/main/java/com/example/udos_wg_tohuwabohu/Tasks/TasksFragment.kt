@@ -75,11 +75,11 @@ class TasksFragment : Fragment() {
                         /** button to check the task */
                         Button(onClick = {
                                 val myTask: Task? = tasksData?.get(taskKey)
-                                myTask?.let { checkTask(it) }
-                                if (myTask != null) {
-                                    myTask.points?.let { givePoints(roommate, it) }
-                                }
-                            },
+                            if (myTask != null) {
+                                checkTask(myTask)
+                                myTask.points?.let { givePoints(dataHandler.user, it) }
+                            }
+                        },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoWhite),
                             modifier = Modifier.absolutePadding(4.dp),
                             shape = RoundedCornerShape(5)
@@ -115,15 +115,16 @@ class TasksFragment : Fragment() {
         val taskYear = date.year+1900
         
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
+        // sorry for that
         when{
-            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskYear<currentYear -> return Pair("War am " + taskDate + " fällig", UdoRed)
             taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoWhite)
-            taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskMonth<currentMonth -> return Pair("War am " + taskDate + " fällig", UdoRed)
             taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoWhite)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
-            taskDay==currentDay-1 -> return Pair("Gestern fällig", UdoRed)
-            taskDay<currentDay -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskDay==currentDay-1 -> return Pair("War gestern fällig", UdoRed)
+            taskDay<currentDay -> return Pair("War am " + taskDate + " fällig", UdoRed)
         }
         return Pair("Am " + taskDate + " fällig", UdoWhite)
     }
@@ -174,7 +175,7 @@ class TasksFragment : Fragment() {
     fun getCompleter(): Roommate? {
         val roommateList = dataHandler.roommateList
         var worstMate: Roommate? = null
-        var worstCount: Long = 0
+        var worstCount: Long = Long.MAX_VALUE
         roommateList.forEach{ mate ->
             if (mate.value.coin_count!! <= worstCount) {
                 worstMate = dataHandler.getRoommate(mate.key)
@@ -183,7 +184,6 @@ class TasksFragment : Fragment() {
         }
         return worstMate
     }
-//    fun createTaskTest(){createTask(Date(),7,"Klo putzen",6)}
 
     /**
      * checks the task in the database,
