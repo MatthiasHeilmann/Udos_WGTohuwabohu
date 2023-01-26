@@ -86,4 +86,13 @@ class MainActivity : AppCompatActivity() {
         replaceFragment(CreateTaskFragment())
         binding.textToolbar.text = "Neue Aufgabe erstellen"
     }
+
+    fun reloadTaskFragment(){
+        if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
+            Log.d(TAG, "TASK FRAGMENT IS VISIBLE")
+            replaceFragment(TasksFragment())
+        }else{
+            Log.d(TAG, "Task fragment is not visible")
+        }
+    }
 }

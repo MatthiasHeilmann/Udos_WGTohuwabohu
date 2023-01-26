@@ -261,6 +261,7 @@ class DBLoader private constructor() {
                                 .get()
                                 .addOnSuccessListener { document ->
                                     dataHandler.addTask(Task(document))
+                                    mainActivity?.reloadTaskFragment()
                                     //TODO refresh fragment if active
                                 }
                         }catch (e: Exception){
@@ -271,9 +272,11 @@ class DBLoader private constructor() {
                     }else if(dc.type == DocumentChange.Type.REMOVED){
                         Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
                         dataHandler.taskList.remove(dc.document.id)
+                        mainActivity?.reloadTaskFragment()
                         //TODO refresh fragment if active
                     }else if(dc.type == DocumentChange.Type.MODIFIED) {
                         try{
+                            Log.d(TAG,"Updating task....")
                             // get new document as DocumentSnapshot and add to dataHandler
                             db.collection("wg")
                                 .document(dataHandler.wg!!.docID)
@@ -282,6 +285,7 @@ class DBLoader private constructor() {
                                 .get()
                                 .addOnSuccessListener { document ->
                                     dataHandler.getTask(document.id).update(document)
+                                    mainActivity?.reloadTaskFragment()
                                     //TODO refresh fragment if active
                                 }
                         }catch (e: Exception){
