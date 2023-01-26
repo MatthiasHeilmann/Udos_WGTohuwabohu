@@ -130,12 +130,10 @@ class ShoppingFragment : Fragment() {
                 Log.d(TAG,"${item.key} gelöscht." )
             }
         }
-        // todo: update shoppingList var
-        // todo: update view
     }
 
     // TODO: createBill
-    // TODO: update view after adding/deleting items
+    // TODO: update view after deleting items
     // TODO: fix height of compose element
 
 
