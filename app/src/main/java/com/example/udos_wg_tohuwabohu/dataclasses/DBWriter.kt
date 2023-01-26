@@ -81,7 +81,6 @@ class DBWriter private constructor() {
                 "einkaufsliste.${item}" to false,
             ))
         // todo: update shoppingList var
-
         // todo: refresh view
     }
 

@@ -7,34 +7,22 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.PullRefreshState
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
@@ -47,18 +35,9 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 import kotlin.collections.HashMap
 
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ShoppingFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ShoppingFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
+
 
     lateinit var composeView: ComposeView
     private val TAG: String = "[SHOPPING FRAGMENT]"
@@ -71,10 +50,6 @@ class ShoppingFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -123,7 +98,7 @@ class ShoppingFragment : Fragment() {
         // Button Items löschen
         deleteItemsButton.setOnClickListener { v ->
             Log.d(TAG,"Items gelöscht")
-            deleteItems(shoppingList)
+            deleteItems(dh.wg?.shoppingList)
         }
 
         // Button Rechnung erstellen
@@ -135,45 +110,26 @@ class ShoppingFragment : Fragment() {
         // compose Komponente
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
-            shoppingList?.let {showShoppingList(shoppingList = (it))}
+            dh.wg?.shoppingList?.let {showShoppingList(shoppingList = (it))}
         }
         return v
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ShoppingFragment.
-         */
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ShoppingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
-
     // TODO: delete checked Items
-    fun deleteItems(shoppingList: HashMap<String, Boolean>?){
-        Log.d(TAG,shoppingList.toString() )
+    fun deleteItems(shoppingList: SnapshotStateMap<String, Boolean>?){
 
-        /*shoppingList.forEach{ item ->
+        shoppingList?.forEach{ item ->
             if (item.value == true) {
                 db.collection("wg")
                     .document(dh.wg!!.docID)
                     .update(
                         mapOf(
-                            "einkaufsliste.${item}" to FieldValue.delete(),
+                            "einkaufsliste.${item.key}" to FieldValue.delete(),
                         )
                     )
+                Log.d(TAG,"${item.key} gelöscht." )
             }
-        }*/
+        }
         // todo: update shoppingList var
         // todo: update view
     }
@@ -215,7 +171,7 @@ class ShoppingFragment : Fragment() {
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    fun showShoppingList(shoppingList: HashMap<String,Boolean>) {
+    fun showShoppingList(shoppingList: SnapshotStateMap<String, Boolean>) {
 
         Column(
             modifier = Modifier
