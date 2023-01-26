@@ -67,11 +67,7 @@ class ShoppingFragment : Fragment() {
     val dh = DataHandler.getInstance()
 
     var shoppingList = dh.wg?.shoppingList
-
-    // testing
-    // var roomateList = dh.roommateList
-
-
+    var roomateList = dh.roommateList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,9 +178,9 @@ class ShoppingFragment : Fragment() {
         // todo: update view
     }
 
-    // TODO: Invoice
+    // TODO: createBill
     // TODO: update view after adding/deleting items
-    // TODO: fix scroll and height of compose element
+    // TODO: fix height of compose element
 
 
     @Composable
