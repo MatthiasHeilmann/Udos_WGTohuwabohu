@@ -4,6 +4,7 @@ enum class Collections(val call: String) {
     Roommate("mitbewohner"),
     WG("wg"),
     CHAT("chat_files"),
+    FINANCES("finanzen"),
     ContactPerson("ansprechtpartner"),
     Task("tasks");
 

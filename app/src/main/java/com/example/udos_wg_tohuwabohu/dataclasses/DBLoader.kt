@@ -36,18 +36,11 @@ class DBLoader private constructor() {
         // Wait for the load to finish
         val wgRef = async { loadUserData(userID) }.await()
         val anRef = async { loadWGData(wgRef) }.await()
-        async { loadChatFilesData(wgRef) }.await()
         async { loadContactPeronData(anRef) }.await()
         async { loadRoommatesData(wgRef) }.await()
+        async { loadChatFilesData(wgRef) }.await()
+        async { loadFinanceData(wgRef) }.await()
         async { loadTaskData(wgRef) }.await()
-
-        Log.d(TAG, "#################################################")
-        dataHandler.getChat().forEach { m ->
-            Log.d(
-                TAG,
-                "${dataHandler.getRoommate(m.user!!.id)?.username} said: ${m.message} at ${m.timestamp}"
-            )
-        }
 
         Log.d(TAG, "Loading Database succesfull")
 
@@ -55,6 +48,7 @@ class DBLoader private constructor() {
         roommateSnapshotListener()
         taskSnapshotListener()
         chatSnapshotListener()
+        financeSnapshotListener()
         wgSnapshotListener()
         contactPersonSnapshotListener()
         addTaskCollectionSnapshotListener()
@@ -125,6 +119,21 @@ class DBLoader private constructor() {
         dataHandler.contactPerson = an
     }
 
+    private suspend fun loadFinanceData(wgRef: DocumentReference){
+        var financeRes: QuerySnapshot? = null
+        try {
+            financeRes = db.collection(Collections.WG.call)
+                .document(wgRef.id).collection(Collections.FINANCES.call)
+                .get().asDeferred().await()
+        } catch (e: Exception) {
+            // TODO handle exception: Give toast and empty chat object
+            e.printStackTrace()
+        }
+        financeRes?.forEach { cost ->
+            dataHandler.addFinanceEntry(FinanceEntry(cost))
+        }
+    }
+
     private suspend fun loadChatFilesData(wgRef: DocumentReference) {
         var chatRes: QuerySnapshot? = null
         try {
@@ -180,7 +189,7 @@ class DBLoader private constructor() {
     }
 
     private fun roommateSnapshotListener() {
-        for (roommate in dataHandler.roommateList.values) {
+        for (roommate in dataHandler.roommateList.values.toList()) {
             db.collection(Collections.Roommate.call).document(roommate.docID)
                 .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
@@ -189,7 +198,7 @@ class DBLoader private constructor() {
                     }
                     // What happens if the database document gets changed
                     documentSnapshot?.let {
-                        dataHandler.getRoommate(roommate.docID)?.update(it)
+                        dataHandler.addRoommate(Roommate(it))
                         if (dataHandler.getRoommate(roommate.docID)
                                 ?.equals(dataHandler.user!!.docID) == true
                         ) {
@@ -292,6 +301,28 @@ class DBLoader private constructor() {
                     Log.d(
                         TAG,
                         "chat updated $it"
+                    )
+                }
+            }
+        Log.d(TAG, "Added snapshotlistener to chat")
+    }
+
+    private fun financeSnapshotListener() {
+        db.collection(Collections.WG.call)
+            .document(dataHandler.wg!!.docID).collection(Collections.FINANCES.call)
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                firebaseFirestoreException?.let {
+                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                    return@addSnapshotListener
+                }
+                // What happens if the database document gets changed
+                querySnapshot?.let {
+                    it.forEach { cost ->
+                        dataHandler.addFinanceEntry(FinanceEntry(cost))
+                    }
+                    Log.d(
+                        TAG,
+                        "finances updated $it"
                     )
                 }
             }

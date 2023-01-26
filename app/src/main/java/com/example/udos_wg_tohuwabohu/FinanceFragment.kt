@@ -1,15 +1,33 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.input.KeyboardType.Companion.Text
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
+import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import com.himanshoe.charty.bar.BarChart
+import com.himanshoe.charty.bar.model.BarData
+import com.himanshoe.charty.common.axis.AxisConfig
+import com.himanshoe.charty.common.dimens.ChartDimens
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
@@ -17,23 +35,20 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class FinanceFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private val dataHandler = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_finance, container, false)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                FinanceView()
+            }
+        }
     }
 
     companion object {
@@ -46,16 +61,38 @@ class FinanceFragment : Fragment() {
          * @return A new instance of fragment FinanceFragment.
          */
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            FinanceFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() = FinanceFragment()
     }
-    fun createFinanceEntry(name: String, goenner: Roommate, price: Float, schnorrer: HashMap<String, Roommate>) {
-        //TODO neuen Finanzeintrag erstellen
-        //Mitbewohner > Kontostand -> muss angepasst werden
+
+    @Composable
+    fun FinanceView() {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp)
+                    .background(UdoWhite)
+            ) {
+                MyBarChartParent()
+            }
+        }
+    }
+
+    @Composable
+    fun MyBarChartParent() {
+        val udoColors = listOf(UdoOrange, UdoRed, UdoLightBlue, UdoDarkBlue)
+        // TODO doesn't work use material shit
+        BarChart(
+            modifier = Modifier.fillMaxWidth().height(500.dp).background(UdoOrange),
+            onBarClick = {},
+            color = udoColors[3],
+            chartDimens= ChartDimens(10.dp),
+            axisConfig= AxisConfig(showAxis = true, showXLabels = true, showUnitLabels = true, textColor = UdoWhite, isAxisDashed = false, xAxisColor = UdoDarkBlue, yAxisColor = UdoLightBlue),
+            barData = dataHandler.roommateList.values.map { m ->
+                Log.d("FinanceChart", m.username + ": " + m.balance)
+                BarData(m.username ?: "unknown", (m.balance ?: 0.0f).toFloat())
+            }
+        )
     }
 }
+
