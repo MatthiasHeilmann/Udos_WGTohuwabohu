@@ -13,8 +13,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -64,10 +70,11 @@ class ShoppingFragment : Fragment() {
     val dh = DataHandler.getInstance()
     var shoppingList = dh.wg?.shoppingList
 
+    var checkboxesArrayList: ArrayList<String> = ArrayList()
+
     // testing
-    /*var roomateList = dh.roommateList
-    var docId = dh.wg?.docID
-    var user = dh.user*/
+    // var roomateList = dh.roommateList
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,6 +98,8 @@ class ShoppingFragment : Fragment() {
         val createInvoiceButton:FloatingActionButton = v.findViewById(R.id.button_create_invoice)
         val entryField:EditText = v.findViewById(R.id.addItemEntryField)
 
+
+
          // Button Item hinzufügen
         addItemButton.setOnClickListener { v ->
             // test logs
@@ -110,6 +119,11 @@ class ShoppingFragment : Fragment() {
                 val entryItem = entryField.text.toString()
                 Log.d(TAG,"${entryItem} hinzugefügt.")
                 addItem(entryItem)
+                Toast.makeText(
+                    requireActivity(),
+                    "${entryItem} hinzugefügt.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -119,10 +133,10 @@ class ShoppingFragment : Fragment() {
             // deleteItems()
         }
 
-        // Button Items löschen
+        // Button Rechnung erstellen
         createInvoiceButton.setOnClickListener { v ->
             Log.d(TAG,"Rechnung erstellt.")
-            // deleteItems()
+            // createBill()
         }
 
         // compose Komponente
@@ -158,65 +172,81 @@ class ShoppingFragment : Fragment() {
             .update(mapOf(
                 "einkaufsliste.${item}" to false,
             ))
+        // refresh view
+    }
+
+    fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
+        db.collection("wg")
+            .document(dh.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item.key}" to checkedState.value,
+            ));
+        Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
     }
 
     // TODO: delete Items
-    /*fun deleteItems(){
-        // (optional Frage: "markierte Items löschen?" ja/nein)
+    fun deleteItems(){
         // every item with item.value = true will be deleted from db
         // update list
-    }*/
+
+        db.collection("wg")
+            .document(dh.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.banane" to FieldValue.delete(),
+            ))
+    }
 
     // TODO: Invoice
-    /*fun createInvoice(){
+    // TODO: update view after adding/deleting items
+    // TODO: fix scroll and height of compose element
 
-        // every item with item.value = true will be deleted from db
 
-        // update list
-    }*/
+    @Composable
+    fun createItemRow(item: Map.Entry<String, Boolean>) {
+        var checkedState = remember { mutableStateOf(false) }
 
-}
+        Row {
+            Checkbox(
+                checked = checkedState.value,
+                onCheckedChange = {
+                    checkedState.value = it;
+                    checkShoppinglistItem(item, checkedState)
+                },
+                Modifier.size(30.dp),
+            )
+            Text(
+                modifier = Modifier
+                    .clickable {
+                        checkedState.value = !checkedState.value;
+                        checkShoppinglistItem(item, checkedState)
+                    },
+                text = item.key + " " + item.value.toString(),
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = 20.sp,
+                )
+            )
+        }
+    }
 
-@Composable
-fun itemCheckBox() {
-    val checkedState = remember { mutableStateOf(false) }
-    Checkbox(
-        checked = checkedState.value,
-        onCheckedChange = { checkedState.value = it },
-        Modifier.size(30.dp)
-    )
-}
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    fun showShoppingList(shoppingList: HashMap<String,Boolean>) {
 
-@Composable
-fun showShoppingList(shoppingList: HashMap<String,Boolean>) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        shoppingList.forEach { item ->
-            Row {
-                itemCheckBox();
-                Text(
-                    text = item.key + " " + item.value.toString(),
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        /*background = Color.LightGray*/
-                    )
-                );
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(
+                    state = rememberScrollState(),
+                    enabled = true,
+                ),
+        ) {
+            shoppingList.forEach { item ->
+                createItemRow(item);
             }
         }
     }
 }
-
-// TODO: add checkbox behaviour
-// click on row -> checked
-
-/*fun checkShoppinglistItem(item: String){
-    // make items checkable
-    // click -> box gets checked ->
-        // item.value = true
-}*/
 
 // TODO: create bill with checked items
 /*fun createBill() {
