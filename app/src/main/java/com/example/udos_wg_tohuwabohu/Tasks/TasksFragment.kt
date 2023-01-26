@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Collections
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
@@ -81,7 +80,7 @@ class TasksFragment : Fragment() {
                                     myTask.points?.let { givePoints(roommate, it) }
                                 }
                             },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoGray),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoWhite),
                             modifier = Modifier.absolutePadding(4.dp),
                             shape = RoundedCornerShape(5)
                         ) {
@@ -118,15 +117,15 @@ class TasksFragment : Fragment() {
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
         when{
             taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoWhite)
             taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoWhite)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
             taskDay==currentDay-1 -> return Pair("Gestern fällig", UdoRed)
             taskDay<currentDay -> return Pair("Am " + taskDate + " fällig", UdoRed)
         }
-        return Pair("Am " + taskDate + " fällig", UdoGray)
+        return Pair("Am " + taskDate + " fällig", UdoWhite)
     }
 
     /**
