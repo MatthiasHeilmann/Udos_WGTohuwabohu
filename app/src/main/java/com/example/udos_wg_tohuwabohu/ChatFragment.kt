@@ -122,9 +122,7 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MessageInput() {
-        // TODO get input event and upload to database
         var textFieldValue by remember { mutableStateOf("") }
-        var test by remember { mutableStateOf(ArrayList<String>()) }
 
         Box {
             TextField(
