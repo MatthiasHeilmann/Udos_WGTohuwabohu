@@ -35,10 +35,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
-import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
-import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
-import com.example.udos_wg_tohuwabohu.dataclasses.Task
+import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -66,11 +63,10 @@ class ShoppingFragment : Fragment() {
     lateinit var composeView: ComposeView
     private val TAG: String = "[SHOPPING FRAGMENT]"
     private val db = Firebase.firestore
-
+    val dbWriter = DBWriter.getInstance()
     val dh = DataHandler.getInstance()
-    var shoppingList = dh.wg?.shoppingList
 
-    var checkboxesArrayList: ArrayList<String> = ArrayList()
+    var shoppingList = dh.wg?.shoppingList
 
     // testing
     // var roomateList = dh.roommateList
@@ -99,7 +95,6 @@ class ShoppingFragment : Fragment() {
         val entryField:EditText = v.findViewById(R.id.addItemEntryField)
 
 
-
          // Button Item hinzufügen
         addItemButton.setOnClickListener { v ->
             // test logs
@@ -117,20 +112,22 @@ class ShoppingFragment : Fragment() {
                 return@setOnClickListener
             } else {
                 val entryItem = entryField.text.toString()
-                Log.d(TAG,"${entryItem} hinzugefügt.")
-                addItem(entryItem)
+                /*addItem(entryItem)*/
+                dbWriter.addItemToShoppingList(entryItem)
+
                 Toast.makeText(
                     requireActivity(),
                     "${entryItem} hinzugefügt.",
                     Toast.LENGTH_SHORT
                 ).show()
+                Log.d(TAG,"${entryItem} hinzugefügt.")
             }
         }
 
         // Button Items löschen
         deleteItemsButton.setOnClickListener { v ->
             Log.d(TAG,"Items gelöscht")
-            // deleteItems()
+            deleteItems(shoppingList)
         }
 
         // Button Rechnung erstellen
@@ -166,34 +163,23 @@ class ShoppingFragment : Fragment() {
             }
     }
 
-    fun addItem(item: String) {
-        db.collection("wg")
-            .document(dh.wg!!.docID)
-            .update(mapOf(
-                "einkaufsliste.${item}" to false,
-            ))
-        // refresh view
-    }
+    // TODO: delete checked Items
+    fun deleteItems(shoppingList: HashMap<String, Boolean>?){
+        Log.d(TAG,shoppingList.toString() )
 
-    fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
-        db.collection("wg")
-            .document(dh.wg!!.docID)
-            .update(mapOf(
-                "einkaufsliste.${item.key}" to checkedState.value,
-            ));
-        Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
-    }
-
-    // TODO: delete Items
-    fun deleteItems(){
-        // every item with item.value = true will be deleted from db
-        // update list
-
-        db.collection("wg")
-            .document(dh.wg!!.docID)
-            .update(mapOf(
-                "einkaufsliste.banane" to FieldValue.delete(),
-            ))
+        /*shoppingList.forEach{ item ->
+            if (item.value == true) {
+                db.collection("wg")
+                    .document(dh.wg!!.docID)
+                    .update(
+                        mapOf(
+                            "einkaufsliste.${item}" to FieldValue.delete(),
+                        )
+                    )
+            }
+        }*/
+        // todo: update shoppingList var
+        // todo: update view
     }
 
     // TODO: Invoice
@@ -210,7 +196,8 @@ class ShoppingFragment : Fragment() {
                 checked = checkedState.value,
                 onCheckedChange = {
                     checkedState.value = it;
-                    checkShoppinglistItem(item, checkedState)
+                    /*checkShoppinglistItem(item, checkedState)*/
+                    dbWriter.checkShoppinglistItem(item, checkedState)
                 },
                 Modifier.size(30.dp),
             )
@@ -218,7 +205,8 @@ class ShoppingFragment : Fragment() {
                 modifier = Modifier
                     .clickable {
                         checkedState.value = !checkedState.value;
-                        checkShoppinglistItem(item, checkedState)
+                        /*checkShoppinglistItem(item, checkedState)*/
+                        dbWriter.checkShoppinglistItem(item, checkedState)
                     },
                 text = item.key + " " + item.value.toString(),
                 style = TextStyle(
@@ -266,3 +254,28 @@ class ShoppingFragment : Fragment() {
                 // every checked roommate -> balance - (price/#ofBegünstigt)
         // cancel button -> close popup
 }*/
+
+
+// ---------------------------------------------------------
+// OLD, now in dbwriter
+/*  fun addItem(item: String) {
+      db.collection("wg")
+          .document(dh.wg!!.docID)
+          .update(mapOf(
+              "einkaufsliste.${item}" to false,
+          ))
+
+      // update shoppingList var
+      // refresh view
+  }
+
+  fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
+      db.collection("wg")
+          .document(dh.wg!!.docID)
+          .update(mapOf(
+              "einkaufsliste.${item.key}" to checkedState.value,
+          ));
+      Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
+
+      // update shoppingList var
+  }*/

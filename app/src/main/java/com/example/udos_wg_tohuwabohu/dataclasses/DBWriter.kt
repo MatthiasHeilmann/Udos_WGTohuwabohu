@@ -1,5 +1,7 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.util.Log
+import androidx.compose.runtime.MutableState
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -70,5 +72,27 @@ class DBWriter private constructor() {
             .document(dataHandler.wg!!.docID)
             .collection("chat_files")
             .add(cmMap)
+    }
+
+    fun addItemToShoppingList(item: String) {
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item}" to false,
+            ))
+        // todo: update shoppingList var
+
+        // todo: refresh view
+    }
+
+    fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item.key}" to checkedState.value,
+            ));
+        Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
+
+        // todo: update shoppingList var
     }
 }
