@@ -1,15 +1,21 @@
 package com.example.udos_wg_tohuwabohu.Tasks
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +45,8 @@ class TasksFragment : Fragment() {
     private val myFirestore = Firebase.firestore
     private val roommateCollection = Collections.Roommate.toString()
 
+    private var currentTask: Task? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -58,6 +66,13 @@ class TasksFragment : Fragment() {
     }
     @Composable
     fun TaskCard(taskTitle:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
+        val myTask: Task? = tasksData?.get(taskKey)
+        val showCheckDialog = remember { mutableStateOf(false) }
+        if(showCheckDialog.value){
+            CheckConfirmationDialog(showCheckDialog = showCheckDialog.value,
+                onDismiss = {showCheckDialog.value = it},
+                myTask = myTask)
+        }
             Card(colors = UdoCardTheme(), modifier = Modifier
                 .padding(5.dp)){
                 Row(modifier = Modifier.padding(10.dp)){
@@ -74,11 +89,7 @@ class TasksFragment : Fragment() {
                         }
                         /** button to check the task */
                         Button(onClick = {
-                                val myTask: Task? = tasksData?.get(taskKey)
-                            if (myTask != null) {
-                                checkTask(myTask)
-                                myTask.points?.let { givePoints(dataHandler.user, it) }
-                            }
+                            showCheckDialog.value = true
                         },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoWhite),
                             modifier = Modifier.absolutePadding(4.dp),
@@ -165,6 +176,35 @@ class TasksFragment : Fragment() {
                     taskKey = task.docId
                 )
             }
+        }
+    }
+    @Composable
+    fun CheckConfirmationDialog(showCheckDialog: Boolean,
+                          onDismiss: (Boolean) -> Unit,
+                                myTask: Task?){
+        if (showCheckDialog) {
+            AlertDialog(
+                onDismissRequest = {onDismiss(false)},
+                dismissButton = {
+                    TextButton(onClick = {onDismiss(false)})
+                    { Text(text = "Abbrechen", color = UdoRed) }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if(myTask!=null){
+                            checkTask(myTask!!)
+                            myTask!!.points?.let { givePoints(dataHandler.user, it) }
+                        }else{
+                            Log.d(TAG,"No task to check")
+                        }
+                        onDismiss(false)
+                    }
+                        , shape = RoundedCornerShape(4.dp))
+                    { Text(text = "Ja, sicher!") }
+                },
+                title = { Text(text = "Bestätigen") },
+                text = { Text(text = "Sicher, dass du die Aufgabe erledigt hast?") }
+            )
         }
     }
 
