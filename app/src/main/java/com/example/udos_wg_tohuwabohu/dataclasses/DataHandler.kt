@@ -31,8 +31,16 @@ data class DataHandler(
             if (!financeEntries.contains(f)) {
                 financeEntries.add(f)
             }
+            else{
+                val i = financeEntries.indexOf(f)
+                println("Changed finance: " + financeEntries[i].price + " (${i})")
+                financeEntries.remove(f)
+                financeEntries.add(i, f)
+                println("Changed to: " + financeEntries[i].price + " (${f.price})")
+            }
         }
     }
+
     fun addChatMessage(vararg messages: ChatMessage) {
         for (m in messages) {
             if (!chat.contains(m)) {

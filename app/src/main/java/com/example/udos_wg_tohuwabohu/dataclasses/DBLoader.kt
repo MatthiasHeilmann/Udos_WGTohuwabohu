@@ -124,6 +124,7 @@ class DBLoader private constructor() {
         try {
             financeRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.FINANCES.call)
+                .orderBy("timestamp").limit(50)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             // TODO handle exception: Give toast and empty chat object
@@ -139,7 +140,7 @@ class DBLoader private constructor() {
         try {
             chatRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.CHAT.call)
-                .orderBy("timestamp").limit(50)
+                .orderBy("timestamp").limit(200)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             // TODO handle exception: Give toast and empty chat object
