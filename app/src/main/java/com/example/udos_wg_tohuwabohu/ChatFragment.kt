@@ -1,6 +1,5 @@
 package com.example.udos_wg_tohuwabohu
 
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -25,14 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -40,7 +35,6 @@ import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.util.*
-import androidx.compose.ui.graphics.Color as ComposeColor
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_CHAT_LIST = "chatList"
@@ -128,11 +122,7 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MessageInput() {
-        // TODO get input event and upload to database
         var textFieldValue by remember { mutableStateOf("") }
-        var test by remember { mutableStateOf(ArrayList<String>()) }
-
-        var backgroundColor: Int = Color.GRAY;
 
         Box {
             TextField(
@@ -142,11 +132,13 @@ class ChatFragment : Fragment() {
                 },
                 label = { Text(text = "Message") },
                 placeholder = { Text(text = "Type a message") },
-                modifier = Modifier.background(ComposeColor(backgroundColor))
+                modifier = Modifier.background(UdoWhite),
+                textStyle = TextStyle(color = UdoDarkGray)
             )
 
             Button(
                 modifier = Modifier.align(CenterEnd),
+                colors = UdoChatButtonTheme(),
                 onClick = {
                     if (textFieldValue.trim() != "") {
                         uploadMessage(textFieldValue)
@@ -171,7 +163,7 @@ class ChatFragment : Fragment() {
                 Icon(
                     Icons.Filled.Send,
                     contentDescription = "Send Message",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier.size(ButtonDefaults.IconSize.times(1.5f))
                 )
             }
         }
@@ -180,52 +172,51 @@ class ChatFragment : Fragment() {
     @Composable
     fun MessageCard(msg: ChatMessage) {
         // TODO correct Theme and Get colors for own Messages
-        val thisUser = msg.user?.id == dataHandler.user?.docID
-        val layoutDirection = if (thisUser) LayoutDirection.Rtl else LayoutDirection.Ltr
-        val alignment = if(thisUser) Alignment.CenterEnd else Alignment.CenterStart
+        val thisUser = (msg.user?.id == dataHandler.user?.docID) || false;
+        //if(thisUser) ""
+        //                        else
+        val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown"
+        val alignment = if (thisUser) Alignment.CenterEnd else Alignment.CenterStart
         Box(modifier = Modifier.fillMaxWidth()) {
-            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
-                Row(
-                    modifier = Modifier
-                        .align(alignment)
-                        .padding(all = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            Box(
+                modifier = Modifier
+                    .align(alignment)
+                    .padding(all = 8.dp)
+            ) {
+                Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                    Text(
+                        text = username,
+                        color = UdoOrange,
+                        modifier= Modifier.align(Alignment.Start),
+                        style = MaterialTheme.typography.subtitle2,
+                    )
 
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = 5.dp
+                    ) {
                         Text(
-                            text = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown",
-                            color = MaterialTheme.colors.secondaryVariant,
-                            style = MaterialTheme.typography.subtitle2,
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                            elevation = 5.dp
-                        ) {
-                            Text(
-                                text = msg.message ?: "",
-                                modifier = Modifier.padding(all = 4.dp),
-                                style = MaterialTheme.typography.body2
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(1.dp))
-
-                        Text(
-                            text = formatDate(msg.timestamp!!),
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colors.secondary,
-                            style = TextStyle(
-                                textAlign = TextAlign.Right,
-                                fontSize = 12.sp
-                            )
+                            text = msg.message ?: "",
+                            modifier = Modifier.background(UdoLightBlue).padding(all = 4.dp),
+                            color = UdoWhite,
+                            style = MaterialTheme.typography.body2
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(1.dp))
+
+                    Text(
+                        text = formatDate(msg.timestamp!!),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = UdoGray,
+                        style = TextStyle(
+                            textAlign = TextAlign.Right,
+                            fontSize = 12.sp
+                        )
+                    )
                 }
             }
         }

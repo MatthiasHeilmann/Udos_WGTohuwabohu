@@ -1,18 +1,26 @@
 package com.example.udos_wg_tohuwabohu.Tasks
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,7 +28,6 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Collections
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
@@ -39,6 +46,8 @@ class TasksFragment : Fragment() {
     private var tasksData = dataHandler.getTasks()
     private val myFirestore = Firebase.firestore
     private val roommateCollection = Collections.Roommate.toString()
+
+    private var currentTask: Task? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,8 +68,29 @@ class TasksFragment : Fragment() {
     }
     @Composable
     fun TaskCard(taskTitle:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
+        val myTask: Task? = tasksData?.get(taskKey)
+        val showCheckDialog = remember { mutableStateOf(false) }
+        val showDeleteDialog = remember { mutableStateOf(false) }
+        if(showCheckDialog.value){
+            CheckConfirmationDialog(showCheckDialog = showCheckDialog.value,
+                onDismiss = {showCheckDialog.value = it},
+                myTask = myTask)
+        }
+        if(showDeleteDialog.value){
+            DeleteConfirmationDialog(showDeleteDialog = showDeleteDialog.value,
+                onDismiss = {showDeleteDialog.value = it},
+                myTask = myTask)
+        }
             Card(colors = UdoCardTheme(), modifier = Modifier
-                .padding(5.dp)){
+                .padding(5.dp)
+                .pointerInput(Unit){
+                    detectTapGestures(
+                        onLongPress = {
+                            showDeleteDialog.value = true
+                        }
+                    )
+                })
+            {
                 Row(modifier = Modifier.padding(10.dp)){
                     Column{
                         Text(text = taskTitle, color = dueDate.second)
@@ -75,13 +105,9 @@ class TasksFragment : Fragment() {
                         }
                         /** button to check the task */
                         Button(onClick = {
-                                val myTask: Task? = tasksData?.get(taskKey)
-                                myTask?.let { checkTask(it) }
-                                if (myTask != null) {
-                                    myTask.points?.let { givePoints(roommate, it) }
-                                }
-                            },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoGray),
+                            showCheckDialog.value = true
+                        },
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoWhite),
                             modifier = Modifier.absolutePadding(4.dp),
                             shape = RoundedCornerShape(5)
                         ) {
@@ -116,17 +142,18 @@ class TasksFragment : Fragment() {
         val taskYear = date.year+1900
         
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
+        // sorry for that
         when{
-            taskYear<currentYear -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoGray)
-            taskMonth<currentMonth -> return Pair("Am " + taskDate + " fällig", UdoRed)
-            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoGray)
+            taskYear<currentYear -> return Pair("War am " + taskDate + " fällig", UdoRed)
+            taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoWhite)
+            taskMonth<currentMonth -> return Pair("War am " + taskDate + " fällig", UdoRed)
+            taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoWhite)
             taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
-            taskDay==currentDay-1 -> return Pair("Gestern fällig", UdoRed)
-            taskDay<currentDay -> return Pair("Am " + taskDate + " fällig", UdoRed)
+            taskDay==currentDay-1 -> return Pair("War gestern fällig", UdoRed)
+            taskDay<currentDay -> return Pair("War am " + taskDate + " fällig", UdoRed)
         }
-        return Pair("Am " + taskDate + " fällig", UdoGray)
+        return Pair("Am " + taskDate + " fällig", UdoWhite)
     }
 
     /**
@@ -167,6 +194,64 @@ class TasksFragment : Fragment() {
             }
         }
     }
+    @Composable
+    fun CheckConfirmationDialog(showCheckDialog: Boolean,
+                          onDismiss: (Boolean) -> Unit,
+                                myTask: Task?){
+        if (showCheckDialog) {
+            AlertDialog(
+                onDismissRequest = {onDismiss(false)},
+                dismissButton = {
+                    TextButton(onClick = {onDismiss(false)})
+                    { Text(text = "Abbrechen", color = UdoRed) }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if(myTask!=null){
+                            checkTask(myTask!!)
+                            myTask!!.points?.let { givePoints(dataHandler.user, it) }
+                        }else{
+                            Log.d(TAG,"No task to check")
+                        }
+                        onDismiss(false)
+                    }
+                        , shape = RoundedCornerShape(4.dp))
+                    { Text(text = "Ich bin sicher") }
+                },
+                title = { Text(text = "Bestätigen") },
+                text = { Text(text = "Sicher, dass du die Aufgabe erledigt hast?") }
+            )
+        }
+    }
+    @Composable
+    fun DeleteConfirmationDialog(showDeleteDialog: Boolean,
+                                onDismiss: (Boolean) -> Unit,
+                                myTask: Task?){
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = {onDismiss(false)},
+                dismissButton = {
+                    TextButton(onClick = {onDismiss(false)})
+                    { Text(text = "Abbrechen") }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        Log.d(TAG,"LÖSCHEN")
+                        if(myTask!=null){
+                            deleteTask(myTask.docId)
+                        }else{
+                            Log.d(TAG,"No task to delete")
+                        }
+                        onDismiss(false)
+                    }
+                        , shape = RoundedCornerShape(4.dp))
+                    { Text(text = "Ja, sicher!", color = UdoRed) }
+                },
+                title = { Text(text = "Bestätigen") },
+                text = { Text(text = "Sicher, dass du die Aufgabe löschen möchtest?") }
+            )
+        }
+    }
 
     /**
      * finds the new completer, which has the lowest coin_count
@@ -175,7 +260,7 @@ class TasksFragment : Fragment() {
     fun getCompleter(): Roommate? {
         val roommateList = dataHandler.roommateList
         var worstMate: Roommate? = null
-        var worstCount: Long = 0
+        var worstCount: Long = Long.MAX_VALUE
         roommateList.forEach{ mate ->
             if (mate.value.coin_count!! <= worstCount) {
                 worstMate = dataHandler.getRoommate(mate.key)
@@ -184,7 +269,6 @@ class TasksFragment : Fragment() {
         }
         return worstMate
     }
-//    fun createTaskTest(){createTask(Date(),7,"Klo putzen",6)}
 
     /**
      * checks the task in the database,
@@ -215,7 +299,11 @@ class TasksFragment : Fragment() {
      * deletes a task in the database
      */
     fun deleteTask(docId: String){
-        myFirestore.collection(Collections.Task.toString()).document(docId).delete()
+        myFirestore.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .collection("tasks")
+            .document(docId)
+            .delete()
     }
 
     /**

@@ -1,16 +1,11 @@
 package com.example.udos_wg_tohuwabohu
 
 
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.foundation.text.KeyboardOptions
-
-import androidx.compose.material.lightColors
 import androidx.compose.material3.*
-import androidx.compose.material3.AlertDialogDefaults.containerColor
+import androidx.compose.material3.TextFieldDefaults.textFieldColors
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CardDefaults.cardColors
-import androidx.compose.material3.ListItemDefaults.contentColor
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -28,9 +23,10 @@ val Red900 = Color(0xffc20029)
 
 val UdoLightBlue = Color(0xff30475e)
 val UdoDarkBlue = Color(0xff222831)
-val UdoGray = Color(0xffdddddd)
+val UdoWhite = Color(0xFFDCDCDC)
 val UdoOrange = Color(0xffe29e21)
 val UdoRed = Color(0xfff05454)
+val UdoGray = Color(0xFF808080)
 val UdoDarkGray= Color(0xFF313131)
 
 val Typography.popupLabel: TextStyle
@@ -40,7 +36,7 @@ val Typography.popupLabel: TextStyle
 
 @Composable
 fun UdosTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = lightColorScheme().copy(primary = UdoDarkBlue, secondary = UdoGray),
+    MaterialTheme(colorScheme = lightColorScheme().copy(primary = UdoDarkBlue, secondary = UdoWhite),
         content = content,
         typography = Typography(
             displayMedium = TextStyle(
@@ -52,9 +48,20 @@ fun UdosTheme(content: @Composable () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UdoChatTextFieldTheme(): TextFieldColors{
+    return textFieldColors(containerColor = UdoDarkGray, textColor = UdoWhite)
+}
+
+@Composable
+fun UdoChatButtonTheme(): ButtonColors {
+    return buttonColors(containerColor =  Color.Transparent, contentColor = UdoLightBlue)
+}
+
 @Composable
 fun UdoCardTheme(): CardColors {
-    val UdoCardColors= cardColors(containerColor= UdoDarkBlue, contentColor= UdoGray, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoCardColors= cardColors(containerColor= UdoDarkBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoCardColors
 }
 
@@ -67,7 +74,7 @@ fun UdoCardTheme(): CardColors {
 fun UdoPopupCardTheme(): CardColors {
     val UdoPopupCardColors = cardColors(
         containerColor = UdoLightBlue,
-        contentColor = UdoGray,
+        contentColor = UdoWhite,
         disabledContainerColor = Color.Black,
         disabledContentColor = Color.Magenta
     )
@@ -77,13 +84,13 @@ fun UdoPopupCardTheme(): CardColors {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UdoPopupTextfieldColors(): TextFieldColors{
-    val UdoPopupTextfieldColors= TextFieldDefaults.textFieldColors(textColor = UdoDarkGray, containerColor = UdoGray, cursorColor = UdoDarkGray)
+    val UdoPopupTextfieldColors= TextFieldDefaults.textFieldColors(textColor = UdoDarkGray, containerColor = UdoWhite, cursorColor = UdoDarkGray)
     return UdoPopupTextfieldColors
 }
 
 @Composable
 fun UdoDateCardTheme(): CardColors {
-    val UdoDateCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoGray, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoDateCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoDateCardColors
 }
 

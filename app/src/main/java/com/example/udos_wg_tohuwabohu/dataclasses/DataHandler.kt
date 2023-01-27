@@ -2,19 +2,21 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.google.firebase.Timestamp
 
 data class DataHandler(
     var wg: WG?,
     var contactPerson: ContactPerson?,
     var user: Roommate?,
-    var roommateList: HashMap<String, Roommate>,
+    var roommateList: SnapshotStateMap<String, Roommate>,
     var taskList: HashMap<String, Task>,
+    var financeEntries: SnapshotStateList<FinanceEntry>,
     var chat: SnapshotStateList<ChatMessage>
 ) {
-    private constructor() : this(null, null, null, HashMap(), HashMap(), mutableStateListOf<ChatMessage>() )
+    private constructor() : this(null, null, null, mutableStateMapOf(), HashMap(), mutableStateListOf<FinanceEntry>(), mutableStateListOf<ChatMessage>() )
 
     companion object {
         private var instance: DataHandler? = null;
@@ -24,10 +26,16 @@ data class DataHandler(
         }
     }
 
+    fun addFinanceEntry(vararg finances: FinanceEntry) {
+        for (f in finances) {
+            if (!financeEntries.contains(f)) {
+                financeEntries.add(f)
+            }
+        }
+    }
     fun addChatMessage(vararg messages: ChatMessage) {
         for (m in messages) {
             if (!chat.contains(m)) {
-                Log.d("DataHandler", "Adding message: ${m.message}")
                 chat.add(m)
             }
         }
@@ -45,8 +53,17 @@ data class DataHandler(
         }
     }
 
+
+    fun getFinancesEntries(): Array<FinanceEntry>{
+        return financeEntries.toTypedArray()
+    }
+
     fun getChat(): Array<ChatMessage> {
         return chat.toTypedArray()
+    }
+
+    fun getAllRoommates(): Array<Roommate>{
+        return roommateList.values.toTypedArray()
     }
 
     fun getRoommate(uid: String?): Roommate? {

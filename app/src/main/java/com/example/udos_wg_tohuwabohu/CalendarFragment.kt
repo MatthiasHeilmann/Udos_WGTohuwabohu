@@ -1,25 +1,14 @@
 package com.example.udos_wg_tohuwabohu
 
-import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import android.widget.DatePicker
-import android.widget.EditText
-import android.widget.PopupWindow
-import androidx.cardview.widget.CardView
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,18 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.firebase.Timestamp
 
 
@@ -220,7 +203,7 @@ fun CalendarFAB(){
                 onClick = { popupActive = true }, modifier = Modifier
                     .requiredHeight(75.dp)
                     .requiredWidth(75.dp), shape = CircleShape, containerColor = Color(0xff30475e)
-            ) { Text("+", color = UdoGray, fontSize = 30.sp) }
+            ) { Text("+", color = UdoWhite, fontSize = 30.sp) }
         }
     }
 }
