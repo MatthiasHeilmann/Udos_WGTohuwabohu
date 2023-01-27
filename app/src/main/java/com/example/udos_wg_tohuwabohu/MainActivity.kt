@@ -2,8 +2,12 @@ package com.example.udos_wg_tohuwabohu
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
+import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.firebase.auth.FirebaseAuth
@@ -11,6 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val dbLoader = DBLoader.getInstance()
+    private val dataHandler = DataHandler.getInstance()
     val TAG = "[MainActivity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +28,11 @@ class MainActivity : AppCompatActivity() {
         // get user values and show
         val userID = intent.getStringExtra("user_id")
         val emailID = intent.getStringExtra("email_id")
+
+        // load database
+        dbLoader.setMainActivity(this)
+        dbLoader.loadDatabase(userID!!)
+
         binding.textUserID.text = "User ID: $userID"
         binding.textUserEmail.text = "Email: $emailID"
 
@@ -30,6 +41,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
         }
+
+
         replaceFragment(ChatFragment())
         binding.textToolbar.text = "Chat"
         // navigation
@@ -61,11 +74,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        // database
-        val dbLoader = DBLoader.getInstance()
-        dbLoader.setMainActivity(this)
-        dbLoader.loadDatabase(userID!!)
-
     }
 
     private fun replaceFragment(fragment : Fragment){
@@ -73,5 +81,24 @@ class MainActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
+    }
+    fun openCreateTaskFragment(view: View){
+        val f = CreateTaskFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = "Neue Aufgabe erstellen"
+    }
+
+    fun reloadTaskFragment(){
+        if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
+            Log.d(TAG, "TASK FRAGMENT IS VISIBLE")
+            replaceFragment(TasksFragment())
+        }else{
+            Log.d(TAG, "Task fragment is not visible")
+        }
+    }
+    fun showTaskFragment(){
+        replaceFragment(TasksFragment())
+        binding.textToolbar.text = "Aufgaben"
     }
 }
