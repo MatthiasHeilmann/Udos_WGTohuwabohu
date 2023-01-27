@@ -80,8 +80,6 @@ class DBWriter private constructor() {
             .update(mapOf(
                 "einkaufsliste.${item}" to false,
             ))
-        // todo: update shoppingList var
-        // todo: refresh view
     }
 
     fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
@@ -91,7 +89,5 @@ class DBWriter private constructor() {
                 "einkaufsliste.${item.key}" to checkedState.value,
             ));
         Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
-
-        // todo: update shoppingList var
     }
 }
