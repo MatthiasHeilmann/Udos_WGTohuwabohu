@@ -247,8 +247,8 @@ class TasksFragment : Fragment() {
                         , shape = RoundedCornerShape(4.dp))
                     { Text(text = "Ja, sicher!", color = UdoRed) }
                 },
-                title = { Text(text = "Bestätigen") },
-                text = { Text(text = "Sicher, dass du die Aufgabe löschen möchtest?") }
+                title = { Text(text = "Wirklich löschen?") },
+                text = { Text(text = "Bist du sicher, dass du die Aufgabe löschen möchtest?") }
             )
         }
     }
