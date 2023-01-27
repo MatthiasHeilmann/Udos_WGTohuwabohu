@@ -86,10 +86,6 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox() {
-
-        println("Got bound Messages")
-        println(dataHandler.chat.joinToString { it.message + ", " + it.timestamp?.toString() + ", " + it.user.toString() + "\n\t" })
-
         Column(
             modifier = Modifier
                 .fillMaxHeight(),

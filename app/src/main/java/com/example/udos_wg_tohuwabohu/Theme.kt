@@ -48,6 +48,11 @@ fun UdosTheme(content: @Composable () -> Unit) {
     )
 }
 
+@Composable
+fun UdoFinanceTextFieldTypographie(): TextStyle{
+    return androidx.compose.material.MaterialTheme.typography.h6
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UdoChatTextFieldTheme(): TextFieldColors{

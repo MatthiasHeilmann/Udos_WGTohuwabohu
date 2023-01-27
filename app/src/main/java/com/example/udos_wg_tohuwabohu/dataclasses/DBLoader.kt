@@ -125,6 +125,7 @@ class DBLoader private constructor() {
         try {
             financeRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.FINANCES.call)
+                .orderBy("timestamp").limit(50)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             // TODO handle exception: Give toast and empty chat object
@@ -140,7 +141,7 @@ class DBLoader private constructor() {
         try {
             chatRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.CHAT.call)
-                .orderBy("timestamp").limit(50)
+                .orderBy("timestamp").limit(200)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             // TODO handle exception: Give toast and empty chat object
@@ -260,7 +261,6 @@ class DBLoader private constructor() {
                 for(dc in snapshots!!.documentChanges){
                     // for new documents
                     if(dc.type == DocumentChange.Type.ADDED){
-                        Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
                         try{
                             // get new document as DocumentSnapshot and add to dataHandler
                             db.collection("wg")

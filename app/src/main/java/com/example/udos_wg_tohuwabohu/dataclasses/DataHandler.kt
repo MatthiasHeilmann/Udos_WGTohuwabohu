@@ -1,6 +1,5 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -31,8 +30,14 @@ data class DataHandler(
             if (!financeEntries.contains(f)) {
                 financeEntries.add(f)
             }
+            else{
+                val i = financeEntries.indexOf(f)
+                financeEntries.remove(f)
+                financeEntries.add(i, f)
+            }
         }
     }
+
     fun addChatMessage(vararg messages: ChatMessage) {
         for (m in messages) {
             if (!chat.contains(m)) {
