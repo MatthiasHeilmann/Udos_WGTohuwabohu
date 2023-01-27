@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
+import com.example.udos_wg_tohuwabohu.Home.HomeFragment
 import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
@@ -41,7 +43,18 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity,LoginActivity::class.java))
             finish()
         }
+        binding.homeButton.setOnClickListener{
+            replaceFragment(HomeFragment())
+            binding.textToolbar.text = "Eure WG"
+            binding.homeEdit.visibility = View.VISIBLE
+            binding.homeButton.visibility = View.INVISIBLE
 
+        }
+        binding.homeEdit.setOnClickListener{
+            replaceFragment(HomeEditFragment())
+            binding.homeButton.visibility = View.VISIBLE
+            binding.homeEdit.visibility = View.INVISIBLE
+        }
 
         replaceFragment(ChatFragment())
         binding.textToolbar.text = "Chat"
@@ -72,6 +85,8 @@ class MainActivity : AppCompatActivity() {
 
                 }
             }
+            binding.homeEdit.visibility = View.INVISIBLE
+            binding.homeButton.visibility = View.VISIBLE
             true
         }
     }

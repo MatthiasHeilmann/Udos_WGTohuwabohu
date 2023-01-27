@@ -108,14 +108,18 @@ class DBLoader private constructor() {
         val an: ContactPerson?
         var anRes: DocumentSnapshot? = null
         try {
-
-            anRes = db.collection(Collections.ContactPerson.call).document(anRef.id)
+            Log.d("[*******]",anRef.id)
+            anRes = db.collection(Collections.ContactPerson.call)
+//                .document(anRef.id)
+                .document("yva7SVaptjVPVTkI7CVr")
                 .get()
-                .asDeferred().await()
+                .asDeferred()
+                .await()
         } catch (e: Exception) {
             // TODO handle exception: Give toast and create default contact person
             e.printStackTrace()
         }
+        Log.d(TAG,anRes.toString())
         an = ContactPerson(anRes!!)
         dataHandler.contactPerson = an
     }
