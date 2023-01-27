@@ -1,6 +1,5 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -33,10 +32,8 @@ data class DataHandler(
             }
             else{
                 val i = financeEntries.indexOf(f)
-                println("Changed finance: " + financeEntries[i].price + " (${i})")
                 financeEntries.remove(f)
                 financeEntries.add(i, f)
-                println("Changed to: " + financeEntries[i].price + " (${f.price})")
             }
         }
     }

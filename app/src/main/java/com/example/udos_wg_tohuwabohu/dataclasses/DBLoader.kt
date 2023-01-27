@@ -260,7 +260,6 @@ class DBLoader private constructor() {
                 for(dc in snapshots!!.documentChanges){
                     // for new documents
                     if(dc.type == DocumentChange.Type.ADDED){
-                        Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
                         try{
                             // get new document as DocumentSnapshot and add to dataHandler
                             db.collection("wg")

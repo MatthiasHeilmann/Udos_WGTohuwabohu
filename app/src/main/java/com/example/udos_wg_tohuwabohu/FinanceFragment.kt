@@ -1,7 +1,6 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,7 +71,6 @@ class FinanceFragment : Fragment() {
     }
 
     fun formatNumber(n: Int): String {
-        Log.d("FinanceFragmentFormatNumber", "Got number: $n")
         return if (n > 9) "" + n else "0" + n
     }
 
@@ -114,7 +112,6 @@ class FinanceFragment : Fragment() {
                 .background(UdoLightBlue)
         ) {
             Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-                Log.d("FinanceChar", financeEntry.toString())
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = financeEntry.description ?: "unknown",
