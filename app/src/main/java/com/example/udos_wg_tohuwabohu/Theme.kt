@@ -1,5 +1,6 @@
 package com.example.udos_wg_tohuwabohu
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.lightColors
 import androidx.compose.material3.*
@@ -65,6 +66,17 @@ fun UdoPopupCardTheme(): CardColors {
     return UdoPopupCardColors
 }
 
+@Composable
+fun UdoUnfocusableCardTheme(): CardColors {
+    val UdoPopupCardColors = cardColors(
+        containerColor = UdoGray,
+        contentColor = Color.Black,
+        disabledContainerColor = Color.Black,
+        disabledContentColor = Color.Magenta
+    )
+    return UdoPopupCardColors
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UdoPopupTextfieldColors(): TextFieldColors{
@@ -84,13 +96,13 @@ fun UdoKeyboardOptions(): KeyboardOptions {
         capitalization =   KeyboardCapitalization.Sentences ,
         autoCorrect = false,
             keyboardType = KeyboardType.Text ,
-            imeAction = ImeAction.Default
+            imeAction = ImeAction.Done
     )
     return UdoKeyboardOptions
 }
 
 fun UdoPopupProperties(): PopupProperties{
-  val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
+    val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
     return UdoPopupProperties
 }
 
