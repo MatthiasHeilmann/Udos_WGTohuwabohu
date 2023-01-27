@@ -83,7 +83,9 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
     fun openCreateTaskFragment(view: View){
-        replaceFragment(CreateTaskFragment())
+        val f = CreateTaskFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
         binding.textToolbar.text = "Neue Aufgabe erstellen"
     }
 
@@ -94,5 +96,9 @@ class MainActivity : AppCompatActivity() {
         }else{
             Log.d(TAG, "Task fragment is not visible")
         }
+    }
+    fun showTaskFragment(){
+        replaceFragment(TasksFragment())
+        binding.textToolbar.text = "Aufgaben"
     }
 }

@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import com.example.udos_wg_tohuwabohu.MainActivity
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCreateTaskBinding
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
@@ -27,6 +28,7 @@ class CreateTaskFragment : Fragment() {
     val TAG = "[CREATE TASK FRAGMENT]"
     val dbWriter = DBWriter.getInstance()
     val dataHandler = DataHandler.getInstance()
+    var mainActivity: MainActivity? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -49,7 +51,7 @@ class CreateTaskFragment : Fragment() {
                 || TextUtils.isEmpty(pointsOfTask.text.toString().trim{it <= ' '})
                 || TextUtils.isEmpty(frequencyOfTask.text.toString().trim{it <= ' '})){
 //                Toast.makeText(
-//                        context = activity,
+//                        context = mainActivity,
 //                        "Hilfe",
 //                        Toast.LENGTH_SHORT
 //                    ).show()
@@ -60,6 +62,7 @@ class CreateTaskFragment : Fragment() {
             val points: Int = Integer.parseInt(pointsOfTask.text.toString())
 
             dbWriter.createTask(frequency,nameOfTask.text.toString(),points, getCompleter())
+            mainActivity?.showTaskFragment()
         }
         return view
     }
@@ -84,5 +87,10 @@ class CreateTaskFragment : Fragment() {
             }
         }
         return worstMate
+    }
+
+    @JvmName("setMainActivity1")
+    fun setMainActivity(mActivity: MainActivity){
+        mainActivity = mActivity;
     }
 }
