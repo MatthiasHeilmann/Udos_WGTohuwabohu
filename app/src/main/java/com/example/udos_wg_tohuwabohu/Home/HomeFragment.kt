@@ -34,11 +34,16 @@ class HomeFragment : Fragment() {
         _binding = FragmentHome2Binding.inflate(inflater,container,false)
         val view = _binding.root
         dataHandler.wg?.name.toString().also { _binding.wgName.text = it }
-        "${dataHandler.contactPerson?.forename.toString()} ${dataHandler.contactPerson?.surname.toString()}".also { _binding.contactName.text = it }
+        "Name: ${dataHandler.contactPerson?.forename.toString()} ${dataHandler.contactPerson?.surname.toString()}".also { _binding.contactName.text = it }
         "Email: ${dataHandler.contactPerson?.email.toString()}".also { _binding.contactEmail.text = it }
         "Telefon: ${dataHandler.contactPerson?.telNr.toString()}".also { _binding.contactPhone.text = it }
         "IBAN: ${dataHandler.contactPerson?.IBAN.toString()}".also { _binding.contactIban.text = it }
         _binding.entrycode.text = dataHandler.wg?.entryCode.toString()
+
+        _binding.userEmail.text ="Email: "+ dataHandler.user?.email.toString()
+        _binding.userFirstname.text ="Vorname: "+ dataHandler.user?.forename.toString()
+        _binding.userSurname.text ="Nachname: "+ dataHandler.user?.surname.toString()
+        _binding.userUsername.text ="Nutzername: "+ dataHandler.user?.username.toString()
 
         _binding.buttonLeaveWg.setOnClickListener{
             val builder = AlertDialog.Builder(activity)

@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Home.HomeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -14,6 +13,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingBottom="24dp"
             tools:visibility="visible">
 
             <TextView
@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="Name"
-                android:textSize="24sp"
+                android:textSize="48sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="code"
-                android:textSize="16sp"
+                android:textSize="34sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/entrycodeLabel" />
@@ -64,7 +64,7 @@
                 android:id="@+id/textView10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="24dp"
                 android:text="Euer Ansprechpartner:"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,10 +73,24 @@
                 app:layout_constraintTop_toBottomOf="@+id/entrycode" />
 
             <TextView
-                android:id="@+id/contact_name"
+                android:id="@+id/textView12"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Dein Profil"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/contact_iban" />
+
+            <TextView
+                android:id="@+id/contact_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
                 android:text="name"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -84,9 +98,11 @@
 
             <TextView
                 android:id="@+id/contact_email"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
                 android:text="email"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -94,9 +110,11 @@
 
             <TextView
                 android:id="@+id/contact_phone"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
                 android:text="telnr"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -104,25 +122,77 @@
 
             <TextView
                 android:id="@+id/contact_iban"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
                 android:text="iban"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/contact_phone" />
+
+            <TextView
+                android:id="@+id/user_firstname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
+                android:text="Vorname"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView12" />
+
+            <TextView
+                android:id="@+id/user_surname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
+                android:text="Nachname"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_firstname" />
+
+            <TextView
+                android:id="@+id/user_username"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
+                android:text="Username"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_surname" />
+
+            <TextView
+                android:id="@+id/user_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="64dp"
+                android:text="Email"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_username" />
 
             <Button
                 android:id="@+id/button_leave_wg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="64dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginEnd="64dp"
                 android:text="WG Verlassen"
+                android:textColor="#FFDDDDDD"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/contact_iban" />
+                app:layout_constraintTop_toBottomOf="@+id/user_email" />
 
             <Button
                 android:id="@+id/button_logout2"
@@ -132,6 +202,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="64dp"
                 android:text="Ausloggen"
+                android:textColor="#FFDDDDDD"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/button_leave_wg" />
