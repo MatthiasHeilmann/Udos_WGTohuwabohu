@@ -87,7 +87,7 @@ data class DataHandler(
         return taskList
     }
 
-    fun getCalendar(): MutableList<MutableMap<String, Timestamp>>? {
+    fun getCalendar(): ArrayList<HashMap<String, Timestamp>>? {
         return wg.first().calendar
     }
 

@@ -94,7 +94,7 @@ class DBWriter private constructor() {
         val wgName: MutableMap<String, Any> = HashMap()
         wgName["bezeichnung"] = name
         db.collection(Collections.WG.call)
-            .document(dataHandler.wg!!.docID)
+            .document(dataHandler.wg!!.first().docID)
             .update(wgName)
         val contact: MutableMap<String, Any> = HashMap()
         contact["IBAN"] = contactIBAN
@@ -105,5 +105,10 @@ class DBWriter private constructor() {
         db.collection(Collections.ContactPerson.call)
             .document(dataHandler.contactPerson!!.docID)
             .update(contact)
+    }
+
+    fun leaveWG(){
+        val EmptyWG = db.collection(Collections.WG.call).document("EmptyWG")
+        db.collection(Collections.Roommate.call).document(dataHandler.user!!.docID).update("wg_id",EmptyWG)
     }
 }

@@ -11,7 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.example.udos_wg_tohuwabohu.LoginActivity
+import com.example.udos_wg_tohuwabohu.LonelyPageActivity
 import com.example.udos_wg_tohuwabohu.databinding.FragmentHome2Binding
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.google.firebase.auth.FirebaseAuth
 
@@ -33,12 +35,12 @@ class HomeFragment : Fragment() {
     ): View? {
         _binding = FragmentHome2Binding.inflate(inflater,container,false)
         val view = _binding.root
-        dataHandler.wg?.name.toString().also { _binding.wgName.text = it }
+        dataHandler.wg?.first()?.name.toString().also { _binding.wgName.text = it }
         "Name: ${dataHandler.contactPerson?.forename.toString()} ${dataHandler.contactPerson?.surname.toString()}".also { _binding.contactName.text = it }
         "Email: ${dataHandler.contactPerson?.email.toString()}".also { _binding.contactEmail.text = it }
         "Telefon: ${dataHandler.contactPerson?.telNr.toString()}".also { _binding.contactPhone.text = it }
         "IBAN: ${dataHandler.contactPerson?.IBAN.toString()}".also { _binding.contactIban.text = it }
-        _binding.entrycode.text = dataHandler.wg?.entryCode.toString()
+        _binding.entrycode.text = dataHandler.wg?.first()?.entryCode.toString()
 
         _binding.userEmail.text ="Email: "+ dataHandler.user?.email.toString()
         _binding.userFirstname.text ="Vorname: "+ dataHandler.user?.forename.toString()
@@ -50,8 +52,10 @@ class HomeFragment : Fragment() {
             builder.setTitle("WG verlassen?")
             builder.setMessage("Bist Du sicher, dass Du die WG verlassen willst?")
             builder.setPositiveButton("Ja"){dialogInterface, which ->
-                Log.d(TAG,"YEEES")
-                //TODO leave WG
+                DBWriter.getInstance().leaveWG()
+                val activity: Activity = requireActivity()
+                startActivity(Intent(activity, LonelyPageActivity::class.java))
+                activity.finish()
             }
             builder.setNegativeButton("Abbrechen"){dialogInterface,which->
                 Log.d(TAG,"Abgebrochen")

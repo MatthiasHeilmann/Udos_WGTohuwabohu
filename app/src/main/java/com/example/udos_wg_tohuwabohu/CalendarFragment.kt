@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -23,17 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
-import com.google.android.material.internal.ContextUtils.getActivity
 import com.google.firebase.Timestamp
 import java.sql.Time
 import java.text.DateFormatSymbols
@@ -106,7 +102,7 @@ fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
 }
 
 @Composable
-fun FullCalendar(calendarData: MutableList<MutableMap<String, Timestamp>>){
+fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
     var sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
     var currentMonth = 100
     Column (modifier = Modifier

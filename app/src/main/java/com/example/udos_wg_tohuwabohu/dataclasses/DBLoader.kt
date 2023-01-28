@@ -135,8 +135,12 @@ class DBLoader private constructor() {
             // TODO handle exception: Give toast and empty chat object
             e.printStackTrace()
         }
-        financeRes?.forEach { cost ->
-            dataHandler.addFinanceEntry(FinanceEntry(cost))
+        try {
+            financeRes?.forEach { cost ->
+                dataHandler.addFinanceEntry(FinanceEntry(cost))
+            }
+        }catch (e: Exception){
+            Log.d(TAG,"couldnt find finances. Not created yet?")
         }
     }
 
@@ -151,8 +155,12 @@ class DBLoader private constructor() {
             // TODO handle exception: Give toast and empty chat object
             e.printStackTrace()
         }
-        chatRes?.forEach { msg ->
-            dataHandler.addChatMessage(ChatMessage(msg))
+        try {
+            chatRes?.forEach { msg ->
+                dataHandler.addChatMessage(ChatMessage(msg))
+            }
+        }catch(e:Exception){
+            Log.d(TAG,"couldnt find chatfiles. Not created yet?")
         }
     }
 
@@ -186,11 +194,13 @@ class DBLoader private constructor() {
             // TODO handle exception: Give toast and shutdown app
             e.printStackTrace()
         }
-
-        tasksRes!!.forEach { task ->
-            dataHandler.addTask(Task(task))
+        try {
+            tasksRes!!.forEach { task ->
+                dataHandler.addTask(Task(task))
+            }
+        }catch (e: Exception){
+            Log.d(TAG,"couldnt find tasks. Not created yet?")
         }
-
 
     }
 
@@ -230,7 +240,7 @@ class DBLoader private constructor() {
      */
     private fun addTaskCollectionSnapshotListener(){
             db.collection(Collections.WG.call)
-                .document(it.docID)
+                .document(dataHandler.wg!!.first().docID)
                 .collection(Collections.Task.call)
                 // Listener for collection
                 .addSnapshotListener{ snapshots,e ->
@@ -289,7 +299,7 @@ class DBLoader private constructor() {
                         }
                     }
                 }
-        }
+
     }
 
     private fun chatSnapshotListener() {
