@@ -5,7 +5,7 @@ enum class Collections(val call: String) {
     WG("wg"),
     CHAT("chat_files"),
     FINANCES("finanzen"),
-    ContactPerson("ansprechtpartner"),
+    ContactPerson("ansprechpartner"),
     Task("tasks");
 
     override fun toString(): String {

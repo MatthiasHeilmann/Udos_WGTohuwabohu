@@ -110,8 +110,7 @@ class DBLoader private constructor() {
         try {
             Log.d("[*******]",anRef.id)
             anRes = db.collection(Collections.ContactPerson.call)
-//                .document(anRef.id)
-                .document("yva7SVaptjVPVTkI7CVr")
+                .document(anRef.id)
                 .get()
                 .asDeferred()
                 .await()
@@ -222,30 +221,6 @@ class DBLoader private constructor() {
         }
     }
 
-    private fun taskSnapshotListener() {
-        for (task in dataHandler.taskList.values) {
-            db.collection(Collections.Task.call).document(task.docId)
-                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
-                        return@addSnapshotListener
-                    }
-                    // What happens if the database document gets changed
-                    documentSnapshot?.let {
-                        dataHandler.getTask(task.docId).update(it)
-                        Log.d(
-                            TAG,
-                            "task updated ${dataHandler.getTask(it.id)}"
-                        )
-                    }
-                }
-            Log.d(
-                TAG,
-                "added snapshotlistener to task: ${task.docId}"
-            )
-        }
-    }
-
     /**
      * Listens to the whole collection tasks
      * adds new tasks to dataHandler
@@ -275,7 +250,6 @@ class DBLoader private constructor() {
                                 .addOnSuccessListener { document ->
                                     dataHandler.addTask(Task(document))
                                     mainActivity?.reloadTaskFragment()
-                                    //TODO refresh fragment if active
                                 }
                         }catch (e: Exception){
                             Log.d(TAG, "Error getting new task")
@@ -286,7 +260,6 @@ class DBLoader private constructor() {
                         Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
                         dataHandler.taskList.remove(dc.document.id)
                         mainActivity?.reloadTaskFragment()
-                        //TODO refresh fragment if active
                     }else if(dc.type == DocumentChange.Type.MODIFIED) {
                         try{
                             Log.d(TAG,"Updating task....")
@@ -299,7 +272,6 @@ class DBLoader private constructor() {
                                 .addOnSuccessListener { document ->
                                     dataHandler.getTask(document.id).update(document)
                                     mainActivity?.reloadTaskFragment()
-                                    //TODO refresh fragment if active
                                 }
                         }catch (e: Exception){
                             Log.d(TAG, "Error updating new task")

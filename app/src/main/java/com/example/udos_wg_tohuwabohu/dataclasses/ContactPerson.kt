@@ -18,6 +18,11 @@ data class ContactPerson(val docID: String, var forename: String?, var surname: 
         this.telNr = vals["tel_nr"].toString()
         val TAG = "[CONTACT]"
         Log.d(TAG,vals.toString())
+        Log.d(TAG,vals["vorname"].toString())
+        Log.d(TAG,vals["nachname"].toString())
+        Log.d(TAG,vals["email"].toString())
+        Log.d(TAG,vals["IBAN"].toString())
+        Log.d(TAG,vals["tel_nr"].toString())
         Log.d(TAG,this.forename.toString())
         Log.d(TAG,this.surname.toString())
         Log.d(TAG,this.email.toString())
