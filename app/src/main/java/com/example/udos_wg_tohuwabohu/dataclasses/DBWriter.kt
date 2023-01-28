@@ -71,4 +71,20 @@ class DBWriter private constructor() {
             .collection("chat_files")
             .add(cmMap)
     }
+    fun updateWgData(name: String,contactSurname:String,contactFirstname:String,contactEmail:String,contactPhone:String,contactIBAN:String){
+        val wgName: MutableMap<String, Any> = HashMap()
+        wgName["bezeichnung"] = name
+        db.collection(Collections.WG.call)
+            .document(dataHandler.wg!!.docID)
+            .update(wgName)
+        val contact: MutableMap<String, Any> = HashMap()
+        contact["IBAN"] = contactIBAN
+        contact["email"] = contactEmail
+        contact["nachname"] = contactSurname
+        contact["vorname"] = contactFirstname
+        contact["tel_nr"] = contactPhone
+        db.collection(Collections.ContactPerson.call)
+            .document(dataHandler.contactPerson!!.docID)
+            .update(contact)
+    }
 }

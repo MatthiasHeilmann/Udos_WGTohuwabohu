@@ -30,6 +30,7 @@ class RegisterActivity : AppCompatActivity() {
         binding.buttonRegister.setOnClickListener{
             when{
                 // show errors if textfields are empty
+                //TODO DEUTSCH
                 TextUtils.isEmpty(binding.textfieldFirstName.text.toString().trim{it <= ' '}) -> {
                     Toast.makeText(
                         this@RegisterActivity,
