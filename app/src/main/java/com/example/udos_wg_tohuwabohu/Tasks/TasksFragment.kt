@@ -284,14 +284,16 @@ class TasksFragment : Fragment() {
         newDate = c.time
         if (newCompleter != null) {
             val newCompleterRef = myFirestore.collection("mitbewohner").document(newCompleter.docID)
-            myFirestore.collection("wg")
-                .document(dataHandler.wg!!.docID)
-                .collection("tasks")
-                .document(task.docId)
-                .update(mapOf(
-                    "frist" to newDate,
-                    "erlediger" to newCompleterRef
-                ))
+            dataHandler.wg!!.first().let {
+                myFirestore.collection("wg")
+                    .document(it.docID)
+                    .collection("tasks")
+                    .document(task.docId)
+                    .update(mapOf(
+                        "frist" to newDate,
+                        "erlediger" to newCompleterRef
+                    ))
+            }
         }
     }
 
@@ -299,11 +301,13 @@ class TasksFragment : Fragment() {
      * deletes a task in the database
      */
     fun deleteTask(docId: String){
-        myFirestore.collection("wg")
-            .document(dataHandler.wg!!.docID)
-            .collection("tasks")
-            .document(docId)
-            .delete()
+        dataHandler.wg!!.first().let {
+            myFirestore.collection("wg")
+                .document(it.docID)
+                .collection("tasks")
+                .document(docId)
+                .delete()
+        }
     }
 
     /**

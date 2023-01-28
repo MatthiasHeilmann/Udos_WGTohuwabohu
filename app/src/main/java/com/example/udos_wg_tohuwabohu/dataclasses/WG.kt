@@ -17,7 +17,11 @@ data class WG(val docID: String, var name: String?,var entryCode:Long?, var cont
         this.entryCode = vals["entrycode"] as Long
         this.contactPerson = vals.getDocumentReference("ansprechpartner")
         this.shoppingList = vals["einkaufsliste"] as HashMap<String, Boolean>
-        this.calendar = vals["calendar"] as ArrayList<HashMap<String, Timestamp>>
+        try{
+            this.calendar = vals["calendar"] as ArrayList<HashMap<String, Timestamp>>
+        }catch (e:Exception){
+
+        }
         val TAG = "########"
         Log.d(TAG,this.name.toString())
         Log.d(TAG,this.contactPerson.toString())

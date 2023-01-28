@@ -29,14 +29,14 @@ class HomeEditFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentHomeEditBinding.inflate(inflater,container,false)
         val view = _binding.root
-        _binding.wgName.setText(dataHandler.wg?.name)
+        _binding.wgName.setText(dataHandler.wg?.first()?.name)
         _binding.contactName.setText(dataHandler.contactPerson?.forename + " " +dataHandler.contactPerson?.surname)
         _binding.contactEmail.setText(dataHandler.contactPerson?.email)
         _binding.contactPhone.setText(dataHandler.contactPerson?.telNr)
         _binding.contactIban.setText(dataHandler.contactPerson?.IBAN)
 
         _binding.buttonSave.setOnClickListener{
-            if(_binding.wgName.text.toString() == dataHandler.wg?.name
+            if(_binding.wgName.text.toString() == dataHandler.wg?.first()?.name
                 && _binding.contactName.text.toString() == dataHandler.contactPerson?.forename + " " +dataHandler.contactPerson?.surname
                 && _binding.contactEmail.text.toString() == dataHandler.contactPerson?.email
                 && _binding.contactPhone.text.toString() == dataHandler.contactPerson?.telNr
@@ -67,7 +67,7 @@ class HomeEditFragment : Fragment() {
             alertDialog.show()
         }
         _binding.buttonCancel.setOnClickListener{
-            if(_binding.wgName.text.toString() == dataHandler.wg?.name
+            if(_binding.wgName.text.toString() == dataHandler.wg?.first()?.name
                 && _binding.contactName.text.toString() == dataHandler.contactPerson?.forename + " " +dataHandler.contactPerson?.surname
                 && _binding.contactEmail.text.toString() == dataHandler.contactPerson?.email
                 && _binding.contactPhone.text.toString() == dataHandler.contactPerson?.telNr
