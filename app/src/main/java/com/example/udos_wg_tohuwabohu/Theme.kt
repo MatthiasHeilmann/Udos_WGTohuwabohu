@@ -41,7 +41,7 @@ fun UdosTheme(content: @Composable () -> Unit) {
         typography = Typography(
             displayMedium = TextStyle(
                 fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.W600,
+                fontWeight = FontWeight.W300,
                 fontSize = 30.sp
             )
         )
@@ -106,9 +106,21 @@ fun UdoKeyboardOptions(): KeyboardOptions {
 }
 
 fun UdoPopupProperties(): PopupProperties{
-  val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
+    val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
     return UdoPopupProperties
 }
+
+@Composable
+fun UdoUnfocusableCardTheme(): CardColors {
+    val UdoPopupCardColors = cardColors(
+        containerColor = UdoWhite,
+        contentColor = Color.Black,
+        disabledContainerColor = Color.Black,
+        disabledContentColor = Color.Magenta
+    )
+    return UdoPopupCardColors
+}
+
 
 
 

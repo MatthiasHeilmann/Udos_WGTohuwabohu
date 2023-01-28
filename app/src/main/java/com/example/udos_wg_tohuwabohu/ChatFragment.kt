@@ -211,7 +211,7 @@ class ChatFragment : Fragment() {
                     Text(
                         text = formatDate(msg.timestamp!!),
                         modifier = Modifier.fillMaxWidth(),
-                        color = UdoGray,
+                        color = UdoWhite,
                         style = TextStyle(
                             textAlign = TextAlign.Right,
                             fontSize = 12.sp

@@ -4,7 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 
-data class WG(val docID: String, var name: String?, var contactPerson: DocumentReference?, var shoppingList: HashMap<String,Boolean>?, var calendar: ArrayList<HashMap<String,Timestamp>>?){
+data class WG(val docID: String, var name: String?, var contactPerson: DocumentReference?, var shoppingList: HashMap<String,Boolean>?, var calendar: MutableList<MutableMap<String,Timestamp>>?){
     constructor(vals: DocumentSnapshot) : this(
         vals.id,null, null, null, null
     )
@@ -15,6 +15,6 @@ data class WG(val docID: String, var name: String?, var contactPerson: DocumentR
         this.name = vals.getString("bezeichnung")
         this.contactPerson = vals.getDocumentReference("ansprechpartner")
         this.shoppingList = vals["einkaufsliste"] as HashMap<String, Boolean>
-        this.calendar = vals["calendar"] as ArrayList<HashMap<String, Timestamp>>
+        this.calendar = vals["calendar"] as MutableList<MutableMap<String, Timestamp>>
     }
 }

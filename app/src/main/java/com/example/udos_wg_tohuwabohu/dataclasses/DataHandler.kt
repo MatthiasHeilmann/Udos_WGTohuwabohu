@@ -1,14 +1,15 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.MutableSnapshot
+import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.google.firebase.Timestamp
 
 data class DataHandler(
-    var wg: WG?,
+    var wg: SnapshotStateList<WG>,
     var contactPerson: ContactPerson?,
     var user: Roommate?,
     var roommateList: SnapshotStateMap<String, Roommate>,
@@ -16,7 +17,8 @@ data class DataHandler(
     var financeEntries: SnapshotStateList<FinanceEntry>,
     var chat: SnapshotStateList<ChatMessage>
 ) {
-    private constructor() : this(null, null, null, mutableStateMapOf(), HashMap(), mutableStateListOf<FinanceEntry>(), mutableStateListOf<ChatMessage>() )
+    private constructor() : this(
+        mutableStateListOf<WG>(), null, null, mutableStateMapOf(), HashMap(), mutableStateListOf<FinanceEntry>(), mutableStateListOf<ChatMessage>() )
 
     companion object {
         private var instance: DataHandler? = null;
@@ -78,7 +80,9 @@ data class DataHandler(
         return taskList
     }
 
-    fun getCalendar(): ArrayList<HashMap<String, Timestamp>>? {
-        return wg!!.calendar
+    fun getCalendar(): MutableList<MutableMap<String, Timestamp>>? {
+        return wg.first().calendar
     }
+
 }
+

@@ -1,6 +1,8 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -32,8 +34,10 @@ class DBWriter private constructor() {
         newDate = c.time
 
         val wgDocRef = dataHandler.wg?.let {
-            db.collection(Collections.WG.toString()).document(
-                it.docID)
+            it.first().let { it1 ->
+                db.collection(Collections.WG.toString()).document(
+                    it1.docID)
+            }
         } ?: return
 
         val completerDocRef = completer?.let {
@@ -49,10 +53,12 @@ class DBWriter private constructor() {
         myTask["punkte"] = points
         myTask["wg_id"] = wgDocRef
         myTask["erlediger"] = completerDocRef
-        db.collection("wg")
-            .document(dataHandler.wg!!.docID)
-            .collection("tasks")
-            .add(myTask)
+        dataHandler.wg!!.first().let {
+            db.collection("wg")
+                .document(it.docID)
+                .collection("tasks")
+                .add(myTask)
+        }
     }
 
     fun createChatMessage(message: String, timestamp: Date, user: Roommate?){
@@ -66,9 +72,22 @@ class DBWriter private constructor() {
         cmMap["timestamp"] = timestamp
         cmMap["user"] = userDocRef
 
-        db.collection("wg")
-            .document(dataHandler.wg!!.docID)
-            .collection("chat_files")
-            .add(cmMap)
+        dataHandler.wg!!.first().let {
+            db.collection("wg")
+                .document(it.docID)
+                .collection("chat_files")
+                .add(cmMap)
+        }
+    }
+
+    fun createCalendarEntry(description: String, timestamp: Timestamp){
+        val ceMap: MutableMap<String, Timestamp> = HashMap()
+        ceMap[description] = timestamp
+
+        dataHandler.wg.first().let {
+            db.collection("wg")
+                .document(it.docID)
+                .update("calendar",FieldValue.arrayUnion(ceMap))
+        }
     }
 }
