@@ -44,14 +44,12 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
         binding.homeButton.setOnClickListener{
-            replaceFragment(HomeFragment())
-            binding.textToolbar.text = "Eure WG"
-            binding.homeEdit.visibility = View.VISIBLE
-            binding.homeButton.visibility = View.INVISIBLE
-
+            showHome()
         }
         binding.homeEdit.setOnClickListener{
-            replaceFragment(HomeEditFragment())
+            val f = HomeEditFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
             binding.homeButton.visibility = View.VISIBLE
             binding.homeEdit.visibility = View.INVISIBLE
         }
@@ -115,5 +113,11 @@ class MainActivity : AppCompatActivity() {
     fun showTaskFragment(){
         replaceFragment(TasksFragment())
         binding.textToolbar.text = "Aufgaben"
+    }
+    fun showHome(){
+        replaceFragment(HomeFragment())
+        binding.textToolbar.text = "Eure WG"
+        binding.homeEdit.visibility = View.VISIBLE
+        binding.homeButton.visibility = View.INVISIBLE
     }
 }
