@@ -90,13 +90,13 @@ fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
         Card(colors= UdoCardTheme(),modifier = Modifier.fillMaxWidth().padding(5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(colors = UdoDateCardTheme()) {
-                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall)
+                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(5.dp))
                 }
                 Box(modifier= Modifier.fillMaxWidth().padding(5.dp), contentAlignment= Alignment.CenterEnd){
-                    Text(text= " " + time + " Uhr", textAlign = TextAlign.End)
+                    Text(text= " " + time + " Uhr", textAlign = TextAlign.End, modifier = Modifier.padding(5.dp))
                 }
             }
-            Text(text =" "+ cardText, fontSize = 24.sp)
+            Text(text =" "+ cardText, fontSize = 24.sp, modifier = Modifier.padding(5.dp))
         }
     }
 }
@@ -369,12 +369,13 @@ fun CalendarFAB() {
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.padding(10.dp)
         ) {
             FloatingActionButton(
                 onClick = { popupActive = true },
                 modifier = Modifier
-                    .requiredHeight(75.dp)
-                    .requiredWidth(75.dp),
+                    .requiredHeight(60.dp)
+                    .requiredWidth(60.dp),
                 shape = CircleShape,
                 containerColor = Color(0xff30475e)
             ) { Text("+", color = UdoWhite, fontSize = 30.sp) }

@@ -187,7 +187,7 @@ class ChatFragment : Fragment() {
                         style = MaterialTheme.typography.subtitle2,
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+//                    Spacer(modifier = Modifier.height(1.dp))
 
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -196,7 +196,7 @@ class ChatFragment : Fragment() {
                     ) {
                         Text(
                             text = msg.message ?: "",
-                            modifier = Modifier.background(UdoLightBlue).padding(all = 4.dp),
+                            modifier = Modifier.background(UdoLightBlue).padding(all = 7.dp),
                             color = UdoWhite,
                             style = MaterialTheme.typography.body2
                         )
