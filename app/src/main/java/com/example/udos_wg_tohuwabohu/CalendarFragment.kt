@@ -377,8 +377,8 @@ fun CalendarFAB() {
                     .requiredHeight(60.dp)
                     .requiredWidth(60.dp),
                 shape = CircleShape,
-                containerColor = Color(0xff30475e)
-            ) { Text("+", color = UdoWhite, fontSize = 30.sp) }
+                containerColor = UdoOrange
+            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
         }
     }
 }

@@ -64,7 +64,9 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = "Finanzen"
                 }
                 R.id.nav_task -> {
-                    replaceFragment(TasksFragment())
+                    val f = TasksFragment()
+                    f.setMainActivity(this)
+                    replaceFragment(f)
                     binding.textToolbar.text = "Aufgaben"
                 }
                 R.id.nav_shopping -> {
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
     }
-    fun openCreateTaskFragment(view: View){
+    fun openCreateTaskFragment(){
         val f = CreateTaskFragment()
         f.setMainActivity(this)
         replaceFragment(f)
@@ -100,14 +102,15 @@ class MainActivity : AppCompatActivity() {
 
     fun reloadTaskFragment(){
         if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
-            Log.d(TAG, "TASK FRAGMENT IS VISIBLE")
-            replaceFragment(TasksFragment())
-        }else{
-            Log.d(TAG, "Task fragment is not visible")
+            val f = TasksFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
         }
     }
     fun showTaskFragment(){
-        replaceFragment(TasksFragment())
+        val f = TasksFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
         binding.textToolbar.text = "Aufgaben"
     }
     fun showHome(){

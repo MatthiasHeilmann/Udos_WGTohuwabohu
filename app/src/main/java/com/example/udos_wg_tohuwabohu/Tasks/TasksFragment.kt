@@ -8,12 +8,11 @@ import android.view.ViewGroup
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +20,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
@@ -37,6 +38,8 @@ class TasksFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     private val dbWriter = DBWriter.getInstance()
     private var tasksData = dataHandler.getTasks()
+    private lateinit var mainActivity: MainActivity
+    lateinit var _binding:FragmentTasksBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +50,12 @@ class TasksFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        var _binding: FragmentTasksBinding? = FragmentTasksBinding.inflate(layoutInflater)
+        _binding = FragmentTasksBinding.inflate(layoutInflater)
         val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
             tasksData?.let { FullTasks(it) }
+            TasksFAB()
         }
         return v
     }
@@ -173,6 +177,10 @@ class TasksFragment : Fragment() {
         Column (modifier = Modifier
             .verticalScroll(scrollState)
         ){
+            if(sortedTaskList.isEmpty()){
+                _binding.taskEmptyText.visibility = View.VISIBLE
+                return@Column
+            }
             sortedTaskList.forEach { task ->
                 if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
                 val roommate: Roommate? = dataHandler.getRoommate(task.roommate!!.id)
@@ -244,5 +252,27 @@ class TasksFragment : Fragment() {
                 text = { Text(text = "Bist du sicher, dass du die Aufgabe löschen möchtest?") }
             )
         }
+    }
+    @Composable
+    fun TasksFAB() {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            FloatingActionButton(
+                onClick = {
+                  mainActivity.openCreateTaskFragment()
+                          },
+                modifier = Modifier
+                    .requiredHeight(60.dp)
+                    .requiredWidth(60.dp),
+                shape = CircleShape,
+                containerColor = UdoOrange
+            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
+        }
+    }
+    fun setMainActivity(mainActivity: MainActivity){
+        this.mainActivity=mainActivity
     }
 }
