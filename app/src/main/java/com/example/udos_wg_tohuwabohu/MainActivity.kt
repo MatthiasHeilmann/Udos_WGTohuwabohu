@@ -36,6 +36,11 @@ class MainActivity : AppCompatActivity() {
         // load database
         dbLoader.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
+        binding.buttonConnection.setOnClickListener{
+            if(ConnectionCheck.getInstance().check(this)){
+                noConnection()
+            }
+        }
 
 //        binding.textUserID.text = "User ID: $userID"
 //        binding.textUserEmail.text = "Email: $emailID"
@@ -133,5 +138,12 @@ class MainActivity : AppCompatActivity() {
             (context as Activity).finish()
         }
         Runtime.getRuntime().exit(0)
+    }
+    fun noConnection(){
+        val intent = Intent(this@MainActivity, NoConnectionActivity::class.java)
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

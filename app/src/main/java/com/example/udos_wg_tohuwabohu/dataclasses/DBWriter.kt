@@ -1,6 +1,9 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.app.Activity
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.widget.Toast
 import com.example.udos_wg_tohuwabohu.MainActivity

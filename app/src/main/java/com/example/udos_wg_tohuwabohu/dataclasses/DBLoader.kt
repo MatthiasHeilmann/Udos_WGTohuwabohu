@@ -1,11 +1,15 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.LonelyPageActivity
 import com.example.udos_wg_tohuwabohu.MainActivity
+import com.example.udos_wg_tohuwabohu.NoConnectionActivity
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
