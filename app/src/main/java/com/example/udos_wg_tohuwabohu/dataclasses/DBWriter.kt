@@ -3,15 +3,9 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import android.app.Activity
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.util.Log
 import android.widget.Toast
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -209,7 +203,7 @@ class DBWriter private constructor() {
 
     fun addItemToShoppingList(item: String) {
         db.collection("wg")
-            .document(dataHandler.wg!!.docID)
+            .document(dataHandler.wg.first().docID)
             .update(mapOf(
                 "einkaufsliste.${item}" to false,
             ))
@@ -217,7 +211,7 @@ class DBWriter private constructor() {
 
     fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
         db.collection("wg")
-            .document(dataHandler.wg!!.docID)
+            .document(dataHandler.wg.first().docID)
             .update(mapOf(
                 "einkaufsliste.${item.key}" to checkedState.value,
             ));

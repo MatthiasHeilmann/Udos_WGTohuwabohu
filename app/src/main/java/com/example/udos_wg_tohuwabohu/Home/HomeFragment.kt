@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
         "Email: ${dataHandler.contactPerson?.email.toString()}".also { _binding.contactEmail.text = it }
         "Telefon: ${dataHandler.contactPerson?.telNr.toString()}".also { _binding.contactPhone.text = it }
         "IBAN: ${dataHandler.contactPerson?.IBAN.toString()}".also { _binding.contactIban.text = it }
-        _binding.entrycode.text = dataHandler.wg?.first()?.entryCode.toString()
+        _binding.entrycode.text = dataHandler.wg.first().entryCode.toString()
 
         _binding.userEmail.text ="Email: "+ dataHandler.user?.email.toString()
         _binding.userFirstname.text ="Vorname: "+ dataHandler.user?.forename.toString()

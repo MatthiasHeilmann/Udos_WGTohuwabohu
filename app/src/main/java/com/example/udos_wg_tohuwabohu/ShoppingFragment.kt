@@ -15,33 +15,22 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class ShoppingFragment : Fragment() {
@@ -52,7 +41,7 @@ class ShoppingFragment : Fragment() {
     private val db = Firebase.firestore
     private val dbWriter = DBWriter.getInstance()
     private val dh = DataHandler.getInstance()
-    private var shoppingList = dh.wg?.shoppingList
+    private var shoppingList = dh.wg.first().shoppingList
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,14 +94,14 @@ class ShoppingFragment : Fragment() {
         // delete items button
         deleteItemsButton.setOnClickListener { v ->
             Log.d(TAG,"Items gelöscht")
-            deleteItems(dh.wg?.shoppingList)
+            deleteItems(dh.wg.first().shoppingList)
         }
 
 
         // compose component
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
-            dh.wg?.shoppingList?.let {showShoppingList(shoppingList = (it))}
+            dh.wg.first().shoppingList?.let {showShoppingList(shoppingList = (it))}
         }
         return v
     }
@@ -121,7 +110,7 @@ class ShoppingFragment : Fragment() {
         shoppingList?.forEach{ item ->
             if (item.value == true) {
                 db.collection("wg")
-                    .document(dh.wg!!.docID)
+                    .document(dh.wg.first().docID)
                     .update(
                         mapOf(
                             "einkaufsliste.${item.key}" to FieldValue.delete(),
@@ -136,7 +125,7 @@ class ShoppingFragment : Fragment() {
 
     @Composable
     fun createItemRow(item: Map.Entry<String, Boolean>) {
-        var checkedState = remember { mutableStateOf(false) }
+        val checkedState = remember { mutableStateOf(false) }
 
         Row {
             Checkbox(
@@ -155,7 +144,7 @@ class ShoppingFragment : Fragment() {
                         /*checkShoppinglistItem(item, checkedState)*/
                         dbWriter.checkShoppinglistItem(item, checkedState)
                     },
-                text = item.key + " " + item.value.toString(),
+                text = item.key,
                 style = TextStyle(
                     color = Color.White,
                     fontSize = 20.sp,
