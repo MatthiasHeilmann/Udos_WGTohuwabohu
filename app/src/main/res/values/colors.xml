@@ -9,6 +9,7 @@
     <color name="black">#FF222831</color>
     <color name="white">#FFDDDDDD</color>
     <color name="udo_blue">#FF30475e</color>
+    <color name="udo_dark_blue">#FF1D364E</color>
     <color name="udo_red">#FFf05454</color>
     <color name="udo_orange">#FFe29e21</color>
 </resources>

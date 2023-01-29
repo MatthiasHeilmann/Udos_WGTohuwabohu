@@ -13,7 +13,8 @@
     <item android:title="Einkaufsliste"
         android:icon="@drawable/ic_baseline_shopping_cart_24"
         android:id="@+id/nav_shopping"/>
-    <item android:title="Kalender"
-        android:icon="@android:drawable/ic_menu_my_calendar"
-        android:id="@+id/nav_calender"/>
+    <item
+        android:id="@+id/nav_calender"
+        android:icon="@drawable/ic_baseline_calendar_month_24"
+        android:title="Kalender" />
 </menu>
