@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +61,7 @@ class TasksFragment : Fragment() {
         return v
     }
     @Composable
-    fun TaskCard(taskTitle:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
+    fun TaskCard(taskTitle:String,taskCoins:String, dueDate: Pair<String,Color>, frequency:String, roommate: Roommate?,taskKey:String){
         val myTask: Task? = tasksData?.get(taskKey)
         val showCheckDialog = remember { mutableStateOf(false) }
         val showDeleteDialog = remember { mutableStateOf(false) }
@@ -75,7 +76,7 @@ class TasksFragment : Fragment() {
                 myTask = myTask)
         }
             Card(colors = UdoCardTheme(), modifier = Modifier
-                .padding(5.dp)
+                .padding(15.dp,5.dp)
                 .pointerInput(Unit){
                     detectTapGestures(
                         onLongPress = {
@@ -86,25 +87,31 @@ class TasksFragment : Fragment() {
             {
                 Row(modifier = Modifier.padding(10.dp)){
                     Column{
-                        Text(text = taskTitle, color = dueDate.second)
+                        Text(text = taskTitle, color = dueDate.second, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         Text(text = dueDate.first, color = dueDate.second)
-                        Text(text = frequency)
+                        Text(text = "$frequency für $taskCoins \uD83D\uDCB0")
                     }
                     Spacer(modifier = Modifier.weight(1.0f))
                     Column(horizontalAlignment = Alignment.End)
                         {
-                        if (roommate != null||roommate?.username!=null) {
-                            roommate.username?.let { Text(text = it) }
-                        }else{
-                            Text(text = "Unbekannter Benutzer")
-                        }
-                        /** button to check the task */
+                            var myText:String = "Unbekannter Benutzer"
+                            if (roommate != null||roommate?.username!=null) {
+                                roommate.username?.let { myText = it }
+                            }
+                            Text(text = myText, modifier = Modifier.padding(4.dp,1.dp))
+                            /** button to check the task */
                         Button(onClick = {
                             showCheckDialog.value = true
                         },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = UdoLightBlue, containerColor = UdoWhite),
-                            modifier = Modifier.absolutePadding(4.dp),
-                            shape = RoundedCornerShape(5)
+                            modifier = Modifier.padding(4.dp).height(30.dp),
+                            shape = RoundedCornerShape(15),
+                            contentPadding = PaddingValues(
+                                start = 20.dp,
+                                top = 2.dp,
+                                end = 20.dp,
+                                bottom = 2.dp
+                            )
                         ) {
                             Text(text = "Erledigt")
                         }
@@ -165,7 +172,7 @@ class TasksFragment : Fragment() {
     @Preview
     @Composable
     fun PreviewTaskCard(){
-        TaskCard("Müll rausbringen",Pair("Morgen fällig", UdoOrange),"Wöchentlich",null,"ABCS")
+        TaskCard("Müll rausbringen","3",Pair("Morgen fällig", UdoOrange),"Wöchentlich",null,"ABCS")
     }
 
     @Composable
@@ -178,6 +185,7 @@ class TasksFragment : Fragment() {
         val sortedTaskList = unSortedTaskList.sortedWith(compareBy { it.dueDate })
         Column (modifier = Modifier
             .verticalScroll(scrollState)
+            .padding(1.dp,10.dp)
         ){
             _binding.taskEmptyText.visibility = View.VISIBLE
             sortedTaskList.forEach { task ->
@@ -188,6 +196,7 @@ class TasksFragment : Fragment() {
 
                 TaskCard(
                     taskTitle = task.name!!,
+                    taskCoins = task.points.toString(),
                     dueDate = getTaskDate(task.dueDate!!),
                     frequency = getTaskFrequency(task.frequency!!),
                     roommate = roommate,

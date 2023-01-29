@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
             val f = HomeEditFragment()
             f.setMainActivity(this)
             replaceFragment(f)
+            binding.textToolbar.text = "WG bearbeiten"
             binding.homeButton.visibility = View.VISIBLE
             binding.homeEdit.visibility = View.INVISIBLE
         }
@@ -113,6 +114,11 @@ class MainActivity : AppCompatActivity() {
         replaceFragment(f)
         binding.textToolbar.text = "Aufgaben"
     }
+    fun reloadHomeFragment(){
+        if(binding.textToolbar.text == "Eure WG"){
+            showHome()
+        }
+    }
     fun showHome(){
         val f = HomeFragment()
         f.setMainActivity(this)
@@ -130,12 +136,5 @@ class MainActivity : AppCompatActivity() {
             (context as Activity).finish()
         }
         Runtime.getRuntime().exit(0)
-    }
-    fun noConnection(){
-        val intent = Intent(this@MainActivity, NoConnectionActivity::class.java)
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
     }
 }

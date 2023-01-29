@@ -223,6 +223,7 @@ class DBLoader private constructor() {
                                 ?.equals(dataHandler.user!!.docID) == true
                         ) {
                             dataHandler.user!!.update(it)
+                            mainActivity!!.reloadHomeFragment()
                         }
                         Log.d(
                             TAG,
@@ -244,7 +245,7 @@ class DBLoader private constructor() {
      */
     private fun addTaskCollectionSnapshotListener(){
             db.collection(Collections.WG.call)
-                .document(dataHandler.wg!!.first().docID)
+                .document(dataHandler.wg.first().docID)
                 .collection(Collections.Task.call)
                 // Listener for collection
                 .addSnapshotListener{ snapshots,e ->
@@ -258,7 +259,7 @@ class DBLoader private constructor() {
                             Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
                             try{
                                 // get new document as DocumentSnapshot and add to dataHandler
-                                dataHandler.wg!!.first().let { it1 ->
+                                dataHandler.wg.first().let { it1 ->
                                     db.collection("wg")
                                         .document(it1.docID)
                                         .collection("tasks")
@@ -328,7 +329,7 @@ class DBLoader private constructor() {
     }
 
     private fun financeSnapshotListener() {
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection(Collections.WG.call)
                 .document(it.docID).collection(Collections.FINANCES.call)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -352,7 +353,7 @@ class DBLoader private constructor() {
     }
 
     private fun wgSnapshotListener() {
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection(Collections.WG.call).document(it.docID)
                 .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
