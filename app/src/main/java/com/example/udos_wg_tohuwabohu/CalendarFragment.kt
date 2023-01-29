@@ -103,15 +103,15 @@ fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
 
 @Composable
 fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
-    var sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
+    val sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
     var currentMonth = 100
     Column (modifier = Modifier
             .verticalScroll(rememberScrollState()).padding(5.dp)){
         sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
             if(currentMonth != appointment.values.first().toDate().month){
                 currentMonth = appointment.values.first().toDate().month
-                Text(text= DateFormatSymbols.getInstance().months[appointment.values.first().toDate().month], textAlign = TextAlign.End)
-                Divider(thickness= 2.dp,color= UdoDarkGray)
+                Text(text= DateFormatSymbols.getInstance().months[appointment.values.first().toDate().month], textAlign = TextAlign.End,color= UdoWhite)
+                Divider(thickness= 2.dp,color= UdoWhite)
             }
             Log.d("Calendar Date:", appointment.values.first().toDate().toString())
             CalendarCard(

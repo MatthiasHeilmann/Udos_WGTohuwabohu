@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import java.text.DateFormatSymbols
 import java.util.*
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -102,7 +104,30 @@ class ChatFragment : Fragment() {
                     )
                     .weight(1f, false)
             ) {
+                var date:Int = 0
+                val c = Calendar.getInstance()
+                val currentDay = c.get(Calendar.DATE)
+                val currentMonth = c.get(Calendar.MONTH)+1
+                val currentYear = c.get(Calendar.YEAR)
                 dataHandler.chat.forEach { msg ->
+                    if(msg.timestamp?.date!=date){
+                        if(date!=0) Divider(thickness= 1.dp,color= UdoWhite)
+                        val day = msg.timestamp!!.date
+                        val month = msg.timestamp!!.month+1
+                        val year = msg.timestamp!!.year+1900
+                        date = day
+                        val dateText:String
+                        dateText = if(day==currentDay&&year==currentYear&&month==currentMonth){
+                            "Heute"
+                        }else if(day+1==currentDay&&year==currentYear&&month==currentMonth){
+                            "Gestern"
+                        }else{
+                            "$day.$month.$year"
+                        }
+                        androidx.compose.material3.Text(
+                            text = dateText, textAlign = TextAlign.Center, color = UdoWhite
+                        )
+                    }
                     MessageCard(msg)
                 }
             }
@@ -167,12 +192,12 @@ class ChatFragment : Fragment() {
 
     @Composable
     fun MessageCard(msg: ChatMessage) {
-        // TODO correct Theme and Get colors for own Messages
         val thisUser = (msg.user?.id == dataHandler.user?.docID) || false;
-        //if(thisUser) ""
-        //                        else
         val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown"
         val alignment = if (thisUser) Alignment.CenterEnd else Alignment.CenterStart
+        val alignmentText = if (thisUser) Alignment.End else Alignment.Start
+        val cardColor = if (thisUser) UdoWhite else UdoLightBlue
+        val cardTextColor = if (thisUser) UdoDarkBlue else UdoWhite
         Box(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
@@ -183,7 +208,7 @@ class ChatFragment : Fragment() {
                     Text(
                         text = username,
                         color = UdoOrange,
-                        modifier= Modifier.align(Alignment.Start),
+                        modifier= Modifier.align(alignmentText),
                         style = MaterialTheme.typography.subtitle2,
                     )
 
@@ -196,8 +221,8 @@ class ChatFragment : Fragment() {
                     ) {
                         Text(
                             text = msg.message ?: "",
-                            modifier = Modifier.background(UdoLightBlue).padding(all = 7.dp),
-                            color = UdoWhite,
+                            modifier = Modifier.background(cardColor).padding(all = 7.dp),
+                            color = cardTextColor,
                             style = MaterialTheme.typography.body2
                         )
                     }

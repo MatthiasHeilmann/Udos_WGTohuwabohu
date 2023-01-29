@@ -80,45 +80,5 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
-
-        <!--        <Button-->
-        <!--            android:id="@+id/button_logout"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="100dp"-->
-        <!--            android:backgroundTint="@color/udo_blue"-->
-        <!--            android:text="Logout"-->
-        <!--            android:textColor="@color/white" />-->
-
-        <!--        <TextView-->
-        <!--            android:id="@+id/text_userID"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="85dp"-->
-        <!--            android:text="userID" />-->
-
-        <!--        <TextView-->
-        <!--            android:id="@+id/text2"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="55dp"-->
-        <!--            android:layout_marginBottom="32dp"-->
-        <!--            android:text="You are logged in successful"-->
-        <!--            android:textStyle="bold" />-->
-
-        <!--        <TextView-->
-        <!--            android:id="@+id/text_userEmail"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="70dp"-->
-        <!--            android:layout_marginBottom="24dp"-->
-        <!--            android:text="userEmail" />-->
-
-        <Button
-            android:id="@+id/button_connection"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Button" />
-    </FrameLayout>
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
