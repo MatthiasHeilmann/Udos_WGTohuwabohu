@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.example.udos_wg_tohuwabohu.LoginActivity
 import com.example.udos_wg_tohuwabohu.LonelyPageActivity
+import com.example.udos_wg_tohuwabohu.MainActivity
 import com.example.udos_wg_tohuwabohu.databinding.FragmentHome2Binding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -23,6 +24,7 @@ class HomeFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     val TAG = "[HOME FRAGMENT]"
     private lateinit var _binding: FragmentHome2Binding
+    private var mainActivity: MainActivity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,10 +54,10 @@ class HomeFragment : Fragment() {
             builder.setTitle("WG verlassen?")
             builder.setMessage("Bist Du sicher, dass Du die WG verlassen willst?")
             builder.setPositiveButton("Ja"){dialogInterface, which ->
-                DBWriter.getInstance().leaveWG()
-                val activity: Activity = requireActivity()
-                startActivity(Intent(activity, LonelyPageActivity::class.java))
-                activity.finish()
+                DBWriter.getInstance().leaveWG(mainActivity!!)
+//                val activity: Activity = requireActivity()
+//                startActivity(Intent(activity, LonelyPageActivity::class.java))
+//                activity.finish()
             }
             builder.setNegativeButton("Abbrechen"){dialogInterface,which->
                 Log.d(TAG,"Abgebrochen")
@@ -82,6 +84,9 @@ class HomeFragment : Fragment() {
             alertDialog.show()
         }
         return view
+    }
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
     }
 
 

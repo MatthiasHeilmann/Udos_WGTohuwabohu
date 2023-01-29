@@ -1,7 +1,9 @@
 package com.example.udos_wg_tohuwabohu
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +14,7 @@ import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
-import com.google.firebase.auth.FirebaseAuth
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -115,9 +117,21 @@ class MainActivity : AppCompatActivity() {
         binding.textToolbar.text = "Aufgaben"
     }
     fun showHome(){
-        replaceFragment(HomeFragment())
+        val f = HomeFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
         binding.textToolbar.text = "Eure WG"
         binding.homeEdit.visibility = View.VISIBLE
         binding.homeButton.visibility = View.INVISIBLE
+    }
+    fun restartApp() {
+        val context = this@MainActivity
+        val intent = Intent(context, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        if (context is Activity) {
+            (context as Activity).finish()
+        }
+        Runtime.getRuntime().exit(0)
     }
 }

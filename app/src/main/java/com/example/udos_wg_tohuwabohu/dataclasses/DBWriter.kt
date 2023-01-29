@@ -1,5 +1,9 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.app.Activity
+import android.util.Log
+import android.widget.Toast
+import com.example.udos_wg_tohuwabohu.MainActivity
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -20,7 +24,7 @@ class DBWriter private constructor() {
     private val db = Firebase.firestore
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[MainActivity]"
-
+    val EmptyWG = db.collection(Collections.WG.call).document("EmptyWG")
     /**
      * creates a new task for the wg in the database
      * gets the completer with getCompleter()
@@ -107,8 +111,15 @@ class DBWriter private constructor() {
             .update(contact)
     }
 
-    fun leaveWG(){
-        val EmptyWG = db.collection(Collections.WG.call).document("EmptyWG")
-        db.collection(Collections.Roommate.call).document(dataHandler.user!!.docID).update("wg_id",EmptyWG)
+    fun leaveWG(mainActivity: MainActivity){
+        db.collection("mitbewohner")
+            .document(dataHandler.user!!.docID)
+            .update("wg_id",EmptyWG)
+            .addOnSuccessListener {
+                mainActivity.restartApp()
+            }
+            .addOnFailureListener{
+                Toast.makeText(mainActivity,"Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",Toast.LENGTH_SHORT).show()
+            }
     }
 }

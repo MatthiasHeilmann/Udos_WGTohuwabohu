@@ -86,9 +86,27 @@ class LonelyPageActivity: AppCompatActivity() {
                 }
                 else -> {
                     val uid = FirebaseAuth.getInstance().currentUser!!.uid
-                    val WgEntryCode: Int =
-                        binding.textfieldWgEntryCode.text.toString().trim { it <= ' ' }.toInt()
-                    joinWG(WgEntryCode, uid, email!!)
+                    val WgEntryCode: Int = binding.textfieldWgEntryCode.text.toString().trim { it <= ' ' }.toInt()
+                    //Make database query matching entry code
+                    try{
+                        db.collection("wg")
+                            .whereEqualTo("entrycode", WgEntryCode)
+                            .get()
+                            //Update User Profile and start Main Activity
+                            .addOnSuccessListener { WG_documents ->
+                                WG_documents.forEach {
+                                    db.collection("mitbewohner").document(uid)
+                                        .update("wg_id",db.collection("wg").document(it.id))
+                                        .addOnSuccessListener {
+                                            val intent= createMainActivityIntent(this@LonelyPageActivity, email!!)
+                                            startActivity(intent)
+                                        }
+                                }
+                            }
+                    }catch (e:Exception){
+                        Toast.makeText(this@LonelyPageActivity,"Es gab einen Fehler beim Beitreten der WG. Stelle sicher, dass der Beitrittscode korrekt ist.",Toast.LENGTH_LONG).show()
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -115,7 +133,6 @@ class LonelyPageActivity: AppCompatActivity() {
                         "ansprechpartner" to newAnsprechpartner,
                         "bezeichnung" to "Neue WG",
                         "einkaufsliste" to emptyMap<String, Int>(),
-//                        "calendar" to MutableList<MutableMap<String,com.google.firebase.Timestamp>>(0,),
                         "calendar" to emptyList<MutableMap<String, com.google.firebase.Timestamp>>(),
                         "entrycode" to createEntryCode()
                     )
@@ -133,28 +150,6 @@ class LonelyPageActivity: AppCompatActivity() {
             Log.d("[LONELY PAGE]", "[#############################]")
             Log.d("[LONELY PAGE]", e.toString())
         }
-    }
-
-    fun joinWG(entryCode: Int, uid: String, email: String) = runBlocking<Unit> {
-        val wg = async { db.collection("wg").whereEqualTo("entrycode", entryCode).get() }.await()
-        if (wg.result.isEmpty) {
-            Toast.makeText(
-                this@LonelyPageActivity,
-                "Ungültiger Code. Bitte überprüfe deine Eingabe.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return@runBlocking
-        }
-        async {
-            wg.addOnSuccessListener { documents ->
-                for (document in documents) {
-                    val wgRef = db.collection("wg").document(document.id).get()
-                    db.collection("mitbewohner").document(uid).update("wg_id", wgRef)
-                }
-            }
-        }.await()
-        val intent = createMainActivityIntent(this@LonelyPageActivity, email)
-        startActivity(intent)
     }
 
     fun createEntryCode(): Int {
