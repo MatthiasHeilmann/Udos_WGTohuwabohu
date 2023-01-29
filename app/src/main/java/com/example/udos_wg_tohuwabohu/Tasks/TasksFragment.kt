@@ -5,9 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -28,12 +25,7 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
-import com.example.udos_wg_tohuwabohu.dataclasses.Collections
-import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
-import com.example.udos_wg_tohuwabohu.dataclasses.Task
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.example.udos_wg_tohuwabohu.dataclasses.*
 import java.util.*
 
 /**
@@ -43,11 +35,8 @@ class TasksFragment : Fragment() {
     lateinit var composeView: ComposeView
     private val TAG: String = "[TASKS FRAGMENT]"
     private val dataHandler = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
     private var tasksData = dataHandler.getTasks()
-    private val myFirestore = Firebase.firestore
-    private val roommateCollection = Collections.Roommate.toString()
-
-    private var currentTask: Task? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,16 +112,17 @@ class TasksFragment : Fragment() {
     /**
      * returns the frequency of the task in the correct format
      */
-    fun getTaskFrequency(frequency: Int) : String{
+    private fun getTaskFrequency(frequency: Int) : String{
         if(frequency == 1) return "Täglich"
         if(frequency == 7) return "Wöchentlich"
-        return "Alle " + frequency + " Tage"
+        if(frequency % 7==0) return "Alle "+ frequency/7 + " Wochen"
+        return "Alle $frequency Tage"
     }
 
     /**
      * returns the date of a task in the correct format with the priority color
      */
-    fun getTaskDate(date: Date): Pair<String,Color>{
+    private fun getTaskDate(date: Date): Pair<String,Color>{
         val c = Calendar.getInstance()
         val currentDay = c.get(Calendar.DATE)
         val currentMonth = c.get(Calendar.MONTH)+1
@@ -144,14 +134,17 @@ class TasksFragment : Fragment() {
         val taskDate = formatNumber(taskDay)+"."+formatNumber(taskMonth)+"."+taskYear.toString()
         // sorry for that
         when{
-            taskYear<currentYear -> return Pair("War am " + taskDate + " fällig", UdoRed)
+            // future
             taskYear>currentYear -> return Pair("Am " + taskDate + " fällig", UdoWhite)
-            taskMonth<currentMonth -> return Pair("War am " + taskDate + " fällig", UdoRed)
             taskMonth>currentMonth -> return Pair("Am " + taskDate + " fällig", UdoWhite)
-            taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
             taskDay==currentDay+1 -> return Pair("Morgen fällig", UdoOrange)
+            // past
+            taskYear<currentYear -> return Pair("War am " + taskDate + " fällig", UdoRed)
+            taskMonth<currentMonth -> return Pair("War am " + taskDate + " fällig", UdoRed)
             taskDay==currentDay-1 -> return Pair("War gestern fällig", UdoRed)
             taskDay<currentDay -> return Pair("War am " + taskDate + " fällig", UdoRed)
+            // today
+            taskDay==currentDay -> return Pair("Heute fällig", UdoRed)
         }
         return Pair("Am " + taskDate + " fällig", UdoWhite)
     }
@@ -176,9 +169,9 @@ class TasksFragment : Fragment() {
         taskData.forEach{task ->
             unSortedTaskList.add(task.value)
         }
-        var sortedTaskList = unSortedTaskList.sortedWith(compareBy { it.dueDate })
+        val sortedTaskList = unSortedTaskList.sortedWith(compareBy { it.dueDate })
         Column (modifier = Modifier
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
         ){
             sortedTaskList.forEach { task ->
                 if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
@@ -208,8 +201,8 @@ class TasksFragment : Fragment() {
                 confirmButton = {
                     TextButton(onClick = {
                         if(myTask!=null){
-                            checkTask(myTask!!)
-                            myTask!!.points?.let { givePoints(dataHandler.user, it) }
+                           dbWriter.checkTask(myTask)
+                            myTask.points?.let {dbWriter.givePoints(dataHandler.user, it) }
                         }else{
                             Log.d(TAG,"No task to check")
                         }
@@ -238,7 +231,7 @@ class TasksFragment : Fragment() {
                     TextButton(onClick = {
                         Log.d(TAG,"LÖSCHEN")
                         if(myTask!=null){
-                            deleteTask(myTask.docId)
+                           dbWriter.deleteTask(myTask.docId)
                         }else{
                             Log.d(TAG,"No task to delete")
                         }
@@ -250,73 +243,6 @@ class TasksFragment : Fragment() {
                 title = { Text(text = "Wirklich löschen?") },
                 text = { Text(text = "Bist du sicher, dass du die Aufgabe löschen möchtest?") }
             )
-        }
-    }
-
-    /**
-     * finds the new completer, which has the lowest coin_count
-     * @return roommate with the lowest coin_count
-     */
-    fun getCompleter(): Roommate? {
-        val roommateList = dataHandler.roommateList
-        var worstMate: Roommate? = null
-        var worstCount: Long = Long.MAX_VALUE
-        roommateList.forEach{ mate ->
-            if (mate.value.coin_count!! <= worstCount) {
-                worstMate = dataHandler.getRoommate(mate.key)
-                worstCount = mate.value.coin_count!!
-            }
-        }
-        return worstMate
-    }
-
-    /**
-     * checks the task in the database,
-     * sets the duedate to today + frequency,
-     * sets new completer to completer given by getCompleter()
-     */
-    fun checkTask(task: Task) {
-        val newCompleter = getCompleter()
-        var newDate = Date()
-        val c = Calendar.getInstance()
-        c.time = newDate
-        task.frequency?.let { c.add(Calendar.DATE, it) }
-        newDate = c.time
-        if (newCompleter != null) {
-            val newCompleterRef = myFirestore.collection("mitbewohner").document(newCompleter.docID)
-            dataHandler.wg!!.first().let {
-                myFirestore.collection("wg")
-                    .document(it.docID)
-                    .collection("tasks")
-                    .document(task.docId)
-                    .update(mapOf(
-                        "frist" to newDate,
-                        "erlediger" to newCompleterRef
-                    ))
-            }
-        }
-    }
-
-    /**
-     * deletes a task in the database
-     */
-    fun deleteTask(docId: String){
-        dataHandler.wg!!.first().let {
-            myFirestore.collection("wg")
-                .document(it.docID)
-                .collection("tasks")
-                .document(docId)
-                .delete()
-        }
-    }
-
-    /**
-     * gives the roommate who checks the task the points in the database
-     */
-    fun givePoints(roommate: Roommate?, points: Int){
-        if (roommate != null) {
-            val newPoints = roommate.coin_count?.plus(points)
-            myFirestore.collection(roommateCollection).document(roommate.docID).update("coin_count",newPoints)
         }
     }
 }

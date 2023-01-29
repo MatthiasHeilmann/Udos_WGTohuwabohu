@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val dbLoader = DBLoader.getInstance()
     private val dataHandler = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
     val TAG = "[MainActivity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,21 +36,9 @@ class MainActivity : AppCompatActivity() {
 
         // load database
         dbLoader.setMainActivity(this)
+        dbWriter.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
-        binding.buttonConnection.setOnClickListener{
-            if(ConnectionCheck.getInstance().check(this)){
-                noConnection()
-            }
-        }
 
-//        binding.textUserID.text = "User ID: $userID"
-//        binding.textUserEmail.text = "Email: $emailID"
-//
-//        binding.buttonLogout.setOnClickListener{
-//            FirebaseAuth.getInstance().signOut()
-//            startActivity(Intent(this@MainActivity,LoginActivity::class.java))
-//            finish()
-//        }
         binding.homeButton.setOnClickListener{
             showHome()
         }
