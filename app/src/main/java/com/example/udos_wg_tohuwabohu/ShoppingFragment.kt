@@ -1,7 +1,8 @@
-// TODO: fix height of compose element
+// TODO: create Invoice
 
 package com.example.udos_wg_tohuwabohu
 
+import android.nfc.Tag
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -49,11 +50,10 @@ class ShoppingFragment : Fragment() {
     lateinit var composeView: ComposeView
     private val TAG: String = "[SHOPPING FRAGMENT]"
     private val db = Firebase.firestore
-    val dbWriter = DBWriter.getInstance()
-    val dh = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
+    private val dh = DataHandler.getInstance()
+    private var shoppingList = dh.wg?.shoppingList
 
-    var shoppingList = dh.wg?.shoppingList
-    var roomateList = dh.roommateList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,16 +69,11 @@ class ShoppingFragment : Fragment() {
 
         val addItemButton:FloatingActionButton = v.findViewById(R.id.button_add_item)
         val deleteItemsButton:FloatingActionButton = v.findViewById(R.id.button_delete_items)
-        val createInvoiceButton:FloatingActionButton = v.findViewById(R.id.button_create_invoice)
         val entryField:EditText = v.findViewById(R.id.addItemEntryField)
 
-        // log button for testing (remove later)
-        val logButton: Button = v.findViewById(R.id.log_button)
-        logButton.setOnClickListener { v ->
-            Log.d(TAG, roomateList.size.toString())
-        }
 
-         // add items button
+
+        // add items button
         addItemButton.setOnClickListener { v ->
             // test logs
             Log.d(TAG,"Button geklickt")
@@ -113,41 +108,15 @@ class ShoppingFragment : Fragment() {
             deleteItems(dh.wg?.shoppingList)
         }
 
-        // create invoice button
-        createInvoiceButton.setOnClickListener { v ->
-            Log.d(TAG,"Rechnung erstellt.")
-            // createInvoice()
-        }
-
-        // TODO: create Invoice with checked items
-        /*fun createInvoice() {
-            // bill button > open popup
-                // every item.key with item.value = true will be shown
-                    // (optional: can add more items manually)
-                // entryfield for price
-                // every roommmate from users wg will be shown (user included)
-                    // checkable boxes
-                // send button ->
-                    // checked users (excluding self) will get notification
-                    // notification: confirm/refuse
-                        // confirm:
-                        // refuse:
-                    // on finished confirmation ->
-                        // user.balance + price
-                        // every checked roommate -> balance - (price/#ofBegünstigt)
-                // cancel button -> close popup
-        }*/
 
         // compose component
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
             dh.wg?.shoppingList?.let {showShoppingList(shoppingList = (it))}
-            /*InvoiceButton()*/
         }
         return v
     }
 
-    // TODO: delete checked Items
     fun deleteItems(shoppingList: SnapshotStateMap<String, Boolean>?){
         shoppingList?.forEach{ item ->
             if (item.value == true) {
@@ -195,13 +164,11 @@ class ShoppingFragment : Fragment() {
         }
     }
 
-
-
-
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun showShoppingList(shoppingList: SnapshotStateMap<String, Boolean>) {
 
+        // list with items
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -214,27 +181,8 @@ class ShoppingFragment : Fragment() {
                     createItemRow(item);
                 }
             }
+
     }
 
-    /*@Composable
-    @Preview
-    fun InvoiceButton() {
-        var popupActive by remember { mutableStateOf(false) }
-
-        if (popupActive) {
-            Popup(onDismissRequest = { popupActive = false } ) {
-                // InvoiceBox()
-            }
-        } else{
-            Row(
-            ) {
-                FloatingActionButton(
-                    onClick = { popupActive = true }, modifier = Modifier
-                        .requiredHeight(100.dp)
-                        .requiredWidth(100.dp), shape = CircleShape, containerColor = Color(0xff30475e)
-                ) { Text("$", color = UdoWhite, fontSize = 25.sp) }
-            }
-        }
-    }*/
-
 }
+
