@@ -21,7 +21,7 @@ val Red700 = Color(0xffdd0d3c)
 val Red800 = Color(0xffd00036)
 val Red900 = Color(0xffc20029)
 
-val UdoLightBlue = Color(0xff30475e)
+val UdoLightBlue = Color(0xFF273B4E)
 val UdoDarkBlue = Color(0xff222831)
 val UdoWhite = Color(0xFFDCDCDC)
 val UdoOrange = Color(0xffe29e21)
@@ -41,11 +41,16 @@ fun UdosTheme(content: @Composable () -> Unit) {
         typography = Typography(
             displayMedium = TextStyle(
                 fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.W600,
+                fontWeight = FontWeight.W300,
                 fontSize = 30.sp
             )
         )
     )
+}
+
+@Composable
+fun UdoFinanceTextFieldTypographie(): TextStyle{
+    return androidx.compose.material.MaterialTheme.typography.h6
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +66,7 @@ fun UdoChatButtonTheme(): ButtonColors {
 
 @Composable
 fun UdoCardTheme(): CardColors {
-    val UdoCardColors= cardColors(containerColor= UdoDarkBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoCardColors
 }
 
@@ -90,7 +95,7 @@ fun UdoPopupTextfieldColors(): TextFieldColors{
 
 @Composable
 fun UdoDateCardTheme(): CardColors {
-    val UdoDateCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoDateCardColors= cardColors(containerColor= UdoWhite, contentColor= UdoLightBlue, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoDateCardColors
 }
 
@@ -106,9 +111,21 @@ fun UdoKeyboardOptions(): KeyboardOptions {
 }
 
 fun UdoPopupProperties(): PopupProperties{
-  val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
+    val UdoPopupProperties= PopupProperties(focusable = true, dismissOnBackPress = true, dismissOnClickOutside = true)
     return UdoPopupProperties
 }
+
+@Composable
+fun UdoUnfocusableCardTheme(): CardColors {
+    val UdoPopupCardColors = cardColors(
+        containerColor = UdoWhite,
+        contentColor = Color.Black,
+        disabledContainerColor = Color.Black,
+        disabledContentColor = Color.Magenta
+    )
+    return UdoPopupCardColors
+}
+
 
 
 

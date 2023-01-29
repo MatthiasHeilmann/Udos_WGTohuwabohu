@@ -1,5 +1,6 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.util.Log
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 
@@ -19,5 +20,6 @@ data class Roommate(val docID: String, var email: String?, var forename: String?
         this.guteNudel_count = vals["guteNudel_count"] as Long
         this.balance = vals.getDouble("kontostand")
         this.wg = vals.getDocumentReference("wg_id")
+        Log.d("[******]",vals.toString())
     }
 }

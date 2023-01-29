@@ -1,9 +1,15 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.LonelyPageActivity
 import com.example.udos_wg_tohuwabohu.MainActivity
+import com.example.udos_wg_tohuwabohu.NoConnectionActivity
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
@@ -68,7 +74,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle excpetion: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
 
@@ -91,13 +97,13 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // Todo handle exception: give toast and shutdown
+            dataLoadError()
             e.printStackTrace()
         }
 
         wg = WG(wgRes!!)
 
-        dataHandler.wg = wg
+        dataHandler.wg = mutableStateListOf(wg)
 
         // ansprechpartner reference
         val anRef = wgRes.get("ansprechpartner") as DocumentReference
@@ -108,12 +114,14 @@ class DBLoader private constructor() {
         val an: ContactPerson?
         var anRes: DocumentSnapshot? = null
         try {
-
-            anRes = db.collection(Collections.ContactPerson.call).document(anRef.id)
+            Log.d("[*******]",anRef.id)
+            anRes = db.collection(Collections.ContactPerson.call)
+                .document(anRef.id)
                 .get()
-                .asDeferred().await()
+                .asDeferred()
+                .await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and create default contact person
+            dataLoadError()
             e.printStackTrace()
         }
         an = ContactPerson(anRes!!)
@@ -125,13 +133,18 @@ class DBLoader private constructor() {
         try {
             financeRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.FINANCES.call)
+                .orderBy("timestamp").limit(50)
                 .get().asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and empty chat object
+            dataLoadError()
             e.printStackTrace()
         }
-        financeRes?.forEach { cost ->
-            dataHandler.addFinanceEntry(FinanceEntry(cost))
+        try {
+            financeRes?.forEach { cost ->
+                dataHandler.addFinanceEntry(FinanceEntry(cost))
+            }
+        }catch (e: Exception){
+            Log.d(TAG,"couldnt find finances. Not created yet?")
         }
     }
 
@@ -140,14 +153,18 @@ class DBLoader private constructor() {
         try {
             chatRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.CHAT.call)
-                .orderBy("timestamp").limit(50)
+                .orderBy("timestamp").limit(200)
                 .get().asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and empty chat object
+            dataLoadError()
             e.printStackTrace()
         }
-        chatRes?.forEach { msg ->
-            dataHandler.addChatMessage(ChatMessage(msg))
+        try {
+            chatRes?.forEach { msg ->
+                dataHandler.addChatMessage(ChatMessage(msg))
+            }
+        }catch(e:Exception){
+            Log.d(TAG,"couldnt find chatfiles. Not created yet?")
         }
     }
 
@@ -160,7 +177,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
 
@@ -178,14 +195,16 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
-
-        tasksRes!!.forEach { task ->
-            dataHandler.addTask(Task(task))
+        try {
+            tasksRes!!.forEach { task ->
+                dataHandler.addTask(Task(task))
+            }
+        }catch (e: Exception){
+            Log.d(TAG,"couldnt find tasks. Not created yet?")
         }
-
 
     }
 
@@ -218,30 +237,6 @@ class DBLoader private constructor() {
         }
     }
 
-    private fun taskSnapshotListener() {
-        for (task in dataHandler.taskList.values) {
-            db.collection(Collections.Task.call).document(task.docId)
-                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
-                        return@addSnapshotListener
-                    }
-                    // What happens if the database document gets changed
-                    documentSnapshot?.let {
-                        dataHandler.getTask(task.docId).update(it)
-                        Log.d(
-                            TAG,
-                            "task updated ${dataHandler.getTask(it.id)}"
-                        )
-                    }
-                }
-            Log.d(
-                TAG,
-                "added snapshotlistener to task: ${task.docId}"
-            )
-        }
-    }
-
     /**
      * Listens to the whole collection tasks
      * adds new tasks to dataHandler
@@ -249,127 +244,135 @@ class DBLoader private constructor() {
      */
     private fun addTaskCollectionSnapshotListener(){
             db.collection(Collections.WG.call)
-            .document(dataHandler.wg!!.docID)
-            .collection(Collections.Task.call)
+                .document(dataHandler.wg!!.first().docID)
+                .collection(Collections.Task.call)
                 // Listener for collection
-            .addSnapshotListener{ snapshots,e ->
-                if(e != null){
-                    Log.d(TAG,"listen:error",e)
-                    return@addSnapshotListener
-                }
-                for(dc in snapshots!!.documentChanges){
-                    // for new documents
-                    if(dc.type == DocumentChange.Type.ADDED){
-                        Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
-                        try{
-                            // get new document as DocumentSnapshot and add to dataHandler
-                            db.collection("wg")
-                                .document(dataHandler.wg!!.docID)
-                                .collection("tasks")
-                                .document(dc.document.id)
-                                .get()
-                                .addOnSuccessListener { document ->
-                                    dataHandler.addTask(Task(document))
-                                    mainActivity?.reloadTaskFragment()
-                                    //TODO refresh fragment if active
+                .addSnapshotListener{ snapshots,e ->
+                    if(e != null){
+                        Log.d(TAG,"listen:error",e)
+                        return@addSnapshotListener
+                    }
+                    for(dc in snapshots!!.documentChanges){
+                        // for new documents
+                        if(dc.type == DocumentChange.Type.ADDED){
+                            Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
+                            try{
+                                // get new document as DocumentSnapshot and add to dataHandler
+                                dataHandler.wg!!.first().let { it1 ->
+                                    db.collection("wg")
+                                        .document(it1.docID)
+                                        .collection("tasks")
+                                        .document(dc.document.id)
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            dataHandler.addTask(Task(document))
+                                            mainActivity?.reloadTaskFragment()
+                                        }
                                 }
-                        }catch (e: Exception){
-                            Log.d(TAG, "Error getting new task")
-                            //TODO Exception
-                        }
-                        // for deleted documents
-                    }else if(dc.type == DocumentChange.Type.REMOVED){
-                        Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
-                        dataHandler.taskList.remove(dc.document.id)
-                        mainActivity?.reloadTaskFragment()
-                        //TODO refresh fragment if active
-                    }else if(dc.type == DocumentChange.Type.MODIFIED) {
-                        try{
-                            Log.d(TAG,"Updating task....")
-                            // get new document as DocumentSnapshot and add to dataHandler
-                            db.collection("wg")
-                                .document(dataHandler.wg!!.docID)
-                                .collection("tasks")
-                                .document(dc.document.id)
-                                .get()
-                                .addOnSuccessListener { document ->
-                                    dataHandler.getTask(document.id).update(document)
-                                    mainActivity?.reloadTaskFragment()
-                                    //TODO refresh fragment if active
+                            }catch (e: Exception){
+                                Log.d(TAG, "Error getting new task")
+                                dataLoadError()
+                            }
+                            // for deleted documents
+                        }else if(dc.type == DocumentChange.Type.REMOVED){
+                            Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
+                            dataHandler.taskList.remove(dc.document.id)
+                            mainActivity?.reloadTaskFragment()
+                        }else if(dc.type == DocumentChange.Type.MODIFIED) {
+                            try{
+                                Log.d(TAG,"Updating task....")
+                                // get new document as DocumentSnapshot and add to dataHandler
+                                dataHandler.wg.first().let { it1 ->
+                                    db.collection("wg")
+                                        .document(it1.docID)
+                                        .collection("tasks")
+                                        .document(dc.document.id)
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            dataHandler.getTask(document.id).update(document)
+                                            mainActivity?.reloadTaskFragment()
+                                        }
                                 }
-                        }catch (e: Exception){
-                            Log.d(TAG, "Error updating new task")
-                            //TODO Exception
+                            }catch (e: Exception){
+                                Log.d(TAG, "Error updating new task")
+                                dataLoadError()
+                            }
                         }
                     }
                 }
-            }
+
     }
 
     private fun chatSnapshotListener() {
-        db.collection(Collections.WG.call)
-            .document(dataHandler.wg!!.docID).collection(Collections.CHAT.call)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                firebaseFirestoreException?.let {
-                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
-                    return@addSnapshotListener
-                }
-                // What happens if the database document gets changed
-                querySnapshot?.let {
-                    it.forEach { msg ->
-                        dataHandler.addChatMessage(ChatMessage(msg))
+        dataHandler.wg.first().let {
+            db.collection(Collections.WG.call)
+                .document(it.docID).collection(Collections.CHAT.call)
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                        return@addSnapshotListener
                     }
-                    Log.d(
-                        TAG,
-                        "chat updated $it"
-                    )
+                    // What happens if the database document gets changed
+                    querySnapshot?.let {
+                        it.forEach { msg ->
+                            dataHandler.addChatMessage(ChatMessage(msg))
+                        }
+                        Log.d(
+                            TAG,
+                            "chat updated $it"
+                        )
+                    }
                 }
-            }
+        }
         Log.d(TAG, "Added snapshotlistener to chat")
     }
 
     private fun financeSnapshotListener() {
-        db.collection(Collections.WG.call)
-            .document(dataHandler.wg!!.docID).collection(Collections.FINANCES.call)
-            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                firebaseFirestoreException?.let {
-                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
-                    return@addSnapshotListener
-                }
-                // What happens if the database document gets changed
-                querySnapshot?.let {
-                    it.forEach { cost ->
-                        dataHandler.addFinanceEntry(FinanceEntry(cost))
+        dataHandler.wg!!.first().let {
+            db.collection(Collections.WG.call)
+                .document(it.docID).collection(Collections.FINANCES.call)
+                .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                        return@addSnapshotListener
                     }
-                    Log.d(
-                        TAG,
-                        "finances updated $it"
-                    )
+                    // What happens if the database document gets changed
+                    querySnapshot?.let {
+                        it.forEach { cost ->
+                            dataHandler.addFinanceEntry(FinanceEntry(cost))
+                        }
+                        Log.d(
+                            TAG,
+                            "finances updated $it"
+                        )
+                    }
                 }
-            }
+        }
         Log.d(TAG, "Added snapshotlistener to chat")
     }
 
     private fun wgSnapshotListener() {
-        db.collection(Collections.WG.call).document(dataHandler.wg!!.docID)
-            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-                firebaseFirestoreException?.let {
-                    Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
-                    return@addSnapshotListener
+        dataHandler.wg!!.first().let {
+            db.collection(Collections.WG.call).document(it.docID)
+                .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                    firebaseFirestoreException?.let {
+                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                        return@addSnapshotListener
+                    }
+                    // What happens if the database document gets changed
+                    documentSnapshot?.let {
+                        dataHandler.wg.first().shoppingList?.clear()
+                        dataHandler.wg.first().update(it)
+                        Log.d(
+                            TAG,
+                            "wg updated ${dataHandler.wg}"
+                        )
+                    }
                 }
-                // What happens if the database document gets changed
-                documentSnapshot?.let {
-                    dataHandler.wg?.shoppingList?.clear()
-                    dataHandler.wg?.update(it)
-                    Log.d(
-                        TAG,
-                        "wg updated ${dataHandler.wg.toString()}"
-                    )
-                }
-            }
+        }
         Log.d(
             TAG,
-            "added snapshotlistener to wg: ${dataHandler.wg.toString()}"
+            "added snapshotlistener to wg: ${dataHandler.wg}"
         )
 
     }
@@ -398,5 +401,12 @@ class DBLoader private constructor() {
 
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
+    }
+
+    private fun dataLoadError(){
+        Toast.makeText(mainActivity,
+            "Es gab einen Fehler beim Laden der Inhalte. Bitte versuche es erneut.",
+            Toast.LENGTH_LONG)
+            .show()
     }
 }

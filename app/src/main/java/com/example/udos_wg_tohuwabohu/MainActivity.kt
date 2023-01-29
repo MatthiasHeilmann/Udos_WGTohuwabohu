@@ -1,22 +1,27 @@
 package com.example.udos_wg_tohuwabohu
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
+import com.example.udos_wg_tohuwabohu.Home.HomeFragment
 import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
-import com.google.firebase.auth.FirebaseAuth
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val dbLoader = DBLoader.getInstance()
     private val dataHandler = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
     val TAG = "[MainActivity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,17 +36,19 @@ class MainActivity : AppCompatActivity() {
 
         // load database
         dbLoader.setMainActivity(this)
+        dbWriter.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
 
-        /*binding.textUserID.text = "User ID: $userID"
-        binding.textUserEmail.text = "Email: $emailID"
-
-        binding.buttonLogout.setOnClickListener{
-            FirebaseAuth.getInstance().signOut()
-            startActivity(Intent(this@MainActivity,LoginActivity::class.java))
-            finish()
-        }*/
-
+        binding.homeButton.setOnClickListener{
+            showHome()
+        }
+        binding.homeEdit.setOnClickListener{
+            val f = HomeEditFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
+            binding.homeButton.visibility = View.VISIBLE
+            binding.homeEdit.visibility = View.INVISIBLE
+        }
 
         replaceFragment(ChatFragment())
         binding.textToolbar.text = "Chat"
@@ -57,7 +64,9 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = "Finanzen"
                 }
                 R.id.nav_task -> {
-                    replaceFragment(TasksFragment())
+                    val f = TasksFragment()
+                    f.setMainActivity(this)
+                    replaceFragment(f)
                     binding.textToolbar.text = "Aufgaben"
                 }
                 R.id.nav_shopping -> {
@@ -72,6 +81,8 @@ class MainActivity : AppCompatActivity() {
 
                 }
             }
+            binding.homeEdit.visibility = View.INVISIBLE
+            binding.homeButton.visibility = View.VISIBLE
             true
         }
     }
@@ -82,17 +93,49 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
     }
-    fun openCreateTaskFragment(view: View){
-        replaceFragment(CreateTaskFragment())
+    fun openCreateTaskFragment(){
+        val f = CreateTaskFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
         binding.textToolbar.text = "Neue Aufgabe erstellen"
     }
 
     fun reloadTaskFragment(){
         if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
-            Log.d(TAG, "TASK FRAGMENT IS VISIBLE")
-            replaceFragment(TasksFragment())
-        }else{
-            Log.d(TAG, "Task fragment is not visible")
+            val f = TasksFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
         }
+    }
+    fun showTaskFragment(){
+        val f = TasksFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = "Aufgaben"
+    }
+    fun showHome(){
+        val f = HomeFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = "Eure WG"
+        binding.homeEdit.visibility = View.VISIBLE
+        binding.homeButton.visibility = View.INVISIBLE
+    }
+    fun restartApp() {
+        val context = this@MainActivity
+        val intent = Intent(context, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        if (context is Activity) {
+            (context as Activity).finish()
+        }
+        Runtime.getRuntime().exit(0)
+    }
+    fun noConnection(){
+        val intent = Intent(this@MainActivity, NoConnectionActivity::class.java)
+        intent.flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

@@ -29,41 +29,22 @@ class RegisterActivity : AppCompatActivity() {
         // on click "register"
         binding.buttonRegister.setOnClickListener{
             when{
-                // show errors if textfields are empty
-                TextUtils.isEmpty(binding.textfieldFirstName.text.toString().trim{it <= ' '}) -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Please enter your Firstname.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                TextUtils.isEmpty(binding.textfieldLastName.text.toString().trim{it <= ' '}) -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Please enter your Lastname.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                TextUtils.isEmpty(binding.textfieldFirstName.text.toString().trim{it <= ' '}) ||
+                TextUtils.isEmpty(binding.textfieldLastName.text.toString().trim{it <= ' '}) ||
                 TextUtils.isEmpty(binding.textfieldUserName.text.toString().trim{it <= ' '}) -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Please enter a Username.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@RegisterActivity,
+                    "Bitte gib alle Informationen an!",
+                    Toast.LENGTH_SHORT).show()
                 }
-                TextUtils.isEmpty(binding.textfieldRegisterEmail.text.toString().trim{it <= ' '}) -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Please enter Email.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                !isEmailValid(binding.textfieldRegisterEmail.text.toString().trim{it <= ' '}) -> {
+                    Toast.makeText(this@RegisterActivity,
+                        "Bitte gib eine gültige Emailadresse an!",
+                        Toast.LENGTH_SHORT).show()
                 }
-                TextUtils.isEmpty(binding.textfieldRegisterPassword.text.toString().trim{it <= ' '}) -> {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Please enter Password.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                binding.textfieldRegisterPassword.text.toString().trim{it <= ' '}.length<6 -> {
+                    Toast.makeText(this@RegisterActivity,
+                        "Dein Passwort ist zu kurz!",
+                        Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     // get email and password
@@ -91,7 +72,6 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.putExtra("user_id",firebaseUser.uid)
                                     intent.putExtra("email_id",firebaseUser.email)
 
-                                    // TODO: create Mitbewohner in database
                                     saveUsertoDatabase(firstName, lastName, userName, email)
 
                                     startActivity(intent)
@@ -128,7 +108,10 @@ class RegisterActivity : AppCompatActivity() {
             .document(Firebase.auth.currentUser!!.uid)
             .set(user)
     }
-    // TODo: permission
+    // TODo: permission on logout: GETTING PERMISSION DENIED?
 
-
+    val EMAIL_REGEX = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})";
+    fun isEmailValid(email: String): Boolean {
+        return EMAIL_REGEX.toRegex().matches(email);
+    }
 }
