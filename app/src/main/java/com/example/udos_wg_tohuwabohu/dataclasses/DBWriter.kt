@@ -1,5 +1,8 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+
+import android.util.Log
+import androidx.compose.runtime.MutableState
 import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
@@ -202,5 +205,22 @@ class DBWriter private constructor() {
             val newPoints = roommate.coin_count?.plus(points)
             db.collection(Collections.Roommate.call).document(roommate.docID).update("coin_count",newPoints)
         }
+    }
+
+    fun addItemToShoppingList(item: String) {
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item}" to false,
+            ))
+    }
+
+    fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
+        db.collection("wg")
+            .document(dataHandler.wg!!.docID)
+            .update(mapOf(
+                "einkaufsliste.${item.key}" to checkedState.value,
+            ));
+        Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
     }
 }

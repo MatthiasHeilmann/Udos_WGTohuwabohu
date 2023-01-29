@@ -361,6 +361,7 @@ class DBLoader private constructor() {
                     }
                     // What happens if the database document gets changed
                     documentSnapshot?.let {
+                        dataHandler.wg.first().shoppingList?.clear()
                         dataHandler.wg.first().update(it)
                         Log.d(
                             TAG,

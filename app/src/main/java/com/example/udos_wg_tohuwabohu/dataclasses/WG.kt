@@ -1,13 +1,16 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 
-data class WG(val docID: String, var name: String?,var entryCode:Long?, var contactPerson: DocumentReference?, var shoppingList: HashMap<String,Boolean>?, var calendar: ArrayList<HashMap<String,Timestamp>>?){
+data class WG(val docID: String, var name: String?, var contactPerson: DocumentReference?, var shoppingList: SnapshotStateMap<String, Boolean>?, var calendar: ArrayList<HashMap<String,Timestamp>>?){
     constructor(vals: DocumentSnapshot) : this(
-        vals.id,null, null, null, null,null
+        vals.id,null, null, mutableStateMapOf(), null
     )
     {
         update(vals)
@@ -16,14 +19,10 @@ data class WG(val docID: String, var name: String?,var entryCode:Long?, var cont
         this.name = vals.getString("bezeichnung")
         this.entryCode = vals["entrycode"] as Long
         this.contactPerson = vals.getDocumentReference("ansprechpartner")
-        this.shoppingList = vals["einkaufsliste"] as HashMap<String, Boolean>
-        try{
-            this.calendar = vals["calendar"] as ArrayList<HashMap<String, Timestamp>>
-        }catch (e:Exception){
-
+        (vals["einkaufsliste"] as HashMap<String, Boolean>).forEach{item ->
+            shoppingList?.set(item.key, item.value)
         }
-        val TAG = "########"
-        Log.d(TAG,this.name.toString())
-        Log.d(TAG,this.contactPerson.toString())
+        this.calendar = vals["calendar"] as ArrayList<HashMap<String, Timestamp>>
+
     }
 }
