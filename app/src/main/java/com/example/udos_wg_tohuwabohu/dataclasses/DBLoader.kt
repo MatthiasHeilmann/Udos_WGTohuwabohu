@@ -74,7 +74,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle excpetion: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
 
@@ -97,7 +97,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // Todo handle exception: give toast and shutdown
+            dataLoadError()
             e.printStackTrace()
         }
 
@@ -121,7 +121,7 @@ class DBLoader private constructor() {
                 .asDeferred()
                 .await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and create default contact person
+            dataLoadError()
             e.printStackTrace()
         }
         an = ContactPerson(anRes!!)
@@ -136,7 +136,7 @@ class DBLoader private constructor() {
                 .orderBy("timestamp").limit(50)
                 .get().asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and empty chat object
+            dataLoadError()
             e.printStackTrace()
         }
         try {
@@ -156,7 +156,7 @@ class DBLoader private constructor() {
                 .orderBy("timestamp").limit(200)
                 .get().asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and empty chat object
+            dataLoadError()
             e.printStackTrace()
         }
         try {
@@ -177,7 +177,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
 
@@ -195,7 +195,7 @@ class DBLoader private constructor() {
                 .get()
                 .asDeferred().await()
         } catch (e: Exception) {
-            // TODO handle exception: Give toast and shutdown app
+            dataLoadError()
             e.printStackTrace()
         }
         try {
@@ -267,24 +267,22 @@ class DBLoader private constructor() {
                                         .addOnSuccessListener { document ->
                                             dataHandler.addTask(Task(document))
                                             mainActivity?.reloadTaskFragment()
-                                            //TODO refresh fragment if active
                                         }
                                 }
                             }catch (e: Exception){
                                 Log.d(TAG, "Error getting new task")
-                                //TODO Exception
+                                dataLoadError()
                             }
                             // for deleted documents
                         }else if(dc.type == DocumentChange.Type.REMOVED){
                             Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
                             dataHandler.taskList.remove(dc.document.id)
                             mainActivity?.reloadTaskFragment()
-                            //TODO refresh fragment if active
                         }else if(dc.type == DocumentChange.Type.MODIFIED) {
                             try{
                                 Log.d(TAG,"Updating task....")
                                 // get new document as DocumentSnapshot and add to dataHandler
-                                dataHandler.wg!!.first().let { it1 ->
+                                dataHandler.wg.first().let { it1 ->
                                     db.collection("wg")
                                         .document(it1.docID)
                                         .collection("tasks")
@@ -293,12 +291,11 @@ class DBLoader private constructor() {
                                         .addOnSuccessListener { document ->
                                             dataHandler.getTask(document.id).update(document)
                                             mainActivity?.reloadTaskFragment()
-                                            //TODO refresh fragment if active
                                         }
                                 }
                             }catch (e: Exception){
                                 Log.d(TAG, "Error updating new task")
-                                //TODO Exception
+                                dataLoadError()
                             }
                         }
                     }
@@ -307,7 +304,7 @@ class DBLoader private constructor() {
     }
 
     private fun chatSnapshotListener() {
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection(Collections.WG.call)
                 .document(it.docID).collection(Collections.CHAT.call)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
@@ -403,5 +400,12 @@ class DBLoader private constructor() {
 
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
+    }
+
+    private fun dataLoadError(){
+        Toast.makeText(mainActivity,
+            "Es gab einen Fehler beim Laden der Inhalte. Bitte versuche es erneut.",
+            Toast.LENGTH_LONG)
+            .show()
     }
 }

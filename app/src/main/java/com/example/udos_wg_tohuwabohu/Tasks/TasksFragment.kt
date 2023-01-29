@@ -51,7 +51,7 @@ class TasksFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTasksBinding.inflate(layoutInflater)
-        val v: View = inflater.inflate(R.layout.fragment_tasks, container, false)
+        val v: View = _binding.root
         composeView = v.findViewById(R.id.compose_view)
         composeView.setContent {
             tasksData?.let { FullTasks(it) }
@@ -93,8 +93,10 @@ class TasksFragment : Fragment() {
                     Spacer(modifier = Modifier.weight(1.0f))
                     Column(horizontalAlignment = Alignment.End)
                         {
-                        if (roommate != null) {
+                        if (roommate != null||roommate?.username!=null) {
                             roommate.username?.let { Text(text = it) }
+                        }else{
+                            Text(text = "Unbekannter Benutzer")
                         }
                         /** button to check the task */
                         Button(onClick = {
@@ -177,11 +179,10 @@ class TasksFragment : Fragment() {
         Column (modifier = Modifier
             .verticalScroll(scrollState)
         ){
-            if(sortedTaskList.isEmpty()){
-                _binding.taskEmptyText.visibility = View.VISIBLE
-                return@Column
-            }
+            _binding.taskEmptyText.visibility = View.VISIBLE
             sortedTaskList.forEach { task ->
+                if(_binding.taskEmptyText.visibility == View.VISIBLE) _binding.taskEmptyText.visibility = View.INVISIBLE
+
                 if(task.name == null || task.dueDate == null || task.frequency==null) return@forEach
                 val roommate: Roommate? = dataHandler.getRoommate(task.roommate!!.id)
 

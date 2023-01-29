@@ -35,7 +35,6 @@ class LonelyPageActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         //This is just so our current version of the MainActivity does not immediately crash
         val email = intent.getStringExtra("email_id")
-        //TODO prevent no internet connection
         db.collection("mitbewohner").document(Firebase.auth.currentUser!!.uid)
             .get()
             .addOnSuccessListener { document ->
