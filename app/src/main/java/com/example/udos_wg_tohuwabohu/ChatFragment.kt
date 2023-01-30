@@ -2,6 +2,7 @@ package com.example.udos_wg_tohuwabohu
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,11 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -24,8 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,11 +45,7 @@ import java.util.*
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_CHAT_LIST = "chatList"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ChatFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
 class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
@@ -60,20 +60,6 @@ class ChatFragment : Fragment() {
             setContent {
                 ChatBox()
             }
-        }
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param chatMessages list of all chat messages that shall be shown
-         * @return A new instance of fragment ChatFragment.
-         */
-        @JvmStatic
-        fun newInstance(): Fragment {
-            return ChatFragment()
         }
     }
 
@@ -111,7 +97,6 @@ class ChatFragment : Fragment() {
                 val currentYear = c.get(Calendar.YEAR)
                 dataHandler.chat.forEach { msg ->
                     if(msg.timestamp?.date!=date){
-                        if(date!=0) Divider(thickness= 1.dp,color= UdoWhite)
                         val day = msg.timestamp!!.date
                         val month = msg.timestamp!!.month+1
                         val year = msg.timestamp!!.year+1900
@@ -127,6 +112,7 @@ class ChatFragment : Fragment() {
                         androidx.compose.material3.Text(
                             text = dateText, textAlign = TextAlign.Center, color = UdoWhite
                         )
+                        if(date!=0) Divider(thickness= 1.dp,color= UdoWhite)
                     }
                     MessageCard(msg)
                 }
@@ -140,51 +126,50 @@ class ChatFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MessageInput() {
         var textFieldValue by remember { mutableStateOf("") }
 
-        Box {
+        Row (modifier = Modifier.background(UdoWhite)) {
             TextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(UdoWhite)
+                    .heightIn(0.dp,100.dp),
                 value = textFieldValue,
-                onValueChange = {
-                    textFieldValue = it
-                },
-                label = { Text(text = "Message") },
-                placeholder = { Text(text = "Type a message") },
-                modifier = Modifier.background(UdoWhite),
-                textStyle = TextStyle(color = UdoDarkGray)
+                onValueChange = { textFieldValue = it },
+                label = { Text(text = "Nachricht") },
+                placeholder = { Text(text = "Schreibe eine Nachricht") },
+                textStyle = TextStyle(color = UdoDarkGray),
+                colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = UdoOrange, unfocusedBorderColor = UdoWhite, focusedLabelColor = UdoOrange, cursorColor = UdoOrange)
             )
-
             Button(
-                modifier = Modifier.align(CenterEnd),
-                colors = UdoChatButtonTheme(),
+                modifier = Modifier
+                    .padding(end = 0.dp)
+                    .height(56.dp).shadow(elevation = 0.dp),
                 onClick = {
-                    if (textFieldValue.trim() != "") {
-                        uploadMessage(textFieldValue)
+                    Log.d("[CHAT]",textFieldValue.trim())
+                    val message =textFieldValue.trim{it <= ' '}.trim{it <= '\n'}
+                    Log.d("[CHAT]",message)
+                    if (message != "") {
+                        uploadMessage(message)
                     } else {
                         Toast.makeText(
                             activity,
-                            "Pls insert a valid Message",
+                            "Bitte gib eine gültige Nachricht ein!",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     textFieldValue = ""
                 },
-                // Uses ButtonDefaults.ContentPadding by default
-                contentPadding = PaddingValues(
-                    start = 20.dp,
-                    top = 12.dp,
-                    end = 20.dp,
-                    bottom = 12.dp
-                )
+                colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = MatthiGrey),
+                shape = RoundedCornerShape(50.dp),
             ) {
-                // Inner content including an icon and a text label
                 Icon(
                     Icons.Filled.Send,
                     contentDescription = "Send Message",
-                    modifier = Modifier.size(ButtonDefaults.IconSize.times(1.5f))
+                    modifier = Modifier.size(ButtonDefaults.IconSize.times(1.5f)),
+
                 )
             }
         }
@@ -193,7 +178,7 @@ class ChatFragment : Fragment() {
     @Composable
     fun MessageCard(msg: ChatMessage) {
         val thisUser = (msg.user?.id == dataHandler.user?.docID) || false;
-        val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown"
+        val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "Unbekannt"
         val alignment = if (thisUser) Alignment.CenterEnd else Alignment.CenterStart
         val alignmentText = if (thisUser) Alignment.End else Alignment.Start
         val cardColor = if (thisUser) UdoWhite else UdoLightBlue
@@ -221,7 +206,9 @@ class ChatFragment : Fragment() {
                     ) {
                         Text(
                             text = msg.message ?: "",
-                            modifier = Modifier.background(cardColor).padding(all = 7.dp),
+                            modifier = Modifier
+                                .background(cardColor)
+                                .padding(all = 7.dp),
                             color = cardTextColor,
                             style = MaterialTheme.typography.body2
                         )
