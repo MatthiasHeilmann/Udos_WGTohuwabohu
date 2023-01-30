@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
@@ -82,13 +83,13 @@ fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
         Card(colors= UdoCardTheme(),modifier = Modifier.fillMaxWidth().padding(5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(colors = UdoDateCardTheme()) {
-                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall, modifier = Modifier.padding(5.dp))
+                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall, fontSize = 20.sp,fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
                 }
                 Box(modifier= Modifier.fillMaxWidth().padding(5.dp), contentAlignment= Alignment.CenterEnd){
-                    Text(text= " " + time + " Uhr", textAlign = TextAlign.End, modifier = Modifier.padding(5.dp))
+                    Text(text= "Ab " + time + " Uhr", textAlign = TextAlign.End, modifier = Modifier.padding(5.dp))
                 }
             }
-            Text(text =" "+ cardText, fontSize = 24.sp, modifier = Modifier.padding(5.dp))
+            Text(text =cardText, fontSize = 24.sp, modifier = Modifier.padding(35.dp,5.dp,5.dp,10.dp))
         }
     }
 }
@@ -100,10 +101,11 @@ fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
     Column (modifier = Modifier
             .verticalScroll(rememberScrollState()).padding(5.dp)){
         sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
-            if(currentMonth != appointment.values.first().toDate().month){
-                currentMonth = appointment.values.first().toDate().month
-                Text(text= DateFormatSymbols.getInstance().months[appointment.values.first().toDate().month], textAlign = TextAlign.End,color= UdoWhite)
-                Divider(thickness= 2.dp,color= UdoWhite)
+            val month = appointment.values.first().toDate().month
+            if(currentMonth != month){
+                currentMonth = month
+                Text(text= DateFormatSymbols.getInstance().months[month], textAlign = TextAlign.End,color= UdoWhite)
+                Divider(thickness= 2.dp,color= UdoWhite, modifier = Modifier.padding(0.dp,0.dp,0.dp,5.dp))
             }
             Log.d("Calendar Date:", appointment.values.first().toDate().toString())
             CalendarCard(

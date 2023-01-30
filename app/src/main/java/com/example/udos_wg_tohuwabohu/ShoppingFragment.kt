@@ -1,9 +1,9 @@
-// TODO: create Invoice
 
 package com.example.udos_wg_tohuwabohu
 
 import android.nfc.Tag
 import android.os.Bundle
+import android.text.Editable
 import android.text.TextUtils
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -25,18 +25,24 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.children
+import androidx.core.view.get
+import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
+import com.example.udos_wg_tohuwabohu.databinding.FragmentShoppingBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ShoppingFragment : Fragment() {
 
 
     lateinit var composeView: ComposeView
+    private lateinit var _binding:FragmentShoppingBinding
     private val TAG: String = "[SHOPPING FRAGMENT]"
     private val db = Firebase.firestore
     private val dbWriter = DBWriter.getInstance()
@@ -52,13 +58,13 @@ class ShoppingFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        _binding = FragmentShoppingBinding.inflate(inflater,container,false)
+        val v: View = _binding.root
 
-        val v: View = inflater.inflate(R.layout.fragment_shopping, container, false)
-
-        val addItemButton:FloatingActionButton = v.findViewById(R.id.button_add_item)
-        val deleteItemsButton:FloatingActionButton = v.findViewById(R.id.button_delete_items)
-        val entryField:EditText = v.findViewById(R.id.addItemEntryField)
+        val addItemButton:FloatingActionButton = _binding.buttonAddItem
+        val deleteItemsButton:FloatingActionButton = _binding.buttonDeleteItems
+        val entryField:EditText = _binding.addItemEntryField
 
 
 
@@ -81,7 +87,7 @@ class ShoppingFragment : Fragment() {
                 val entryItem = entryField.text.toString()
                 /*addItem(entryItem)*/
                 dbWriter.addItemToShoppingList(entryItem)
-
+                _binding.addItemEntryField.text.clear()
                 Toast.makeText(
                     requireActivity(),
                     "${entryItem} hinzugefügt.",
@@ -108,7 +114,7 @@ class ShoppingFragment : Fragment() {
 
     fun deleteItems(shoppingList: SnapshotStateMap<String, Boolean>?){
         shoppingList?.forEach{ item ->
-            if (item.value == true) {
+            if (item.value) {
                 db.collection("wg")
                     .document(dh.wg.first().docID)
                     .update(
@@ -119,15 +125,20 @@ class ShoppingFragment : Fragment() {
                 Log.d(TAG,"${item.key} gelöscht." )
             }
         }
+        // sets all checkboxes to false, otherwise the boxes at the indices of the deleted boxes would stay checked
+        boxStates.forEach{state ->
+            state.value = false
+        }
     }
 
-
+    // holds the mutable states of the checkboxes
+    val boxStates: ArrayList<MutableState<Boolean>> = ArrayList()
 
     @Composable
     fun createItemRow(item: Map.Entry<String, Boolean>) {
         val checkedState = remember { mutableStateOf(false) }
-
-        Row {
+        boxStates.add(checkedState)
+        Row (modifier = Modifier.padding(15.dp,5.dp,15.dp,1.dp)){
             Checkbox(
                 checked = checkedState.value,
                 onCheckedChange = {
@@ -143,7 +154,7 @@ class ShoppingFragment : Fragment() {
                         checkedState.value = !checkedState.value;
                         /*checkShoppinglistItem(item, checkedState)*/
                         dbWriter.checkShoppinglistItem(item, checkedState)
-                    },
+                    }.padding(start = 10.dp),
                 text = item.key,
                 style = TextStyle(
                     color = Color.White,

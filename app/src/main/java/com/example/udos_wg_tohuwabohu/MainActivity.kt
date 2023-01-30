@@ -80,10 +80,7 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = FragmentTitle.Finances.call
                 }
                 R.id.nav_task -> {
-                    val f = TasksFragment()
-                    f.setMainActivity(this)
-                    replaceFragment(f)
-                    binding.textToolbar.text = FragmentTitle.Tasks.call
+                    showTaskFragment()
                 }
                 R.id.nav_shopping -> {
                     replaceFragment(ShoppingFragment())
@@ -152,9 +149,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(context, LoginActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
-        if (context is Activity) {
-            (context as Activity).finish()
-        }
+        (context as Activity).finish()
         Runtime.getRuntime().exit(0)
     }
 }

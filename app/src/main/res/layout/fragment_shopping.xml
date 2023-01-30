@@ -12,49 +12,47 @@
         android:id="@+id/addItemEntryField"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:layout_marginTop="16dp"
         android:height="60dp"
         android:backgroundTint="@color/white"
+        android:ems="10"
         android:hint="Eintrag hinzufügen"
-        android:textColorHint="@color/white"
         android:textColor="@color/white"
+        android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
 
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/button_add_item"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        app:fabCustomSize="48dp"
-        app:maxImageSize="24dp"
-
         android:layout_margin="5dp"
+
+        android:layout_marginBottom="4dp"
         android:clickable="true"
-        android:src="@drawable/baseline_add_24"
         android:scaleType="center"
+        android:src="@drawable/baseline_add_24"
 
         app:backgroundTint="@color/udo_orange"
-        app:tint="@color/udo_dark_blue"
+        app:fabCustomSize="48dp"
+        app:layout_constraintBottom_toBottomOf="@+id/addItemEntryField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/addItemEntryField"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:maxImageSize="24dp"
+        app:tint="@color/udo_dark_blue" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/compose_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="60dp"
-        android:paddingBottom="60dp"
+        android:layout_height="0dp"
 
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addItemEntryField"
 
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addItemEntryField" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/button_delete_items"
