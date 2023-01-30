@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         replaceFragment(ChatFragment())
         binding.textToolbar.text = FragmentTitle.Chat.call
+
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
@@ -137,6 +138,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun showHome(){
+        // TODO Navbar aktuallisieren
         val f = HomeFragment()
         f.setMainActivity(this)
         replaceFragment(f)
