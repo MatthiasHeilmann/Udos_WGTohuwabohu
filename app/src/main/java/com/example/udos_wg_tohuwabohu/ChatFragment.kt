@@ -2,6 +2,7 @@ package com.example.udos_wg_tohuwabohu
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,22 +10,26 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,16 +39,13 @@ import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.ChatMessage
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import java.text.DateFormatSymbols
 import java.util.*
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_CHAT_LIST = "chatList"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ChatFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
 class ChatFragment : Fragment() {
 
     private val dataHandler = DataHandler.getInstance()
@@ -61,20 +63,6 @@ class ChatFragment : Fragment() {
         }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param chatMessages list of all chat messages that shall be shown
-         * @return A new instance of fragment ChatFragment.
-         */
-        @JvmStatic
-        fun newInstance(): Fragment {
-            return ChatFragment()
-        }
-    }
-
     fun formatDate(date: Date): String {
         return "" + formatNumber(date.hours) + ":" + formatNumber(date.minutes)
     }
@@ -86,10 +74,6 @@ class ChatFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ChatBox() {
-
-        println("Got bound Messages")
-        println(dataHandler.chat.joinToString { it.message + ", " + it.timestamp?.toString() + ", " + it.user.toString() + "\n\t" })
-
         Column(
             modifier = Modifier
                 .fillMaxHeight(),
@@ -105,9 +89,39 @@ class ChatFragment : Fragment() {
                         reverseScrolling = true
                     )
                     .weight(1f, false)
+                    .padding(bottom = 10.dp)
             ) {
+                var date:Int = 0
+                val c = Calendar.getInstance()
+                val currentDay = c.get(Calendar.DATE)
+                val currentMonth = c.get(Calendar.MONTH)+1
+                val currentYear = c.get(Calendar.YEAR)
+                var msgBefore:ChatMessage? = null
                 dataHandler.chat.forEach { msg ->
-                    MessageCard(msg)
+                    if(msg.timestamp?.date!=date){
+                        val day = msg.timestamp!!.date
+                        val month = msg.timestamp!!.month+1
+                        val year = msg.timestamp!!.year+1900
+                        date = day
+                        val dateText:String
+                        dateText = if(day==currentDay&&year==currentYear&&month==currentMonth){
+                            "Heute"
+                        }else if(day+1==currentDay&&year==currentYear&&month==currentMonth){
+                            "Gestern"
+                        }else{
+                            "$day.$month.$year"
+                        }
+                        androidx.compose.material3.Text(
+                            text = dateText, textAlign = TextAlign.Center, color = UdoWhite, modifier = Modifier.padding(top = 10.dp, start =9.dp)
+                        )
+                        if(date!=0){
+                            val mod = if(msg.user?.id == dataHandler.user?.docID) Modifier.padding(bottom = 10.dp) else Modifier.padding(all = 0.dp)
+                            Divider(thickness= 1.dp,color= UdoWhite, modifier = mod)
+                            msgBefore = null
+                        }
+                    }
+                    MessageCard(msg,msgBefore)
+                    msgBefore = msg
                 }
             }
             Box(
@@ -119,104 +133,117 @@ class ChatFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun MessageInput() {
         var textFieldValue by remember { mutableStateOf("") }
 
-        Box {
+        Row (modifier = Modifier.background(UdoWhite)) {
             TextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(UdoWhite)
+                    .heightIn(0.dp, 100.dp),
                 value = textFieldValue,
-                onValueChange = {
-                    textFieldValue = it
-                },
-                label = { Text(text = "Message") },
-                placeholder = { Text(text = "Type a message") },
-                modifier = Modifier.background(UdoWhite),
-                textStyle = TextStyle(color = UdoDarkGray)
+                onValueChange = { textFieldValue = it },
+                label = { Text(text = "Nachricht") },
+                placeholder = { Text(text = "Schreibe eine Nachricht") },
+                textStyle = TextStyle(color = UdoDarkGray),
+                colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = UdoDarkBlue, unfocusedBorderColor = UdoWhite, focusedLabelColor = UdoDarkBlue, cursorColor = UdoDarkBlue )
             )
-
             Button(
-                modifier = Modifier.align(CenterEnd),
-                colors = UdoChatButtonTheme(),
+                modifier = Modifier
+                    .padding(all = 3.dp)
+                    .height(50.dp)
+                    .width(50.dp)
+                    .shadow(elevation = 0.dp),
                 onClick = {
-                    if (textFieldValue.trim() != "") {
-                        uploadMessage(textFieldValue)
+                    Log.d("[CHAT]",textFieldValue.trim())
+                    val message =textFieldValue.trim{it <= ' '}.trim{it <= '\n'}
+                    Log.d("[CHAT]",message)
+                    if (message != "") {
+                        uploadMessage(message)
                     } else {
                         Toast.makeText(
                             activity,
-                            "Pls insert a valid Message",
+                            "Bitte gib eine gültige Nachricht ein!",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     textFieldValue = ""
                 },
-                // Uses ButtonDefaults.ContentPadding by default
-                contentPadding = PaddingValues(
-                    start = 20.dp,
-                    top = 12.dp,
-                    end = 20.dp,
-                    bottom = 12.dp
-                )
+                colors = androidx.compose.material.ButtonDefaults.buttonColors(backgroundColor = UdoDarkBlue),
+                shape = RoundedCornerShape(50.dp),
             ) {
-                // Inner content including an icon and a text label
                 Icon(
                     Icons.Filled.Send,
                     contentDescription = "Send Message",
-                    modifier = Modifier.size(ButtonDefaults.IconSize.times(1.5f))
+                    modifier = Modifier.size(ButtonDefaults.IconSize.times(2f)).padding(all = 0.dp),
+                    tint = UdoBeige
                 )
             }
         }
     }
 
     @Composable
-    fun MessageCard(msg: ChatMessage) {
-        // TODO correct Theme and Get colors for own Messages
-        val thisUser = (msg.user?.id == dataHandler.user?.docID) || false;
-        //if(thisUser) ""
-        //                        else
-        val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "unknown"
+    fun MessageCard(msg: ChatMessage, msgbefore:ChatMessage?) {
+        val thisUser = msg.user?.id == dataHandler.user?.docID && msg.user?.id!= null
+        val username = dataHandler.getRoommate(msg.user?.id)?.username ?: "Unbekannt"
         val alignment = if (thisUser) Alignment.CenterEnd else Alignment.CenterStart
+        val alignmentText = if (thisUser) Alignment.End else Alignment.Start
+        val cardColor = if (thisUser) UdoBeige else UdoLightBlue
+        val cardTextColor = if (thisUser) UdoDarkGray else UdoWhite
+        val cardPadding = if(thisUser) Modifier.padding(start = 20.dp) else Modifier.padding(end = 20.dp)
+        val sameUserAsBefore = msg.user?.id == msgbefore?.user?.id
         Box(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
                     .align(alignment)
-                    .padding(all = 8.dp)
+                    .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp)
             ) {
                 Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-                    Text(
-                        text = username,
-                        color = UdoOrange,
-                        modifier= Modifier.align(Alignment.Start),
-                        style = MaterialTheme.typography.subtitle2,
-                    )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    if(!sameUserAsBefore && !thisUser) {
+                        Text(
+                            text = username,
+                            color = UdoOrange,
+                            modifier = Modifier.align(alignmentText).padding(top = 5.dp, bottom = 2.dp),
+                            style = MaterialTheme.typography.subtitle2,
+                        )
+                    }
+//                    Spacer(modifier = Modifier.height(1.dp))
 
                     Surface(
-                        modifier = Modifier.fillMaxWidth(),
+//                        modifier = Modifier.fillMaxWidth(),
+                        modifier = cardPadding,
                         shape = MaterialTheme.shapes.medium,
                         elevation = 5.dp
                     ) {
-                        Text(
-                            text = msg.message ?: "",
-                            modifier = Modifier.background(UdoLightBlue).padding(all = 4.dp),
-                            color = UdoWhite,
-                            style = MaterialTheme.typography.body2
-                        )
+                        Column (modifier = Modifier.background(color = cardColor)) {
+
+                            Text(
+                                text = msg.message ?: "",
+                                modifier = Modifier
+                                    .background(cardColor)
+                                    .padding(all = 7.dp),
+                                color = cardTextColor,
+                                style = MaterialTheme.typography.body2
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                            Text(
+                                text = formatDate(msg.timestamp!!),
+                                modifier = Modifier.background(cardColor).padding(start = 7.dp, end = 20.dp, bottom = 2.dp),
+                                color = cardTextColor,
+                                style = TextStyle(
+                                    textAlign = TextAlign.Right,
+                                    fontSize = 12.sp
+                                )
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(1.dp))
 
-                    Text(
-                        text = formatDate(msg.timestamp!!),
-                        modifier = Modifier.fillMaxWidth(),
-                        color = UdoWhite,
-                        style = TextStyle(
-                            textAlign = TextAlign.Right,
-                            fontSize = 12.sp
-                        )
-                    )
+
+
                 }
             }
         }

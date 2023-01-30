@@ -5,10 +5,12 @@ import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Process
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -19,6 +21,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
+import com.example.udos_wg_tohuwabohu.Home.HomeFragment
 import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
@@ -29,9 +33,25 @@ import java.time.LocalDateTime
 
 class MainActivity : AppCompatActivity() {
 
+    enum class FragmentTitle(val call: String) {
+        WG("Eure WG"),
+        Calendar("Kalender"),
+        Shoppinglist("Einkaufsliste"),
+        Chat("Chat"),
+        EditWG("WG bearbeiten"),
+        Finances("Finanzen"),
+        CreateNewTask("Neue Aufgabe erstellen"),
+        Tasks("Aufgaben");
+
+        override fun toString(): String {
+            return call
+        }
+    }
+
     private lateinit var binding: ActivityMainBinding
     private val dbLoader = DBLoader.getInstance()
     private val dataHandler = DataHandler.getInstance()
+    private val dbWriter = DBWriter.getInstance()
     val TAG = "[MainActivity]"
 
     private companion object{
@@ -53,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         dbLoader.setMainActivity(this)
 
         Log.d(userID.toString(),"User exists")
+        dbWriter.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
 
         binding.textUserID.text = "User ID: $userID"
@@ -62,38 +83,49 @@ class MainActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signOut()
             startActivity(Intent(this@MainActivity, LoginActivity::class.java))
             finish()
+        binding.homeButton.setOnClickListener{
+            showHome()
+        }
+        binding.homeEdit.setOnClickListener{
+            val f = HomeEditFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
+            binding.textToolbar.text = FragmentTitle.EditWG.call
+            binding.homeButton.visibility = View.VISIBLE
+            binding.homeEdit.visibility = View.INVISIBLE
         }
 
-
         replaceFragment(ChatFragment())
-        binding.textToolbar.text = "Chat"
+        binding.textToolbar.text = FragmentTitle.Chat.call
+
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_chat -> {
                     replaceFragment(ChatFragment())
-                    binding.textToolbar.text = "Chat"
+                    binding.textToolbar.text = FragmentTitle.Chat.call
                 }
                 R.id.nav_finance -> {
                     replaceFragment(FinanceFragment())
-                    binding.textToolbar.text = "Finanzen"
+                    binding.textToolbar.text = FragmentTitle.Finances.call
                 }
                 R.id.nav_task -> {
-                    replaceFragment(TasksFragment())
-                    binding.textToolbar.text = "Aufgaben"
+                    showTaskFragment()
                 }
                 R.id.nav_shopping -> {
                     replaceFragment(ShoppingFragment())
-                    binding.textToolbar.text = "Einkaufsliste"
+                    binding.textToolbar.text = FragmentTitle.Shoppinglist.call
                 }
                 R.id.nav_calender -> {
                     replaceFragment(CalendarFragment())
-                    binding.textToolbar.text = "Kalender"
+                    binding.textToolbar.text = FragmentTitle.Calendar.call
                 }
                 else -> {
 
                 }
             }
+            binding.homeEdit.visibility = View.INVISIBLE
+            binding.homeButton.visibility = View.VISIBLE
             true
         }
         val requestMultiplePermissionsLauncher =
@@ -137,24 +169,52 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
     }
-    fun openCreateTaskFragment(view: View){
+    fun openCreateTaskFragment(){
         val f = CreateTaskFragment()
         f.setMainActivity(this)
         replaceFragment(f)
-        binding.textToolbar.text = "Neue Aufgabe erstellen"
+        binding.textToolbar.text = FragmentTitle.CreateNewTask.call
     }
 
     fun reloadTaskFragment(){
-        if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
-            Log.d(TAG, "TASK FRAGMENT IS VISIBLE")
-            replaceFragment(TasksFragment())
-        }else{
-            Log.d(TAG, "Task fragment is not visible")
+        if(binding.textToolbar.text == FragmentTitle.Tasks.call){// sorry for that again
+            val f = TasksFragment()
+            f.setMainActivity(this)
+            replaceFragment(f)
         }
     }
     fun showTaskFragment(){
-        replaceFragment(TasksFragment())
-        binding.textToolbar.text = "Aufgaben"
+        val f = TasksFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.Tasks.call
+    }
+    fun reloadHomeFragment(){
+        if(binding.textToolbar.text == FragmentTitle.WG.call){
+            showHome()
+        }
+    }
+    fun reloadCalendarFragment(){
+        if(binding.textToolbar.text == FragmentTitle.Calendar.call){
+            replaceFragment(CalendarFragment())
+        }
+    }
+    fun showHome(){
+        // TODO Navbar aktuallisieren
+        val f = HomeFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.WG.call
+        binding.homeEdit.visibility = View.VISIBLE
+        binding.homeButton.visibility = View.INVISIBLE
+    }
+    fun restartApp() {
+        val context = this@MainActivity
+        val intent = Intent(context, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        (context as Activity).finish()
+        Runtime.getRuntime().exit(0)
     }
 
     fun setAlarmsCalendar(appointment: MutableMap<String, Timestamp>){

@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.udos_wg_tohuwabohu.databinding.ActivityLoginBinding
+import com.example.udos_wg_tohuwabohu.dataclasses.ConnectionCheck
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
@@ -15,7 +16,14 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        if(!ConnectionCheck.getInstance().check(this)){
+            val intent = Intent(this@LoginActivity, NoConnectionActivity::class.java)
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return
+        }
         // check if user is logged in
         val user = FirebaseAuth.getInstance().currentUser
         if( user != null){

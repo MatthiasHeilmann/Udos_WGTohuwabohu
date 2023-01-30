@@ -9,18 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.example.udos_wg_tohuwabohu.R
-import com.example.udos_wg_tohuwabohu.databinding.FragmentCreateTaskBinding
-import com.example.udos_wg_tohuwabohu.databinding.FragmentTasksBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DBLoader
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import java.util.*
 
 
@@ -39,6 +33,7 @@ class CreateTaskFragment : Fragment() {
     ): View? {
         val view: View = inflater!!.inflate(R.layout.fragment_create_task,container, false)
         val createTaskButton:Button = view.findViewById(R.id.button_create_task)
+        val cancelButton:Button = view.findViewById(R.id.cancel_create_button)
         val nameOfTask:EditText = view.findViewById(R.id.nameOfTaskToCreate)
         val pointsOfTask:EditText = view.findViewById(R.id.pointsOfTaskToCreate)
         val frequencyOfTask:EditText = view.findViewById(R.id.frequencyOfTaskToCreate)
@@ -50,19 +45,21 @@ class CreateTaskFragment : Fragment() {
             if(TextUtils.isEmpty(nameOfTask.text.toString().trim{it <= ' '})
                 || TextUtils.isEmpty(pointsOfTask.text.toString().trim{it <= ' '})
                 || TextUtils.isEmpty(frequencyOfTask.text.toString().trim{it <= ' '})){
-//                Toast.makeText(
-//                        context = mainActivity,
-//                        "Hilfe",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-                Log.d(TAG, "Nicht alles eingegeben")
+                Toast.makeText(
+                        mainActivity,
+                        "Bitte gib alle Informationen ein!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 return@setOnClickListener
                 }
             val frequency: Int = Integer.parseInt(frequencyOfTask.text.toString())
             val points: Int = Integer.parseInt(pointsOfTask.text.toString())
 
             dbWriter.createTask(frequency,nameOfTask.text.toString(),points, getCompleter())
-            mainActivity?.showTaskFragment()
+            mainActivity!!.showTaskFragment()
+        }
+        cancelButton.setOnClickListener {
+            mainActivity!!.showTaskFragment()
         }
         return view
     }

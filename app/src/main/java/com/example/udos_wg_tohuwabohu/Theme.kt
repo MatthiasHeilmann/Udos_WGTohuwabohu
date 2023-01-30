@@ -21,13 +21,15 @@ val Red700 = Color(0xffdd0d3c)
 val Red800 = Color(0xffd00036)
 val Red900 = Color(0xffc20029)
 
-val UdoLightBlue = Color(0xff30475e)
+val UdoLightBlue = Color(0xFF273B4E)
 val UdoDarkBlue = Color(0xff222831)
 val UdoWhite = Color(0xFFDCDCDC)
 val UdoOrange = Color(0xffe29e21)
 val UdoRed = Color(0xfff05454)
 val UdoGray = Color(0xFF808080)
 val UdoDarkGray= Color(0xFF313131)
+val MatthiGrey= Color(0xFFF6E3C9)
+val UdoBeige = Color(0xFFF6E3C9)
 
 val Typography.popupLabel: TextStyle
     get() = TextStyle(fontFamily = FontFamily.Serif,
@@ -48,6 +50,11 @@ fun UdosTheme(content: @Composable () -> Unit) {
     )
 }
 
+@Composable
+fun UdoFinanceTextFieldTypographie(): TextStyle{
+    return androidx.compose.material.MaterialTheme.typography.h6
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UdoChatTextFieldTheme(): TextFieldColors{
@@ -61,7 +68,7 @@ fun UdoChatButtonTheme(): ButtonColors {
 
 @Composable
 fun UdoCardTheme(): CardColors {
-    val UdoCardColors= cardColors(containerColor= UdoDarkBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoCardColors
 }
 
@@ -90,7 +97,7 @@ fun UdoPopupTextfieldColors(): TextFieldColors{
 
 @Composable
 fun UdoDateCardTheme(): CardColors {
-    val UdoDateCardColors= cardColors(containerColor= UdoLightBlue, contentColor= UdoWhite, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
+    val UdoDateCardColors= cardColors(containerColor= UdoWhite, contentColor= UdoLightBlue, disabledContainerColor= Color.Black, disabledContentColor= Color.Magenta)
     return UdoDateCardColors
 }
 

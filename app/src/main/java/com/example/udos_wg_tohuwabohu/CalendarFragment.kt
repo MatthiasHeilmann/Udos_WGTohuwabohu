@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -23,32 +22,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
-import com.google.android.material.internal.ContextUtils.getActivity
 import com.google.firebase.Timestamp
 import java.sql.Time
 import java.text.DateFormatSymbols
 import java.util.Date
 
 
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [CalendarFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CalendarFragment : Fragment() {
     lateinit var composeView: ComposeView
 
@@ -94,28 +83,29 @@ fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
         Card(colors= UdoCardTheme(),modifier = Modifier.fillMaxWidth().padding(5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(colors = UdoDateCardTheme()) {
-                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall)
+                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall, fontSize = 20.sp,fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
                 }
                 Box(modifier= Modifier.fillMaxWidth().padding(5.dp), contentAlignment= Alignment.CenterEnd){
-                    Text(text= " " + time + " Uhr", textAlign = TextAlign.End)
+                    Text(text= "Ab " + time + " Uhr", textAlign = TextAlign.End, modifier = Modifier.padding(5.dp))
                 }
             }
-            Text(text =" "+ cardText, fontSize = 24.sp)
+            Text(text =cardText, fontSize = 24.sp, modifier = Modifier.padding(35.dp,5.dp,5.dp,10.dp))
         }
     }
 }
 
 @Composable
-fun FullCalendar(calendarData: MutableList<MutableMap<String, Timestamp>>){
-    var sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
+fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
+    val sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
     var currentMonth = 100
     Column (modifier = Modifier
             .verticalScroll(rememberScrollState()).padding(5.dp)){
         sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
-            if(currentMonth != appointment.values.first().toDate().month){
-                currentMonth = appointment.values.first().toDate().month
-                Text(text= DateFormatSymbols.getInstance().months[appointment.values.first().toDate().month], textAlign = TextAlign.End)
-                Divider(thickness= 2.dp,color= UdoDarkGray)
+            val month = appointment.values.first().toDate().month
+            if(currentMonth != month){
+                currentMonth = month
+                Text(text= DateFormatSymbols.getInstance().months[month], textAlign = TextAlign.End,color= UdoWhite)
+                Divider(thickness= 2.dp,color= UdoWhite, modifier = Modifier.padding(0.dp,0.dp,0.dp,5.dp))
             }
             Log.d("Calendar Date:", appointment.values.first().toDate().toString())
             CalendarCard(
@@ -373,15 +363,16 @@ fun CalendarFAB() {
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.padding(10.dp)
         ) {
             FloatingActionButton(
                 onClick = { popupActive = true },
                 modifier = Modifier
-                    .requiredHeight(75.dp)
-                    .requiredWidth(75.dp),
+                    .requiredHeight(60.dp)
+                    .requiredWidth(60.dp),
                 shape = CircleShape,
-                containerColor = Color(0xff30475e)
-            ) { Text("+", color = UdoWhite, fontSize = 30.sp) }
+                containerColor = UdoOrange
+            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
         }
     }
 }
