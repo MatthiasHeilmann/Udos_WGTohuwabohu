@@ -29,6 +29,7 @@ val UdoRed = Color(0xfff05454)
 val UdoGray = Color(0xFF808080)
 val UdoDarkGray= Color(0xFF313131)
 val MatthiGrey= Color(0xFFC1C1C1)
+val UdoGreen = Color(0xFF33b731)
 
 val Typography.popupLabel: TextStyle
     get() = TextStyle(fontFamily = FontFamily.Serif,

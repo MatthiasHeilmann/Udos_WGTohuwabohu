@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,24 +63,24 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceView() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        Column{
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(UdoDarkGray)
+                modifier = Modifier.background(UdoDarkBlue)
             ) {
                 BalanceList()
             }
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(15.dp, 0.dp, 15.dp, 0.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+            Text(text = "Letzte Einträge:",
+                modifier = Modifier.padding(10.dp),
+                color = UdoWhite,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
                 dataHandler.financeEntries.forEach { f ->
                     Spacer(modifier = Modifier.height(10.dp))
                     FinanceCard(financeEntry = f)
@@ -157,27 +158,42 @@ class FinanceFragment : Fragment() {
             return@sorted if ((r1.balance ?: 0f).toFloat() <= (r2.balance ?: 0f).toFloat()) 1
             else -1
         }.toList()
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            SimpleSpaceAroundColoumn() {
-                sortedList.forEach { r ->
-                    val color = if ((r.balance ?: 0f).toFloat() >= 0f) Color.Green
-                    else UdoRed
-                    Text(
-                        text = r.username ?: "unknown",
-                        color = color,
-                        style = UdoFinanceTextFieldTypographie()
-                    )
-                }
-            }
-            SimpleSpaceAroundColoumn() {
-                sortedList.forEach { r ->
-                    WhiteSimpleText(
-                        text = "" + ((r.balance?.times(100) ?: 0f) as Double)
-                            .roundToInt().div(100f) + "€"
-                    )
+        Column(modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            Text(text = "Eure Kontostände:",
+                modifier = Modifier.padding(10.dp),
+                color = UdoWhite,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+                )
+            sortedList.forEach{ listElement ->
+                Card (
+                    modifier = Modifier
+                        .padding(60.dp, 5.dp)
+                ) {
+                    Row (modifier = Modifier
+                        .background(UdoLightBlue)){
+                        Column(){
+                            Text(text = listElement.username ?: "Unbekannt",
+                                modifier = Modifier.padding(14.dp,7.dp),
+                                color = UdoWhite,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(0.5f))
+                        Column{
+                            val b = (listElement.balance ?: 0f).toFloat()
+                            val color = if (b > 0f) UdoGreen else if (b == 0f) UdoWhite else UdoRed
+                            Text(
+                                text = "" + ((listElement.balance?.times(100) ?: 0f) as Double)
+                                    .roundToInt().div(100f) + "€",
+                                color = color,
+                                modifier = Modifier.padding(14.dp,7.dp),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -315,7 +331,6 @@ class FinanceFragment : Fragment() {
                     }
                 }
             }
-
         }
     }
 
