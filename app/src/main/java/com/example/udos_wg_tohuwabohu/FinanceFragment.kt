@@ -241,7 +241,6 @@ class FinanceFragment : Fragment() {
         val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
         val listCheckedNames = remember { mutableStateListOf<String>() }
         val checkedList = remember { listItems.map { false }.toMutableStateList() }
-        var selectedIndex by remember { mutableStateOf(0) }
         var expanded by remember { mutableStateOf(false) }
 
         // Up Icon when expanded and down icon when collapsed
@@ -278,7 +277,13 @@ class FinanceFragment : Fragment() {
                     listItems.forEachIndexed { index, name ->
                         println("making for: $name ($index)")
                         DropdownMenuItem(
-                            onClick = { },
+                            onClick = {
+                                checkedList[index] = !checkedList[index]
+                                if (checkedList[index])
+                                    listCheckedNames.add(name)
+                                else
+                                    listCheckedNames.remove(name)
+                            },
                             text = {
                                 Row() {
                                     Checkbox(
@@ -294,6 +299,7 @@ class FinanceFragment : Fragment() {
                                     Text(
                                         modifier = Modifier
                                             .offset(y = 15.dp)
+                                            .fillMaxWidth()
                                             .clickable {
                                                 checkedList[index] = !checkedList[index]
                                                 if (checkedList[index])
