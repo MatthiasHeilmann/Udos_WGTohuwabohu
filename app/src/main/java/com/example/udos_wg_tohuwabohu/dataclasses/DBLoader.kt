@@ -364,6 +364,8 @@ class DBLoader private constructor() {
                     documentSnapshot?.let {
                         dataHandler.wg.first().shoppingList?.clear()
                         dataHandler.wg.first().update(it)
+                        mainActivity!!.reloadHomeFragment()
+                        mainActivity!!.reloadCalendarFragment()
                         Log.d(
                             TAG,
                             "wg updated ${dataHandler.wg}"
@@ -388,6 +390,7 @@ class DBLoader private constructor() {
                 // What happens if the database document gets changed
                 documentSnapshot?.let {
                     dataHandler.contactPerson?.update(it)
+                    mainActivity!!.reloadHomeFragment()
                     Log.d(
                         TAG,
                         "contactPerson updated ${dataHandler.contactPerson.toString()}"

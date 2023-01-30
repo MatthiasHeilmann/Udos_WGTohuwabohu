@@ -18,6 +18,21 @@ import com.example.udos_wg_tohuwabohu.dataclasses.*
 
 class MainActivity : AppCompatActivity() {
 
+    enum class FragmentTitle(val call: String) {
+        WG("Eure WG"),
+        Calendar("Kalender"),
+        Shoppinglist("Einkaufsliste"),
+        Chat("Chat"),
+        EditWG("WG bearbeiten"),
+        Finances("Finanzen"),
+        CreateNewTask("Neue Aufgabe erstellen"),
+        Tasks("Aufgaben");
+
+        override fun toString(): String {
+            return call
+        }
+    }
+
     private lateinit var binding: ActivityMainBinding
     private val dbLoader = DBLoader.getInstance()
     private val dataHandler = DataHandler.getInstance()
@@ -46,37 +61,37 @@ class MainActivity : AppCompatActivity() {
             val f = HomeEditFragment()
             f.setMainActivity(this)
             replaceFragment(f)
-            binding.textToolbar.text = "WG bearbeiten"
+            binding.textToolbar.text = FragmentTitle.EditWG.call
             binding.homeButton.visibility = View.VISIBLE
             binding.homeEdit.visibility = View.INVISIBLE
         }
 
         replaceFragment(ChatFragment())
-        binding.textToolbar.text = "Chat"
+        binding.textToolbar.text = FragmentTitle.Chat.call
         // navigation
         binding.bottomNavigationView.setOnItemSelectedListener {
             when(it.itemId){
                 R.id.nav_chat -> {
                     replaceFragment(ChatFragment())
-                    binding.textToolbar.text = "Chat"
+                    binding.textToolbar.text = FragmentTitle.Chat.call
                 }
                 R.id.nav_finance -> {
                     replaceFragment(FinanceFragment())
-                    binding.textToolbar.text = "Finanzen"
+                    binding.textToolbar.text = FragmentTitle.Finances.call
                 }
                 R.id.nav_task -> {
                     val f = TasksFragment()
                     f.setMainActivity(this)
                     replaceFragment(f)
-                    binding.textToolbar.text = "Aufgaben"
+                    binding.textToolbar.text = FragmentTitle.Tasks.call
                 }
                 R.id.nav_shopping -> {
                     replaceFragment(ShoppingFragment())
-                    binding.textToolbar.text = "Einkaufsliste"
+                    binding.textToolbar.text = FragmentTitle.Shoppinglist.call
                 }
                 R.id.nav_calender -> {
                     replaceFragment(CalendarFragment())
-                    binding.textToolbar.text = "Kalender"
+                    binding.textToolbar.text = FragmentTitle.Calendar.call
                 }
                 else -> {
 
@@ -98,11 +113,11 @@ class MainActivity : AppCompatActivity() {
         val f = CreateTaskFragment()
         f.setMainActivity(this)
         replaceFragment(f)
-        binding.textToolbar.text = "Neue Aufgabe erstellen"
+        binding.textToolbar.text = FragmentTitle.CreateNewTask.call
     }
 
     fun reloadTaskFragment(){
-        if(binding.textToolbar.text == "Aufgaben"){// sorry for that again
+        if(binding.textToolbar.text == FragmentTitle.Tasks.call){// sorry for that again
             val f = TasksFragment()
             f.setMainActivity(this)
             replaceFragment(f)
@@ -112,18 +127,23 @@ class MainActivity : AppCompatActivity() {
         val f = TasksFragment()
         f.setMainActivity(this)
         replaceFragment(f)
-        binding.textToolbar.text = "Aufgaben"
+        binding.textToolbar.text = FragmentTitle.Tasks.call
     }
     fun reloadHomeFragment(){
-        if(binding.textToolbar.text == "Eure WG"){
+        if(binding.textToolbar.text == FragmentTitle.WG.call){
             showHome()
+        }
+    }
+    fun reloadCalendarFragment(){
+        if(binding.textToolbar.text == FragmentTitle.Calendar.call){
+            replaceFragment(CalendarFragment())
         }
     }
     fun showHome(){
         val f = HomeFragment()
         f.setMainActivity(this)
         replaceFragment(f)
-        binding.textToolbar.text = "Eure WG"
+        binding.textToolbar.text = FragmentTitle.WG.call
         binding.homeEdit.visibility = View.VISIBLE
         binding.homeButton.visibility = View.INVISIBLE
     }

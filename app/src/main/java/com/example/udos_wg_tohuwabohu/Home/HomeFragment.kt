@@ -32,7 +32,7 @@ import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.auth.FirebaseAuth
 import java.util.ArrayList
 
-
+//TODO reload on changes
 class HomeFragment : Fragment() {
     lateinit var composeView: ComposeView
     private val dataHandler = DataHandler.getInstance()
