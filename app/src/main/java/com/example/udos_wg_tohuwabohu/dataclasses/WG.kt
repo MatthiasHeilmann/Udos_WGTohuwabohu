@@ -18,3 +18,13 @@ data class WG(val docID: String, var name: String?, var contactPerson: DocumentR
         this.calendar = vals["calendar"] as MutableList<MutableMap<String, Timestamp>>
     }
 }
+
+
+
+
+
+
+
+
+
+

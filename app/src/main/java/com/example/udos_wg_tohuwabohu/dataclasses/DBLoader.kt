@@ -1,12 +1,19 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -39,14 +46,21 @@ class DBLoader private constructor() {
         Log.d(TAG, "Loading database...")
         // Wait for the load to finish
         val wgRef = async { loadUserData(userID) }.await()
+        Log.d(TAG, "Loaded User Data...")
         val anRef = async { loadWGData(wgRef) }.await()
+        Log.d(TAG, "Loaded WG Data...")
         async { loadContactPeronData(anRef) }.await()
+        Log.d(TAG, "Loaded ContactPerson Data...")
         async { loadRoommatesData(wgRef) }.await()
+        Log.d(TAG, "Loaded Roommates Data...")
         async { loadChatFilesData(wgRef) }.await()
+        Log.d(TAG, "Loaded Chat Files Data...")
         async { loadFinanceData(wgRef) }.await()
+        Log.d(TAG, "Loaded Finance Data...")
         async { loadTaskData(wgRef) }.await()
+        Log.d(TAG, "Loaded Task Data...")
 
-        Log.d(TAG, "Loading Database succesfull")
+        Log.d(TAG, "Loading Database succesful")
 
         // Then add snapshotListener
         roommateSnapshotListener()
@@ -55,6 +69,7 @@ class DBLoader private constructor() {
         wgSnapshotListener()
         contactPersonSnapshotListener()
         addTaskCollectionSnapshotListener()
+        Log.d(TAG, "Added all Snapshot Listeners!")
     }
 
     /**
@@ -327,6 +342,7 @@ class DBLoader private constructor() {
                     querySnapshot?.let {
                         it.forEach { msg ->
                             dataHandler.addChatMessage(ChatMessage(msg))
+                            mainActivity!!.setAlarmsCalendar(mutableMapOf(Pair<String,Timestamp>("Test",Timestamp.now())))
                         }
                         Log.d(
                             TAG,
@@ -379,6 +395,7 @@ class DBLoader private constructor() {
                         )
                     }
                 }
+
         }
         Log.d(
             TAG,
@@ -412,4 +429,8 @@ class DBLoader private constructor() {
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
     }
+
+
+
 }
+

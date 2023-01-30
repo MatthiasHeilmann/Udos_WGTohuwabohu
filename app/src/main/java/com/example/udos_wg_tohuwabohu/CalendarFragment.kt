@@ -388,7 +388,7 @@ fun CalendarFAB() {
 
 fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Boolean{
     Log.w( "validateCalendarEntry: ",message+ date.date.toString()+" "+date.month.toString()+" "+date.year.toString()+" "+time.hours.toString()+" "+time.minutes.toString()+" "+time.seconds.toString() )
-    val summedDate= Date(date.year,date.month,date.date,time.hours,time.minutes)
+    val summedDate= Date(date.year-1900,date.month,date.date,time.hours,time.minutes)
     val summedTimestamp= Timestamp(summedDate)
     if ((summedTimestamp.seconds>Timestamp.now().seconds) and (message!="")){
         var dbw = DBWriter.getInstance()
