@@ -8,6 +8,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,9 +18,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
@@ -230,9 +236,7 @@ class FinanceFragment : Fragment() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
     @Composable
     fun FinancePopup(onDismiss: (Boolean) -> Unit) {
-        val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
-        var selectedItem by remember { mutableStateOf(listItems[0]) }
-        var expanded by remember { mutableStateOf(false) }
+
 
         Card(
             colors = UdoPopupCardTheme(),
@@ -245,47 +249,63 @@ class FinanceFragment : Fragment() {
             Column(modifier = Modifier.padding(5.dp)) {
                 Text(text = "Ausgabe hinzufügen", style = MaterialTheme.typography.popupLabel)
 
+                TestDropdown()
+            }
+        }
+    }
 
-                // the box
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = {
-                        expanded = !expanded
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun TestDropdown() {
+        val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
+        var selectedItem by remember { mutableStateOf(listItems[0]) }
+        var expanded by remember { mutableStateOf(false) }
+
+        // Up Icon when expanded and down icon when collapsed
+        val icon = if (expanded)
+            Icons.Filled.KeyboardArrowUp
+        else
+            Icons.Filled.KeyboardArrowDown
+        Column(Modifier.padding(20.dp)) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ){
+                // Create an Outlined Text Field
+                // with icon and not expanded
+                OutlinedTextField(
+                    value = selectedItem,
+                    onValueChange = { selectedItem = it },
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    label = { Text("Schnorrer") },
+                    trailingIcon = {
+                        Icon(icon, "contentDescription",
+                            Modifier.clickable { expanded = !expanded })
                     }
+                )
+
+                // Create a drop-down menu with list of cities,
+                // when clicked, set the Text Field text as the city selected
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
                 ) {
-
-                    // text field
-                    TextField(
-                        value = selectedItem,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(text = "Label") },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                expanded = expanded
-                            )
-                        },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors()
-                    )
-
-                    // menu
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        listItems.forEach { name ->
-                            // menu item
-                            DropdownMenuItem(
-                                onClick = {
-                                    selectedItem = name
-                                    expanded = false
-                                },
-                                text = { Text(text = name) }
-                            )
-                        }
+                    listItems.forEach { label ->
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedItem = label
+                                expanded = false
+                            },
+                            text = {
+                                Text(text = label)
+                            }
+                        )
                     }
                 }
             }
+
         }
     }
 
