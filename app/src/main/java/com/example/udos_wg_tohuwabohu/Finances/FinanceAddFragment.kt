@@ -14,9 +14,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.udos_wg_tohuwabohu.R
+import com.example.udos_wg_tohuwabohu.UdoLightBlue
+import com.example.udos_wg_tohuwabohu.UdoOrange
+import com.example.udos_wg_tohuwabohu.UdoWhite
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 
@@ -73,7 +79,12 @@ class FinanceAddFragment : Fragment() {
                     trailingIcon = {
                         Icon(icon, "contentDescription",
                             Modifier.clickable { expanded = !expanded })
-                    }
+                    },
+                    textStyle = TextStyle(
+                        color = UdoWhite,
+                        fontSize = 20.sp
+                    ),
+                    //colors = TextFieldColors(focusedLabelColor= UdoOrange, focusedIndicatorColor= UdoWhite, containerColor = UdoLightBlue)
                 )
 
                 // Create a drop-down menu with list of cities,
