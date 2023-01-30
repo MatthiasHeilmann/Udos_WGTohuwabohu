@@ -1,18 +1,20 @@
 package com.example.udos_wg_tohuwabohu
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -27,9 +29,8 @@ import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
 import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import java.util.*
-import kotlin.math.abs
-
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+import kotlin.math.roundToInt
+import kotlin.streams.toList
 
 /**
  * A simple [Fragment] subclass.
@@ -67,7 +68,9 @@ class FinanceFragment : Fragment() {
     }
 
     fun formatDate(date: Date): String {
-        return "" + formatNumber(date.date) + "." + formatNumber(date.month+1) + "." + formatNumber(1900+date.year)
+        return "" + formatNumber(date.date) + "." + formatNumber(date.month + 1) + "." + formatNumber(
+            1900 + date.year
+        )
     }
 
     fun formatNumber(n: Int): String {
@@ -86,7 +89,7 @@ class FinanceFragment : Fragment() {
                     .height(300.dp)
                     .background(UdoDarkGray)
             ) {
-                ChartPane()
+                BalanceList()
             }
             Column(
                 modifier = Modifier
@@ -144,7 +147,7 @@ class FinanceFragment : Fragment() {
                     )
                 }
                 Text(
-                    text = financeEntry.timestamp?.let { formatDate(it)} ?: "unknown"
+                    text = financeEntry.timestamp?.let { formatDate(it) } ?: "unknown"
                 )
             }
         }
@@ -166,68 +169,53 @@ class FinanceFragment : Fragment() {
     }
 
     @Composable
+    fun BalanceList() {
+        val sortedList = dataHandler.roommateList.values.stream().sorted { r1, r2 ->
+            return@sorted if ((r1.balance ?: 0f).toFloat() <= (r2.balance ?: 0f).toFloat()) 1
+            else -1
+        }.toList()
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            SimpleSpaceAroundColoumn() {
+                sortedList.forEach { r ->
+                    val color = if ((r.balance ?: 0f).toFloat() >= 0f) Color.Green
+                    else UdoRed
+                    Text(
+                        text = r.username ?: "unknown",
+                        color = color,
+                        style = UdoFinanceTextFieldTypographie()
+                    )
+                }
+            }
+            SimpleSpaceAroundColoumn() {
+                sortedList.forEach { r ->
+                    WhiteSimpleText(
+                        text = "" + ((r.balance?.times(100) ?: 0f) as Double)
+                                    .roundToInt().div(100f) + "€"
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun SimpleSpaceAroundColoumn(content: @Composable() (ColumnScope.() -> Unit)) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceAround
+        )
+        {
+            content()
+        }
+    }
+
+    @Composable
     fun WhiteSimpleText(text: String) {
         Text(
             text = text,
             color = UdoWhite
         )
-    }
-
-    @Composable
-    fun ChartPane() {
-        val chartHeight = 300.dp
-        val udoColors = listOf(UdoOrange, UdoRed, UdoLightBlue, UdoDarkBlue)
-        var index = 0;
-        Column(modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 15.dp)) {
-            // Positive bars
-            BarChart(
-                barChartData = BarChartData(
-                    bars = dataHandler.roommateList.values.filter { r -> (r.balance ?: 0.0) >= 0 }
-                        .map { r ->
-                            if (index == udoColors.size) index = 0
-                            BarChartData.Bar(
-                                label = (r.username ?: "unknown"),
-                                value = (r.balance ?: 0.0).toFloat() + 5,
-                                color = udoColors[index++]
-                            )
-                        },
-                    startAtZero = true
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(chartHeight.div(2))
-                    .background(Color.Transparent),
-                animation = simpleChartAnimation(),
-                barDrawer = SimpleBarDrawer(),
-                yAxisDrawer = SimpleYAxisDrawer(),
-                labelDrawer = SimpleValueDrawer()
-            )
-            index = udoColors.size - 1
-            // Negative bars
-            BarChart(
-                barChartData = BarChartData(
-                    bars = dataHandler.roommateList.values.filter { r -> (r.balance ?: 0.0) < 0 }
-                        .map { r ->
-                            if (index < 0) index = (udoColors.size - 1)
-                            BarChartData.Bar(
-                                label = (r.username ?: "unknown"),
-                                value = abs((r.balance ?: 0.0).toFloat()),
-                                color = udoColors[index--]
-                            )
-                        },
-                    startAtZero = true
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(chartHeight.div(2))
-                    .background(Color.Transparent)
-                    .rotate(180f)
-                    .offset((-40).dp, 2.dp),
-                animation = simpleChartAnimation(),
-                barDrawer = SimpleBarDrawer(),
-                labelDrawer = SimpleValueDrawer()
-            )
-        }
-
     }
 }
