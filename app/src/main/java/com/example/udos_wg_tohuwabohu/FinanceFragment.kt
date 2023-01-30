@@ -6,15 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -41,6 +45,7 @@ class FinanceFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 FinanceView()
+                FinanceFab()
             }
         }
     }
@@ -184,8 +189,101 @@ class FinanceFragment : Fragment() {
                 sortedList.forEach { r ->
                     WhiteSimpleText(
                         text = "" + ((r.balance?.times(100) ?: 0f) as Double)
-                                    .roundToInt().div(100f) + "€"
+                            .roundToInt().div(100f) + "€"
                     )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun FinanceFab() {
+        var popupActive by remember { mutableStateOf(false) }
+        if (popupActive) {
+            UdosTheme {
+                Popup(
+                    alignment = Alignment.Center,
+                    onDismissRequest = { popupActive = false },
+                    properties = UdoPopupProperties()
+                ) {
+                    FinancePopup(onDismiss = { popupActive = it })
+                }
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.padding(10.dp)
+            ) {
+                FloatingActionButton(
+                    onClick = { popupActive = true },
+                    modifier = Modifier
+                        .requiredHeight(60.dp)
+                        .requiredWidth(60.dp),
+                    shape = CircleShape,
+                    containerColor = UdoOrange
+                ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+    @Composable
+    fun FinancePopup(onDismiss: (Boolean) -> Unit) {
+        val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
+        var selectedItem by remember { mutableStateOf(listItems[0]) }
+        var expanded by remember { mutableStateOf(false) }
+
+        Card(
+            colors = UdoPopupCardTheme(),
+            modifier = Modifier
+                .requiredHeight(height = 450.dp)
+                .requiredWidth(width = 300.dp)
+                .padding(2.dp),
+            border = BorderStroke(2.dp, UdoDarkBlue)
+        ) {
+            Column(modifier = Modifier.padding(5.dp)) {
+                Text(text = "Ausgabe hinzufügen", style = MaterialTheme.typography.popupLabel)
+
+
+                // the box
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    }
+                ) {
+
+                    // text field
+                    TextField(
+                        value = selectedItem,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(text = "Label") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = expanded
+                            )
+                        },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    )
+
+                    // menu
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        listItems.forEach { name ->
+                            // menu item
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedItem = name
+                                    expanded = false
+                                },
+                                text = { Text(text = name) }
+                            )
+                        }
+                    }
                 }
             }
         }
