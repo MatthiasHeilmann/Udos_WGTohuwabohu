@@ -34,6 +34,8 @@ import kotlin.streams.toList
 
 class FinanceFragment : Fragment() {
 
+    private lateinit var mainActivity: MainActivity
+
     private val dataHandler = DataHandler.getInstance()
     private val dbWriter = DBWriter.getInstance()
 
@@ -63,7 +65,7 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceView() {
-        Column{
+        Column {
             Box(
                 modifier = Modifier.background(UdoDarkBlue)
             ) {
@@ -75,12 +77,13 @@ class FinanceFragment : Fragment() {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-            Text(text = "Letzte Einträge:",
-                modifier = Modifier.padding(10.dp),
-                color = UdoWhite,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
+                Text(
+                    text = "Letzte Einträge:",
+                    modifier = Modifier.padding(10.dp),
+                    color = UdoWhite,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
                 dataHandler.financeEntries.forEach { f ->
                     Spacer(modifier = Modifier.height(10.dp))
                     FinanceCard(financeEntry = f)
@@ -158,38 +161,43 @@ class FinanceFragment : Fragment() {
             return@sorted if ((r1.balance ?: 0f).toFloat() <= (r2.balance ?: 0f).toFloat()) 1
             else -1
         }.toList()
-        Column(modifier = Modifier.padding(10.dp),
+        Column(
+            modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(text = "Eure Kontostände:",
+        ) {
+            Text(
+                text = "Eure Kontostände:",
                 modifier = Modifier.padding(10.dp),
                 color = UdoWhite,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
-                )
-            sortedList.forEach{ listElement ->
-                Card (
+            )
+            sortedList.forEach { listElement ->
+                Card(
                     modifier = Modifier
                         .padding(60.dp, 5.dp)
                 ) {
-                    Row (modifier = Modifier
-                        .background(UdoLightBlue)){
-                        Column(){
-                            Text(text = listElement.username ?: "Unbekannt",
-                                modifier = Modifier.padding(14.dp,7.dp),
+                    Row(
+                        modifier = Modifier
+                            .background(UdoLightBlue)
+                    ) {
+                        Column() {
+                            Text(
+                                text = listElement.username ?: "Unbekannt",
+                                modifier = Modifier.padding(14.dp, 7.dp),
                                 color = UdoWhite,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         Spacer(modifier = Modifier.weight(0.5f))
-                        Column{
+                        Column {
                             val b = (listElement.balance ?: 0f).toFloat()
                             val color = if (b > 0f) UdoGreen else if (b == 0f) UdoWhite else UdoRed
                             Text(
                                 text = "" + ((listElement.balance?.times(100) ?: 0f) as Double)
                                     .roundToInt().div(100f) + "€",
                                 color = color,
-                                modifier = Modifier.padding(14.dp,7.dp),
+                                modifier = Modifier.padding(14.dp, 7.dp),
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -201,32 +209,19 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceFab() {
-        var popupActive by remember { mutableStateOf(false) }
-        if (popupActive) {
-            UdosTheme {
-                Popup(
-                    alignment = Alignment.Center,
-                    onDismissRequest = { popupActive = false },
-                    properties = UdoPopupProperties()
-                ) {
-                    FinancePopup(onDismiss = { popupActive = it })
-                }
-            }
-        } else {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.padding(10.dp)
-            ) {
-                FloatingActionButton(
-                    onClick = { popupActive = true },
-                    modifier = Modifier
-                        .requiredHeight(60.dp)
-                        .requiredWidth(60.dp),
-                    shape = CircleShape,
-                    containerColor = UdoOrange
-                ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
-            }
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            FloatingActionButton(
+                onClick = { mainActivity.openAddFinanceFragment() },
+                modifier = Modifier
+                    .requiredHeight(60.dp)
+                    .requiredWidth(60.dp),
+                shape = CircleShape,
+                containerColor = UdoOrange
+            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
         }
     }
 
@@ -245,91 +240,6 @@ class FinanceFragment : Fragment() {
         ) {
             Column(modifier = Modifier.padding(5.dp)) {
                 Text(text = "Ausgabe hinzufügen", style = MaterialTheme.typography.popupLabel)
-
-                TestDropdown()
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun TestDropdown() {
-        val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
-        val listCheckedNames = remember { mutableStateListOf<String>() }
-        val checkedList = remember { listItems.map { false }.toMutableStateList() }
-        var expanded by remember { mutableStateOf(false) }
-
-        // Up Icon when expanded and down icon when collapsed
-        val icon = if (expanded)
-            Icons.Filled.KeyboardArrowUp
-        else
-            Icons.Filled.KeyboardArrowDown
-        Column(Modifier.padding(20.dp)) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                // Create an Outlined Text Field
-                // with icon and not expanded
-                OutlinedTextField(
-                    value = listCheckedNames.joinToString("\n"),
-                    onValueChange = { },
-                    readOnly = true,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    label = { Text("Schnorrer") },
-                    trailingIcon = {
-                        Icon(icon, "contentDescription",
-                            Modifier.clickable { expanded = !expanded })
-                    }
-                )
-
-                // Create a drop-down menu with list of cities,
-                // when clicked, set the Text Field text as the city selected
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    listItems.forEachIndexed { index, name ->
-                        println("making for: $name ($index)")
-                        DropdownMenuItem(
-                            onClick = {
-                                checkedList[index] = !checkedList[index]
-                                if (checkedList[index])
-                                    listCheckedNames.add(name)
-                                else
-                                    listCheckedNames.remove(name)
-                            },
-                            text = {
-                                Row() {
-                                    Checkbox(
-                                        checked = checkedList[index],
-                                        onCheckedChange = {
-                                            checkedList[index] = it
-                                            if (it)
-                                                listCheckedNames.add(name)
-                                            else
-                                                listCheckedNames.remove(name)
-                                        },
-                                    )
-                                    Text(
-                                        modifier = Modifier
-                                            .offset(y = 15.dp)
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                checkedList[index] = !checkedList[index]
-                                                if (checkedList[index])
-                                                    listCheckedNames.add(name)
-                                                else
-                                                    listCheckedNames.remove(name)
-                                            },
-                                        text = name
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
             }
         }
     }
@@ -351,5 +261,9 @@ class FinanceFragment : Fragment() {
             text = text,
             color = UdoWhite
         )
+    }
+
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
     }
 }
