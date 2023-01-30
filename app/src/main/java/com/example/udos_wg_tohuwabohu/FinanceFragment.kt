@@ -18,12 +18,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
@@ -241,7 +239,9 @@ class FinanceFragment : Fragment() {
     @Composable
     fun TestDropdown() {
         val listItems = dataHandler.roommateList.values.map { r -> r.username ?: "unknown" }
-        var selectedItem by remember { mutableStateOf(listItems[0]) }
+        val listCheckedNames = remember { mutableStateListOf<String>() }
+        val checkedList = remember { listItems.map { false }.toMutableStateList() }
+        var selectedIndex by remember { mutableStateOf(0) }
         var expanded by remember { mutableStateOf(false) }
 
         // Up Icon when expanded and down icon when collapsed
@@ -253,12 +253,12 @@ class FinanceFragment : Fragment() {
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
-            ){
+            ) {
                 // Create an Outlined Text Field
                 // with icon and not expanded
                 OutlinedTextField(
-                    value = selectedItem,
-                    onValueChange = { selectedItem = it },
+                    value = listCheckedNames.joinToString("\n"),
+                    onValueChange = { },
                     readOnly = true,
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -275,14 +275,35 @@ class FinanceFragment : Fragment() {
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                 ) {
-                    listItems.forEach { label ->
+                    listItems.forEachIndexed { index, name ->
+                        println("making for: $name ($index)")
                         DropdownMenuItem(
-                            onClick = {
-                                selectedItem = label
-                                expanded = false
-                            },
+                            onClick = { },
                             text = {
-                                Text(text = label)
+                                Row() {
+                                    Checkbox(
+                                        checked = checkedList[index],
+                                        onCheckedChange = {
+                                            checkedList[index] = it
+                                            if (it)
+                                                listCheckedNames.add(name)
+                                            else
+                                                listCheckedNames.remove(name)
+                                        },
+                                    )
+                                    Text(
+                                        modifier = Modifier
+                                            .offset(y = 15.dp)
+                                            .clickable {
+                                                checkedList[index] = !checkedList[index]
+                                                if (checkedList[index])
+                                                    listCheckedNames.add(name)
+                                                else
+                                                    listCheckedNames.remove(name)
+                                            },
+                                        text = name
+                                    )
+                                }
                             }
                         )
                     }
