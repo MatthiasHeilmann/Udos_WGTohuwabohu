@@ -298,9 +298,7 @@ class CalendarAddFragment : Fragment() {
             AndroidView(
                 {
 
-                    val mTimePicker = TimePicker(
-                        it
-                    )
+                    val mTimePicker = TimePicker(it)
                     mTimePicker.setIs24HourView(true)
                     return@AndroidView mTimePicker
                 },
