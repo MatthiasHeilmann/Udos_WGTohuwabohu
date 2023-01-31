@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     enum class FragmentTitle(val call: String) {
         WG("Eure WG"),
         Calendar("Kalender"),
-        CalendarAdd("Kalendareintrag hinzufügen"),
+        CalendarAdd("Kalendereintrag hinzufügen"),
         Shoppinglist("Einkaufsliste"),
         Chat("Chat"),
         EditWG("WG bearbeiten"),
