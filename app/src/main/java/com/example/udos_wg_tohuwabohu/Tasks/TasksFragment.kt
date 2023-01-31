@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -226,11 +227,12 @@ class TasksFragment : Fragment() {
                         }
                         onDismiss(false)
                     }
-                        , shape = RoundedCornerShape(4.dp))
-                    { Text(text = "Ich bin sicher") }
+                        , shape = RoundedCornerShape(1.dp))
+                    { Text(text = "Ich bin sicher", color = UdoWhite) }
                 },
-                title = { Text(text = "Bestätigen") },
-                text = { Text(text = "Sicher, dass du die Aufgabe erledigt hast?") }
+                title = { Text(text = "Bestätigen", color = UdoWhite) },
+                text = { Text(text = "Sicher, dass du die Aufgabe erledigt hast?",color = UdoWhite) },
+                containerColor = UdoDarkBlue
             )
         }
     }
@@ -243,7 +245,7 @@ class TasksFragment : Fragment() {
                 onDismissRequest = {onDismiss(false)},
                 dismissButton = {
                     TextButton(onClick = {onDismiss(false)})
-                    { Text(text = "Abbrechen") }
+                    { Text(text = "Abbrechen", color = UdoRed) }
                 },
                 confirmButton = {
                     TextButton(onClick = {
@@ -256,10 +258,11 @@ class TasksFragment : Fragment() {
                         onDismiss(false)
                     }
                         , shape = RoundedCornerShape(4.dp))
-                    { Text(text = "Ja, sicher!", color = UdoRed) }
+                    { Text(text = "Ja, sicher!", color = UdoWhite) }
                 },
-                title = { Text(text = "Wirklich löschen?") },
-                text = { Text(text = "Bist du sicher, dass du die Aufgabe löschen möchtest?") }
+                title = { Text(text = "Wirklich löschen?", color = UdoWhite) },
+                text = { Text(text = "Bist du sicher, dass du die Aufgabe löschen möchtest?", color = UdoWhite) },
+                containerColor = UdoDarkBlue
             )
         }
     }
