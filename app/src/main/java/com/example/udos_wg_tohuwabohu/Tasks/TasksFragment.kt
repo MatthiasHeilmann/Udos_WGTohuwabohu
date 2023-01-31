@@ -169,12 +169,6 @@ class TasksFragment : Fragment() {
         return if (n > 9) "" + n else "0" + n
     }
 
-    @Preview
-    @Composable
-    fun PreviewTaskCard(){
-        TaskCard("Müll rausbringen","3",Pair("Morgen fällig", UdoOrange),"Wöchentlich",null,"ABCS")
-    }
-
     @Composable
     fun FullTasks(taskData: HashMap<String, Task>){
         val scrollState = rememberScrollState()
@@ -221,6 +215,7 @@ class TasksFragment : Fragment() {
                         if(myTask!=null){
                            dbWriter.checkTask(myTask)
                             myTask.points?.let {dbWriter.givePoints(dataHandler.user, it) }
+                            mainActivity.setAlarmTask(myTask, "completed")
                         }else{
                             Log.d(TAG,"No task to check")
                         }

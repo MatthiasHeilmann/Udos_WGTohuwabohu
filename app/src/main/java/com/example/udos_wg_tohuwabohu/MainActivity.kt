@@ -29,6 +29,7 @@ import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import java.time.LocalDateTime
 
 class MainActivity : AppCompatActivity() {
@@ -69,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         Log.d(FirebaseAuth.getInstance().currentUser!!.uid,"my id")
         val emailID = intent.getStringExtra("email_id")
 
+        createNotificationChannel()
+
         // load database
         dbLoader.setMainActivity(this)
 
@@ -76,13 +79,6 @@ class MainActivity : AppCompatActivity() {
         dbWriter.setMainActivity(this)
         dbLoader.loadDatabase(userID!!)
 
-        binding.textUserID.text = "User ID: $userID"
-        binding.textUserEmail.text = "Email: $emailID"
-
-        binding.buttonLogout.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-            startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-            finish()
         binding.homeButton.setOnClickListener{
             showHome()
         }
@@ -141,22 +137,28 @@ class MainActivity : AppCompatActivity() {
             (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
             and
             (ContextCompat.checkSelfPermission(this, Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED) -> {
-                /*dataHandler.wg.first().calendar?.forEach { currentAppointment
+                dataHandler.wg.first().calendar?.forEach { currentAppointment
                     ->
-                    setAlarmsCalendar(currentAppointment)
-                }*/
-                createNotificationChannel()
-                var x= Pair<String,Timestamp>("Test",Timestamp.now())
-                setAlarmsCalendar(mutableMapOf(x))
+                    if(System.currentTimeMillis() < currentAppointment.values.first().seconds*1000) {
+                        setAlarmCalendar(currentAppointment)
+                    }
+                }
+                dataHandler.taskList.forEach{
+                    task ->
+                    if(task.value.roommate?.id == userID){
+                        setAlarmTask(task.value, "due")
+                    }
+                }
+
                 Log.d("Permissions granted!","123456")
             }
 
-            /*else -> {
+            else -> {
                 requestMultiplePermissionsLauncher.launch(
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS,Manifest.permission.SCHEDULE_EXACT_ALARM)
                 )
 
-            }*/
+            }
         }
 
     }//ActivityResultContracts.RequestPermission()
@@ -217,63 +219,135 @@ class MainActivity : AppCompatActivity() {
         Runtime.getRuntime().exit(0)
     }
 
-    fun setAlarmsCalendar(appointment: MutableMap<String, Timestamp>){
-
-        /*val notificationID= appointment.values.first().seconds.toInt()
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-        val MainActivityIntent= Intent(this, MainActivity::class.java)
-        var MainActivityPendingIntent= PendingIntent.getActivity(this,1, MainActivityIntent,PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
-
-
-        notificationBuilder.setSmallIcon(R.drawable.udo_v2_mit_haus)
-        notificationBuilder.setContentTitle("You have an appointment coming up!")
-        notificationBuilder.setContentText(appointment.keys.first())
-        notificationBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        notificationBuilder.setAutoCancel(true)
-        notificationBuilder.setContentIntent(MainActivityPendingIntent)
-
-        MainActivityIntent.flags= Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK*/
+    fun setAlarmCalendar(appointment: MutableMap<String, Timestamp>){
 
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(applicationContext, AlarmReceiver::class.java)
-        intent.putExtra("appointment_name",appointment.keys.first())
-        intent.putExtra("appointment_time", appointment.values.first().seconds.toInt())
+        intent.putExtra("notification_type","appointment")
+        intent.putExtra("notification_name",appointment.keys.first())
+        intent.putExtra("notification_id", appointment.values.first().seconds.toInt())
         val pendingIntent = PendingIntent.getBroadcast(applicationContext, appointment.values.first().seconds.toInt(), intent, PendingIntent.FLAG_IMMUTABLE)
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            (appointment.values.first().seconds.toLong()*1000),
+            ((appointment.values.first().seconds-600)*1000),
             pendingIntent
         )
         Log.d("Millis in Timestamp:",(appointment.values.first().seconds*1000).toString() )
         Log.d("Millis now:", (Timestamp.now().seconds*1000).toString())
         Log.d("Millis in system", System.currentTimeMillis().toString())
-        //val notificationManagerCompat = NotificationManagerCompat.from(this)
-        //notificationManagerCompat.notify(notificationID, notificationBuilder.build())
-
-        /*val alarmManager = ContextCompat.getSystemService() as AlarmManager
-        val intent = Intent(this, MyAlarm::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-        alarmManager.setRepeating(
-            AlarmManager.RTC,
-            timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
-        )*/
-        Toast.makeText(this, "Alarm is set", Toast.LENGTH_SHORT).show()
-        binding.textToolbar.text
     }
+
+    fun setAlarmChat(chatMessage: ChatMessage){
+
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        intent.putExtra("notification_type", "chat")
+        intent.putExtra("notification_name",chatMessage.message)
+        intent.putExtra("notification_id", chatMessage.timestamp)
+        intent.putExtra("notification_user", chatMessage.user?.let { dataHandler.roommateList.get(it.id)?.username })
+
+        val pendingIntent = (chatMessage.timestamp?.let { Timestamp(it) })?.seconds?.let {
+            PendingIntent.getBroadcast(applicationContext,
+                it.toInt(), intent, PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        if(binding.textToolbar.text!= "Chat"){
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                (System.currentTimeMillis()),
+                pendingIntent
+            )
+        }
+    }
+
+    fun setAlarmTask(task: Task, newOrCompletedOrDue: String){
+
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        var NotifTimeInMillis= System.currentTimeMillis()
+        if(newOrCompletedOrDue=="new"){
+        intent.putExtra("notification_type", "task_new")}
+        else if(newOrCompletedOrDue=="completed"){
+            intent.putExtra("notification_type", "task_completed")
+        }
+        else{
+            intent.putExtra("notification_type", "task_due")
+            NotifTimeInMillis= task.dueDate?.let { (Timestamp(it).seconds-3600)*1000 }!!
+        }
+
+
+        intent.putExtra("notification_name",task.name)
+        intent.putExtra("notification_id", NotifTimeInMillis)
+        intent.putExtra("notification_user", task.roommate?.let { dataHandler.roommateList.get(it.id)?.username })
+        intent.putExtra("notification_coins", task.points.toString())
+
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext,
+                NotifTimeInMillis.toInt(), intent, PendingIntent.FLAG_IMMUTABLE)
+        if((newOrCompletedOrDue!="new") or (binding.textToolbar.text!="Aufgaben")) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                (System.currentTimeMillis()),
+                pendingIntent
+            )
+        }
+    }
+
+    fun setAlarmFinance(financeEntry: FinanceEntry){
+
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        intent.putExtra("notification_type", "finance")
+        intent.putExtra("notification_name",financeEntry.description)
+        intent.putExtra("notification_price",financeEntry.price.toString())
+        intent.putExtra("notification_moochers",
+            financeEntry.moucherList?.let { convertRoommateArrayToString(it) })
+        intent.putExtra("notification_id",
+            financeEntry.timestamp?.let { Timestamp(it).seconds.toString() })
+        intent.putExtra("notification_user", financeEntry.benefactor?.let {
+            dataHandler.roommateList.get(
+                it.id)?.username
+        })
+
+        val pendingIntent = financeEntry.timestamp?.let { Timestamp(it).seconds.toInt() }?.let {
+            PendingIntent.getBroadcast(applicationContext,
+                it, intent, PendingIntent.FLAG_IMMUTABLE)
+        }
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            (System.currentTimeMillis()),
+            pendingIntent
+        )
+
+    }
+
+
+
     private fun createNotificationChannel(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             Log.d("NOTIFICATION CHANNEL CREATED",".")
-            val importance= NotificationManager.IMPORTANCE_HIGH
+            val importance= NotificationManager.IMPORTANCE_DEFAULT
             val notificationChannel = NotificationChannel(CHANNEL_ID,"UdosChannel", importance)
             notificationChannel.description="UdosChannel"
+            notificationChannel.setSound(null, null)
             val notificationManager= getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(notificationChannel)
 
         }
 
+    }
+
+    fun convertRoommateArrayToString(referenceList: java.util.ArrayList<DocumentReference>): String{
+        var roommate_string = ""
+        referenceList.forEach{
+            reference ->
+            val username = dataHandler.roommateList.get(
+                reference.id)?.username
+            roommate_string= roommate_string + username +", "
+        }
+        roommate_string= roommate_string.dropLast(2)
+        return roommate_string
     }
     /*private class MyAlarm : BroadcastReceiver() {
         override fun onReceive(
