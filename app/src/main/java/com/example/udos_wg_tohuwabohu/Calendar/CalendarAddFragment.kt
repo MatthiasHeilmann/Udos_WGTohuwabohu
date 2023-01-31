@@ -60,7 +60,7 @@ class CalendarAddFragment : Fragment() {
 
     var dateChosen = mutableStateOf(Date())
     var timeChosen = mutableStateOf(Time(Date().time))
-    var dbw = DBWriter.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -86,7 +86,7 @@ class CalendarAddFragment : Fragment() {
             val validEntries = validateCalendarEntry(description, summedTimestamp)
 
             if(validEntries)
-                dbw.createCalendarEntry(description, summedTimestamp)
+                dbWriter.createCalendarEntry(description, summedTimestamp)
             else{
                 Log.w("Validation Error", "Please enter a description and a time in the future!")
             }
