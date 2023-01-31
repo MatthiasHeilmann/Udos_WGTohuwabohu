@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.TextFieldColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -22,12 +24,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
-import com.example.udos_wg_tohuwabohu.UdoLightBlue
-import com.example.udos_wg_tohuwabohu.UdoOrange
-import com.example.udos_wg_tohuwabohu.UdoWhite
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 
@@ -87,7 +88,9 @@ class FinanceAddFragment : Fragment() {
                         .focusRequester(focusRequester)
                         .onFocusChanged { f ->
                             expanded = (f.isFocused && f.hasFocus)
-                        },
+                        }
+                        .padding(64.dp,10.dp),
+                    label = { Text("Schnorrer") },
                     trailingIcon = {
                         Icon(
                             icon, "contentDescription",
@@ -106,14 +109,14 @@ class FinanceAddFragment : Fragment() {
                     )
                 )
 
-                // Create a drop-down menu with list of cities,
-                // when clicked, set the Text Field text as the city selected
+                // Create a drop-down menu
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = {
                         focusManager.clearFocus(true)
                         expanded = false
                     },
+                    modifier = Modifier.background(UdoLightBlue)
                 ) {
                     listItems.forEachIndexed { index, name ->
                         DropdownMenuItem(
@@ -124,6 +127,7 @@ class FinanceAddFragment : Fragment() {
                                 else
                                     listCheckedNames.remove(name)
                             },
+                            modifier = Modifier.background(UdoLightBlue),
                             text = {
                                 Row() {
                                     Checkbox(
@@ -134,7 +138,10 @@ class FinanceAddFragment : Fragment() {
                                                 listCheckedNames.add(name)
                                             else
                                                 listCheckedNames.remove(name)
-                                        }
+                                        },
+                                        colors = CheckboxDefaults.colors(
+                                            checkedColor = UdoOrange
+                                        )
                                     )
                                     Text(
                                         text = name,
@@ -147,7 +154,8 @@ class FinanceAddFragment : Fragment() {
                                                     listCheckedNames.add(name)
                                                 else
                                                     listCheckedNames.remove(name)
-                                            }
+                                            },
+                                        color = UdoWhite
                                     )
                                 }
                             }
