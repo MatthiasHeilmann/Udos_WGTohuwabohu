@@ -12,13 +12,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
+import androidx.compose.material3.*
 //import androidx.compose.foundation.layout.RowScopeInstance.weight
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -191,15 +190,21 @@ class HomeFragment : Fragment() {
     @Composable
     fun PermissionsButton(permissionsGranted: Boolean){
         if(!permissionsGranted){
-            Button(onClick = {
+            Button(colors= ButtonDefaults.buttonColors(containerColor= UdoLightBlue, contentColor= UdoWhite), onClick = {
                 requestMultiplePermissionsLauncher.launch(
                     arrayOf(
                         Manifest.permission.POST_NOTIFICATIONS,
                         Manifest.permission.SCHEDULE_EXACT_ALARM
                     )
                 )
-            }) {
-                Text("Benachrichtigungen zulassen")
+                Toast.makeText(
+                        mainActivity!!.applicationContext,
+                        "Diese Einstellung ist zukünftig evtl. nur in den App Einstellungen änderbar!",
+                        Toast.LENGTH_LONG).show()
+
+                })
+            {
+            Text("Benachrichtigungen zulassen")
             }
         }
     }
