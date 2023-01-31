@@ -14,6 +14,7 @@ und treten der WG mit dem Beitrittscode "123456" bei.
 
 Wenn Sie eigene WGs erstellen, wird der Beitrittcode für diese im HomeFragment angezeigt.
 
+Möchten Sie die Benachrichtigungen testen, so finden Sie die Einstellung, diese anzuschalten ganz unten im HomeFragment.
 
 Hier finden sie nochmal unsere Präsentation:
 
