@@ -448,7 +448,7 @@ fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Bo
         "validateCalendarEntry: ",
         "$message ${date.date} ${date.month} ${date.year} ${time.hours} ${time.minutes} ${time.seconds}"
     )
-    val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
+    val summedDate = Date(date.year-1900, date.month, date.date, time.hours, time.minutes)
     val summedTimestamp = Timestamp(summedDate)
     if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
         val dbw = DBWriter.getInstance()

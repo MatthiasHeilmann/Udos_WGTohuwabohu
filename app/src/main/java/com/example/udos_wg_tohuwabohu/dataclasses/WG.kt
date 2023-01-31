@@ -26,3 +26,13 @@ data class WG(val docID: String, var name: String?, var contactPerson: DocumentR
 
     }
 }
+
+
+
+
+
+
+
+
+
+

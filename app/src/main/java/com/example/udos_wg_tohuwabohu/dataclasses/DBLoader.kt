@@ -1,16 +1,22 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.LonelyPageActivity
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.example.udos_wg_tohuwabohu.NoConnectionActivity
 import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -44,14 +50,21 @@ class DBLoader private constructor() {
         Log.d(TAG, "Loading database...")
         // Wait for the load to finish
         val wgRef = async { loadUserData(userID) }.await()
+        Log.d(TAG, "Loaded User Data...")
         val anRef = async { loadWGData(wgRef) }.await()
+        Log.d(TAG, "Loaded WG Data...")
         async { loadContactPeronData(anRef) }.await()
+        Log.d(TAG, "Loaded ContactPerson Data...")
         async { loadRoommatesData(wgRef) }.await()
+        Log.d(TAG, "Loaded Roommates Data...")
         async { loadChatFilesData(wgRef) }.await()
+        Log.d(TAG, "Loaded Chat Files Data...")
         async { loadFinanceData(wgRef) }.await()
+        Log.d(TAG, "Loaded Finance Data...")
         async { loadTaskData(wgRef) }.await()
+        Log.d(TAG, "Loaded Task Data...")
 
-        Log.d(TAG, "Loading Database succesfull")
+        Log.d(TAG, "Loading Database succesful")
 
         // Then add snapshotListener
         roommateSnapshotListener()
@@ -60,6 +73,7 @@ class DBLoader private constructor() {
         wgSnapshotListener()
         contactPersonSnapshotListener()
         addTaskCollectionSnapshotListener()
+        Log.d(TAG, "Added all Snapshot Listeners!")
     }
 
     /**
@@ -258,6 +272,7 @@ class DBLoader private constructor() {
                         // for new documents
                         if(dc.type == DocumentChange.Type.ADDED){
                             Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
+                            mainActivity?.setAlarmTask(dataHandler.getTask(dc.document.id), "new")
                             try{
                                 // get new document as DocumentSnapshot and add to dataHandler
                                 dataHandler.wg.first().let { it1 ->
@@ -292,6 +307,7 @@ class DBLoader private constructor() {
                                         .get()
                                         .addOnSuccessListener { document ->
                                             dataHandler.getTask(document.id).update(document)
+                                            mainActivity?.setAlarmTask(dataHandler.getTask(document.id), "completed")
                                             mainActivity?.reloadTaskFragment()
                                         }
                                 }
@@ -314,16 +330,26 @@ class DBLoader private constructor() {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
+                    for(dc in querySnapshot!!.documentChanges){
+                        if(dc.type == DocumentChange.Type.ADDED){
+                            val chatmsg = ChatMessage(dc.document)
+                            dataHandler.addChatMessage(chatmsg)
+                            mainActivity!!.setAlarmChat(chatmsg)
+                        }
+                    }
                     // What happens if the database document gets changed
-                    querySnapshot?.let {
+                    /*querySnapshot?.let {
                         it.forEach { msg ->
-                            dataHandler.addChatMessage(ChatMessage(msg))
+                            Log.d("QuerySnapshot", ChatMessage(msg).toString())
+                            val chatmsg = ChatMessage(msg)
+                            dataHandler.addChatMessage(chatmsg)
+                            mainActivity!!.setAlarmChat(chatmsg)
                         }
                         Log.d(
                             TAG,
                             "chat updated $it"
                         )
-                    }
+                    }*/
                 }
         }
         Log.d(TAG, "Added snapshotlistener to chat")
@@ -339,16 +365,15 @@ class DBLoader private constructor() {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
-                    // What happens if the database document gets changed
-                    querySnapshot?.let {
-                        it.forEach { cost ->
-                            dataHandler.addFinanceEntry(FinanceEntry(cost))
+                    for(dc in querySnapshot!!.documentChanges) {
+                        // for new documents
+                        if (dc.type == DocumentChange.Type.ADDED) {
+                            dataHandler.addFinanceEntry(FinanceEntry(dc.document))
+                            mainActivity?.setAlarmFinance(FinanceEntry(dc.document))
                         }
-                        Log.d(
-                            TAG,
-                            "finances updated $it"
-                        )
                     }
+                    // What happens if the database document gets changed
+
                 }
         }
         Log.d(TAG, "Added snapshotlistener to chat")
@@ -368,12 +393,19 @@ class DBLoader private constructor() {
                         dataHandler.wg.first().update(it)
                         mainActivity!!.reloadHomeFragment()
                         mainActivity!!.reloadCalendarFragment()
+                        dataHandler.wg.first().calendar?.forEach{ appointment ->
+                            if(System.currentTimeMillis() < appointment.values.first().seconds*1000) {
+                                mainActivity!!.setAlarmCalendar(appointment)
+                            }
+                        }
+
                         Log.d(
                             TAG,
                             "wg updated ${dataHandler.wg}"
                         )
                     }
                 }
+
         }
         Log.d(
             TAG,
@@ -415,4 +447,8 @@ class DBLoader private constructor() {
             Toast.LENGTH_LONG)
             .show()
     }
+
+
+
 }
+
