@@ -3,12 +3,11 @@ package com.example.udos_wg_tohuwabohu
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Process
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.Finances.FinanceAddFragment
+import com.example.udos_wg_tohuwabohu.Finances.FinanceFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeFragment
 import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
