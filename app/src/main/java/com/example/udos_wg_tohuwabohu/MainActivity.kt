@@ -3,11 +3,11 @@ package com.example.udos_wg_tohuwabohu
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Process
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Finances.FinanceAddFragment
+import com.example.udos_wg_tohuwabohu.Finances.FinanceFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeFragment
 import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         Chat("Chat"),
         EditWG("WG bearbeiten"),
         Finances("Finanzen"),
+        FinancesAdd("Finanzeintrag erstellen"),
         CreateNewTask("Neue Aufgabe erstellen"),
         Tasks("Aufgaben");
 
@@ -77,8 +78,7 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = FragmentTitle.Chat.call
                 }
                 R.id.nav_finance -> {
-                    replaceFragment(FinanceFragment())
-                    binding.textToolbar.text = FragmentTitle.Finances.call
+                    showFinanceFragment()
                 }
                 R.id.nav_task -> {
                     showTaskFragment()
@@ -107,6 +107,21 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
     }
+
+    fun openAddFinanceFragment(){
+        val f = FinanceAddFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.FinancesAdd.call
+    }
+
+    fun showFinanceFragment(){
+        val f = FinanceFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.Finances.call
+    }
+
     fun openCreateTaskFragment(){
         val f = CreateTaskFragment()
         f.setMainActivity(this)

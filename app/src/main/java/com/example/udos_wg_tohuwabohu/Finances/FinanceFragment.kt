@@ -1,37 +1,39 @@
-package com.example.udos_wg_tohuwabohu
+package com.example.udos_wg_tohuwabohu.Finances
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
+import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.FinanceEntry
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.streams.toList
 
-/**
- * A simple [Fragment] subclass.
- * Use the [FinanceFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FinanceFragment : Fragment() {
 
+    private lateinit var mainActivity: MainActivity
+
     private val dataHandler = DataHandler.getInstance()
-    private val dbWriter = DBWriter.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,22 +43,11 @@ class FinanceFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 FinanceView()
+                FinanceFab()
             }
         }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment FinanceFragment.
-         */
-        @JvmStatic
-        fun newInstance() = FinanceFragment()
-    }
 
     fun formatDate(date: Date): String {
         return "" + formatNumber(date.date) + "." + formatNumber(date.month + 1) + "." + formatNumber(
@@ -70,24 +61,25 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceView() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        Column {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(UdoDarkGray)
+                modifier = Modifier.background(UdoDarkBlue)
             ) {
                 BalanceList()
             }
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(15.dp, 0.dp, 15.dp, 0.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(
+                    text = "Letzte Einträge:",
+                    modifier = Modifier.padding(10.dp),
+                    color = UdoWhite,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
                 dataHandler.financeEntries.forEach { f ->
                     Spacer(modifier = Modifier.height(10.dp))
                     FinanceCard(financeEntry = f)
@@ -109,13 +101,13 @@ class FinanceFragment : Fragment() {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = financeEntry.description ?: "unknown",
-                        style = UdoFinanceTextFieldTypographie()
+                        style = UdoFinanceTextFieldTypographie(),
+                        color = UdoWhite
                     )
                     Text(
-                        text = Math.round(
-                            (financeEntry.price?.times(100) ?: 0.0)
-                        ).div(100).toString() + " €",
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterEnd),
+                        text = (financeEntry.price?.times(100f) ?: 0.0).roundToInt()
+                            .div(100f).toString() + " €",
+                        modifier = Modifier.align(Alignment.CenterEnd),
                         color = UdoOrange
                     )
                 }
@@ -165,40 +157,67 @@ class FinanceFragment : Fragment() {
             return@sorted if ((r1.balance ?: 0f).toFloat() <= (r2.balance ?: 0f).toFloat()) 1
             else -1
         }.toList()
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceAround
+        Column(
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SimpleSpaceAroundColoumn() {
-                sortedList.forEach { r ->
-                    val color = if ((r.balance ?: 0f).toFloat() >= 0f) Color.Green
-                    else UdoRed
-                    Text(
-                        text = r.username ?: "unknown",
-                        color = color,
-                        style = UdoFinanceTextFieldTypographie()
-                    )
-                }
-            }
-            SimpleSpaceAroundColoumn() {
-                sortedList.forEach { r ->
-                    WhiteSimpleText(
-                        text = "" + ((r.balance?.times(100) ?: 0f) as Double)
-                                    .roundToInt().div(100f) + "€"
-                    )
+            Text(
+                text = "Eure Kontostände:",
+                modifier = Modifier.padding(10.dp),
+                color = UdoWhite,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            sortedList.forEach { roommate ->
+                Card(
+                    modifier = Modifier
+                        .padding(60.dp, 5.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .background(UdoLightBlue)
+                    ) {
+                        Column() {
+                            Text(
+                                text = roommate.username ?: "unknown",
+                                modifier = Modifier.padding(14.dp, 7.dp),
+                                color = UdoWhite,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(0.5f))
+                        Column {
+                            val b = (roommate.balance ?: 0f).toFloat()
+                            val color = if (b > 0f) UdoGreen else if (b == 0f) UdoWhite else UdoRed
+                            Text(
+                                text = "" + ((roommate.balance?.times(100) ?: 0f) as Double)
+                                    .roundToInt().div(100f) + "€",
+                                color = color,
+                                modifier = Modifier.padding(14.dp, 7.dp),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
     @Composable
-    fun SimpleSpaceAroundColoumn(content: @Composable() (ColumnScope.() -> Unit)) {
+    fun FinanceFab() {
         Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceAround
-        )
-        {
-            content()
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            FloatingActionButton(
+                onClick = { mainActivity.openAddFinanceFragment() },
+                modifier = Modifier
+                    .requiredHeight(60.dp)
+                    .requiredWidth(60.dp),
+                shape = CircleShape,
+                containerColor = UdoOrange
+            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
         }
     }
 
@@ -208,5 +227,9 @@ class FinanceFragment : Fragment() {
             text = text,
             color = UdoWhite
         )
+    }
+
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
     }
 }

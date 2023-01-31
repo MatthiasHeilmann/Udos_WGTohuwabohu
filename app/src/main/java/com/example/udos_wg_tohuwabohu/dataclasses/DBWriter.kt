@@ -29,12 +29,49 @@ class DBWriter private constructor() {
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
     }
+
+    fun createFinanceEntry(description: String, price: Double, moucherIDs: List<String>) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
+
+        val userDocRef = dataHandler.user?.let {
+            db.collection("Mitbewohner").document(
+                it.docID
+            )
+        } ?: return
+
+        val moucherDocRefs = moucherIDs.map {
+            db.collection("Mitbewohner").document(it)
+        }
+
+        // Update roommates with new balance
+        updateBalance(dataHandler.user, price)
+        moucherIDs.forEach { moucherID ->
+            updateBalance(dataHandler.getRoommate(moucherID), price/moucherIDs.size * -1)
+        }
+
+        // Upload finance entry to database
+        val feMap: MutableMap<String, Any> = HashMap()
+        feMap["bezeichnung"] = description
+        feMap["goenner"] = userDocRef
+        feMap["preis"] = price
+        feMap["schnorrer"] = moucherDocRefs
+        feMap["timestamp"] = Date()
+
+
+        dataHandler.wg!!.first().let {
+            db.collection("wg")
+                .document(it.docID)
+                .collection("finanzen")
+                .add(feMap)
+        }
+    }
+
     /**
      * creates a new task for the wg in the database
      * gets the completer with getCompleter()
      */
-    fun createTask(frequencyInDays: Int, name: String, points: Int, completer: Roommate?){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+    fun createTask(frequencyInDays: Int, name: String, points: Int, completer: Roommate?) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         // first duedate
         var newDate = Date()
         val c = Calendar.getInstance()
@@ -45,13 +82,15 @@ class DBWriter private constructor() {
         val wgDocRef = dataHandler.wg?.let {
             it.first().let { it1 ->
                 db.collection(Collections.WG.toString()).document(
-                    it1.docID)
+                    it1.docID
+                )
             }
         } ?: return
 
         val completerDocRef = completer?.let {
             db.collection("Mitbewohner").document(
-                it.docID)
+                it.docID
+            )
         } ?: return
 
         val myTask: MutableMap<String, Any> = HashMap()
@@ -70,11 +109,12 @@ class DBWriter private constructor() {
         }
     }
 
-    fun createChatMessage(message: String, timestamp: Date, user: Roommate?){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+    fun createChatMessage(message: String, timestamp: Date, user: Roommate?) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         val userDocRef = user?.let {
             db.collection("Mitbewohner").document(
-                it.docID)
+                it.docID
+            )
         } ?: return
 
         val cmMap: MutableMap<String, Any> = HashMap()
@@ -90,19 +130,27 @@ class DBWriter private constructor() {
         }
     }
 
-    fun createCalendarEntry(description: String, timestamp: Timestamp){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+    fun createCalendarEntry(description: String, timestamp: Timestamp) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         val ceMap: MutableMap<String, Timestamp> = HashMap()
         ceMap[description] = timestamp
 
         dataHandler.wg.first().let {
             db.collection("wg")
                 .document(it.docID)
-                .update("calendar",FieldValue.arrayUnion(ceMap))
+                .update("calendar", FieldValue.arrayUnion(ceMap))
         }
     }
-    fun updateWgData(name: String,contactSurname:String,contactFirstname:String,contactEmail:String,contactPhone:String,contactIBAN:String){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+
+    fun updateWgData(
+        name: String,
+        contactSurname: String,
+        contactFirstname: String,
+        contactEmail: String,
+        contactPhone: String,
+        contactIBAN: String
+    ) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         val wgName: MutableMap<String, Any> = HashMap()
         wgName["bezeichnung"] = name
         db.collection(Collections.WG.call)
@@ -119,16 +167,20 @@ class DBWriter private constructor() {
             .update(contact)
     }
 
-    fun leaveWG(mainActivity: MainActivity){
-        if(!ConnectionCheck.getInstance().check(mainActivity)) return
+    fun leaveWG(mainActivity: MainActivity) {
+        if (!ConnectionCheck.getInstance().check(mainActivity)) return
         db.collection("mitbewohner")
             .document(dataHandler.user!!.docID)
-            .update("wg_id",EmptyWG)
+            .update("wg_id", EmptyWG)
             .addOnSuccessListener {
                 mainActivity.restartApp()
             }
-            .addOnFailureListener{
-                Toast.makeText(mainActivity,"Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",Toast.LENGTH_SHORT).show()
+            .addOnFailureListener {
+                Toast.makeText(
+                    mainActivity,
+                    "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -140,7 +192,7 @@ class DBWriter private constructor() {
         val roommateList = dataHandler.roommateList
         var worstMate: Roommate? = null
         var worstCount: Long = Long.MAX_VALUE
-        roommateList.forEach{ mate ->
+        roommateList.forEach { mate ->
             if (mate.value.coin_count!! <= worstCount) {
                 worstMate = dataHandler.getRoommate(mate.key)
                 worstCount = mate.value.coin_count!!
@@ -148,13 +200,14 @@ class DBWriter private constructor() {
         }
         return worstMate
     }
+
     /**
      * checks the task in the database,
      * sets the duedate to today + frequency,
      * sets new completer to completer given by getCompleter()
      */
     fun checkTask(task: Task) {
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         val newCompleter = getCompleter()
         var newDate = Date()
         val c = Calendar.getInstance()
@@ -168,10 +221,12 @@ class DBWriter private constructor() {
                     .document(it.docID)
                     .collection("tasks")
                     .document(task.docId)
-                    .update(mapOf(
-                        "frist" to newDate,
-                        "erlediger" to newCompleterRef
-                    ))
+                    .update(
+                        mapOf(
+                            "frist" to newDate,
+                            "erlediger" to newCompleterRef
+                        )
+                    )
             }
         }
     }
@@ -179,8 +234,8 @@ class DBWriter private constructor() {
     /**
      * deletes a task in the database
      */
-    fun deleteTask(docId: String){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+    fun deleteTask(docId: String) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         dataHandler.wg!!.first().let {
             db.collection("wg")
                 .document(it.docID)
@@ -193,28 +248,51 @@ class DBWriter private constructor() {
     /**
      * gives the roommate who checks the task the points in the database
      */
-    fun givePoints(roommate: Roommate?, points: Int){
-        if(!ConnectionCheck.getInstance().check(mainActivity!!)) return
+    fun givePoints(roommate: Roommate?, points: Int) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
         if (roommate != null) {
-            val newPoints = roommate.coin_count?.plus(points)
-            db.collection(Collections.Roommate.call).document(roommate.docID).update("coin_count",newPoints)
+            val newPoints = (roommate.coin_count ?: 0).plus(points)
+            db.collection(Collections.Roommate.call).document(roommate.docID)
+                .update("coin_count", newPoints)
+        }
+    }
+
+    /**
+     * gives the roommate who checks the task the points in the database
+     */
+    fun updateBalance(roommate: Roommate?, price: Double) {
+        if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
+
+        println("Update shit $roommate, $price")
+
+        if (roommate != null) {
+            val newPoints = (roommate.balance ?: 0.0).plus(price)
+            db.collection(Collections.Roommate.call).document(roommate.docID)
+                .update("kontostand", newPoints)
         }
     }
 
     fun addItemToShoppingList(item: String) {
         db.collection("wg")
             .document(dataHandler.wg.first().docID)
-            .update(mapOf(
-                "einkaufsliste.${item}" to false,
-            ))
+            .update(
+                mapOf(
+                    "einkaufsliste.${item}" to false,
+                )
+            )
     }
 
-    fun checkShoppinglistItem(item: Map.Entry<String, Boolean>, checkedState: MutableState<Boolean>){
+    fun checkShoppinglistItem(
+        item: Map.Entry<String, Boolean>,
+        checkedState: MutableState<Boolean>
+    ) {
         db.collection("wg")
             .document(dataHandler.wg.first().docID)
-            .update(mapOf(
-                "einkaufsliste.${item.key}" to checkedState.value,
-            ));
-        Log.d("[SHOPPING FRAGMENT]",item.key + " geändert zu " + checkedState.value);
+            .update(
+                mapOf(
+                    "einkaufsliste.${item.key}" to checkedState.value,
+                )
+            );
+        Log.d("[SHOPPING FRAGMENT]", item.key + " geändert zu " + checkedState.value);
     }
 }
