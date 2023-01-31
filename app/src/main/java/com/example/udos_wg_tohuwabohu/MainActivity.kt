@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Calendar.CalendarFragment
 import com.example.udos_wg_tohuwabohu.Finances.FinanceAddFragment
 import com.example.udos_wg_tohuwabohu.Finances.FinanceFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment

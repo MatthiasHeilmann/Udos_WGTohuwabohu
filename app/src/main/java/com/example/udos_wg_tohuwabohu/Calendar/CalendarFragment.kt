@@ -1,4 +1,4 @@
-package com.example.udos_wg_tohuwabohu
+package com.example.udos_wg_tohuwabohu.Calendar
 
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
+import com.example.udos_wg_tohuwabohu.*
+import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
