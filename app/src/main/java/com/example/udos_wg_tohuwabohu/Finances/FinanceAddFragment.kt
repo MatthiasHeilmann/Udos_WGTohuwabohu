@@ -14,9 +14,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.udos_wg_tohuwabohu.R
@@ -39,7 +44,7 @@ class FinanceAddFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentFinanceAddBinding.inflate(inflater,container,false)
+        _binding = FragmentFinanceAddBinding.inflate(inflater, container, false)
         val view = _binding.root
 
         composeView = view.findViewById(R.id.compose_view)
@@ -56,6 +61,10 @@ class FinanceAddFragment : Fragment() {
         val listCheckedNames = remember { mutableStateListOf<String>() }
         val checkedList = remember { listItems.map { false }.toMutableStateList() }
         var expanded by remember { mutableStateOf(false) }
+
+
+        val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
 
         // Up Icon when expanded and down icon when collapsed
         val icon = if (expanded)
@@ -74,27 +83,39 @@ class FinanceAddFragment : Fragment() {
                     onValueChange = { },
                     readOnly = true,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    label = { Text("Schnorrer") },
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { f ->
+                            expanded = (f.isFocused && f.hasFocus)
+                        },
                     trailingIcon = {
-                        Icon(icon, "contentDescription",
-                            Modifier.clickable { expanded = !expanded })
+                        Icon(
+                            icon, "contentDescription",
+                            Modifier.clickable { expanded = !expanded },
+                            tint = UdoWhite
+                        )
                     },
                     textStyle = TextStyle(
                         color = UdoWhite,
                         fontSize = 20.sp
                     ),
-                    //colors = TextFieldColors(focusedLabelColor= UdoOrange, focusedIndicatorColor= UdoWhite, containerColor = UdoLightBlue)
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = UdoWhite,
+                        unfocusedIndicatorColor = UdoWhite,
+                        containerColor = Color.Transparent
+                    )
                 )
 
                 // Create a drop-down menu with list of cities,
                 // when clicked, set the Text Field text as the city selected
                 DropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    onDismissRequest = {
+                        focusManager.clearFocus(true)
+                        expanded = false
+                    },
                 ) {
                     listItems.forEachIndexed { index, name ->
-                        println("making for: $name ($index)")
                         DropdownMenuItem(
                             onClick = {
                                 checkedList[index] = !checkedList[index]
@@ -113,9 +134,10 @@ class FinanceAddFragment : Fragment() {
                                                 listCheckedNames.add(name)
                                             else
                                                 listCheckedNames.remove(name)
-                                        },
+                                        }
                                     )
                                     Text(
+                                        text = name,
                                         modifier = Modifier
                                             .offset(y = 15.dp)
                                             .fillMaxWidth()
@@ -125,8 +147,7 @@ class FinanceAddFragment : Fragment() {
                                                     listCheckedNames.add(name)
                                                 else
                                                     listCheckedNames.remove(name)
-                                            },
-                                        text = name
+                                            }
                                     )
                                 }
                             }
@@ -135,5 +156,11 @@ class FinanceAddFragment : Fragment() {
                 }
             }
         }
+    }
+
+    @Preview
+    @Composable
+    fun FinanceAddPreview() {
+        TestDropdown()
     }
 }
