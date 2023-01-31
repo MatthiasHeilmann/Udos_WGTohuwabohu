@@ -50,6 +50,14 @@ class CreateTaskFragment : Fragment() {
                 ).show()
                 return@setOnClickListener
             }
+            if(frequencyOfTask.text.toString().toInt()==0){
+                Toast.makeText(
+                    mainActivity,
+                    "Frequenz muss größer als 0 sein!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             val frequency: Int = Integer.parseInt(frequencyOfTask.text.toString())
             val points: Int = Integer.parseInt(pointsOfTask.text.toString())
 

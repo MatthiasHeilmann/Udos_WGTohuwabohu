@@ -43,6 +43,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="64dp"
         android:hint="WG Beitrittscode"
+        android:inputType="number"
         android:shadowColor="@color/white"
         android:singleLine="true"
         android:textAlignment="center"
