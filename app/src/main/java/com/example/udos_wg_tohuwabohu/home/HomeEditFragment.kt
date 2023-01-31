@@ -1,5 +1,6 @@
 package com.example.udos_wg_tohuwabohu.home
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,7 @@ class HomeEditFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
