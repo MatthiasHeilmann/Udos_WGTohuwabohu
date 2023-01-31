@@ -1,6 +1,5 @@
 package com.example.udos_wg_tohuwabohu.home
 
-//import androidx.compose.foundation.layout.RowScopeInstance.weight
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
