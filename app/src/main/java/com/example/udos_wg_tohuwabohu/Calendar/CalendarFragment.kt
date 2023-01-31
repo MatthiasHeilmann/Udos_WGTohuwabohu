@@ -1,9 +1,8 @@
-package com.example.udos_wg_tohuwabohu
+package com.example.udos_wg_tohuwabohu.Calendar
 
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
@@ -19,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -28,19 +26,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
+import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.*
+import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.google.firebase.Timestamp
 import java.sql.Time
 import java.text.DateFormatSymbols
-import java.util.Date
-
+import java.util.*
 
 
 class CalendarFragment : Fragment() {
-    lateinit var composeView: ComposeView
-
+    private lateinit var composeView: ComposeView
+    private lateinit var mainActivity: MainActivity
+    private lateinit var _binding: FragmentCalendarBinding
     //Get Calendar data from Data Handler
     var calendarData = DataHandler.getInstance().getCalendar()
 
@@ -52,15 +53,15 @@ class CalendarFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        var _binding: FragmentCalendarBinding? = null
+    ): View {
+        _binding = FragmentCalendarBinding.inflate(inflater,container,false)
         // This property is only valid between onCreateView and onDestroyView.
-        var v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+        val v: View = _binding.root
         // Dispose of the Composition when the view's LifecycleOwner
         // is destroyed
         //setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-        composeView = v.findViewById(R.id.compose_view)
+        composeView = _binding.composeView
         composeView.setContent {
             // In  Compose world
             calendarData?.let { FullCalendar(it) }
@@ -70,47 +71,86 @@ class CalendarFragment : Fragment() {
         }
         return v
     }
-}
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
+    }
 
 
-        // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_calendar, container, false)
+
+// Inflate the layout for this fragment
+//return inflater.inflate(R.layout.fragment_calendar, container, false)
 
 @OptIn(ExperimentalUnitApi::class)
 @Composable
-fun CalendarCard(date: String, time: String, shape: Shape, cardText: String){
+fun CalendarCard(date: String, time: String, shape: Shape, cardText: String) {
     UdosTheme {
-        Card(colors= UdoCardTheme(),modifier = Modifier.fillMaxWidth().padding(5.dp)) {
+        Card(
+            colors = UdoCardTheme(), modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(colors = UdoDateCardTheme()) {
-                    Text(text = date.padStart(2,"0".single()),style = MaterialTheme.typography.displaySmall, fontSize = 20.sp,fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
+                    Text(
+                        text = date.padStart(2, "0".single()),
+                        style = MaterialTheme.typography.displaySmall,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
-                Box(modifier= Modifier.fillMaxWidth().padding(5.dp), contentAlignment= Alignment.CenterEnd){
-                    Text(text= "Ab " + time + " Uhr", textAlign = TextAlign.End, modifier = Modifier.padding(5.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = "Ab $time Uhr",
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.padding(5.dp)
+                    )
                 }
             }
-            Text(text =cardText, fontSize = 24.sp, modifier = Modifier.padding(35.dp,5.dp,5.dp,10.dp))
+            Text(
+                text = cardText,
+                fontSize = 24.sp,
+                modifier = Modifier.padding(35.dp, 5.dp, 5.dp, 10.dp)
+            )
         }
     }
 }
 
 @Composable
-fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
-    val sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key= it.keys.first()) })
+fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>) {
+    val sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key = it.keys.first()) })
     var currentMonth = 100
-    Column (modifier = Modifier
-            .verticalScroll(rememberScrollState()).padding(5.dp)){
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(5.dp)
+    ) {
         sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
             val month = appointment.values.first().toDate().month
-            if(currentMonth != month){
+            if (currentMonth != month) {
                 currentMonth = month
-                Text(text= DateFormatSymbols.getInstance().months[month], textAlign = TextAlign.End,color= UdoWhite)
-                Divider(thickness= 2.dp,color= UdoWhite, modifier = Modifier.padding(0.dp,0.dp,0.dp,5.dp))
+                Text(
+                    text = DateFormatSymbols.getInstance().months[month],
+                    textAlign = TextAlign.End,
+                    color = UdoWhite
+                )
+                Divider(
+                    thickness = 2.dp,
+                    color = UdoWhite,
+                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 5.dp)
+                )
             }
             Log.d("Calendar Date:", appointment.values.first().toDate().toString())
             CalendarCard(
-                date  = appointment.values.first().toDate().date.toString(),
-                time  = appointment.values.first().toDate().hours.toString()+":"+appointment.values.first().toDate().minutes.toString().padStart(2,"0".single()),
+                date = appointment.values.first().toDate().date.toString(),
+                time = appointment.values.first()
+                    .toDate().hours.toString() + ":" + appointment.values.first()
+                    .toDate().minutes.toString().padStart(2, "0".single()),
                 shape = MaterialTheme.shapes.large,
                 cardText = appointment.keys.first()
             )
@@ -121,14 +161,14 @@ fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>){
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
-    var descriptionText by remember { mutableStateOf("Hello") }
+    var descriptionText by remember { mutableStateOf("") }
     var datePickerActive by rememberSaveable { mutableStateOf(false) }
     var timePickerActive by rememberSaveable { mutableStateOf(false) }
     var dateChanged by rememberSaveable { mutableStateOf(false) }
     var timeChanged by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     var dateChosen by rememberSaveable { mutableStateOf(java.util.Date(0)) }
-    var timeChosen by rememberSaveable { mutableStateOf(java.sql.Time(0,0,0)) }
+    var timeChosen by rememberSaveable { mutableStateOf(java.sql.Time(0, 0, 0)) }
 
     if (timePickerActive) {
         Box(
@@ -146,8 +186,7 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                 }, onDismiss = { timePickerActive = it })
             }
         }
-    }
-    else if (datePickerActive) {
+    } else if (datePickerActive) {
         Box(
             contentAlignment = Alignment.Center, // you apply alignment to all children
             modifier = Modifier.fillMaxSize()
@@ -172,7 +211,7 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                 .padding(2.dp),
             border = BorderStroke(2.dp, UdoDarkBlue)
         ) {
-            Column(modifier = Modifier.padding(5.dp),) {
+            Column(modifier = Modifier.padding(5.dp)) {
                 Text(text = "Termin Hinzufügen", style = MaterialTheme.typography.popupLabel)
                 Text(text = "Termin Beschreibung", style = MaterialTheme.typography.popupLabel)
                 OutlinedTextField(
@@ -183,6 +222,7 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                         .requiredWidth(width = 300.dp),
                     enabled = true,
                     readOnly = false,
+                    placeholder = { Text(text = "Hallo") },
                     colors = UdoPopupTextfieldColors(),
                     keyboardOptions = UdoKeyboardOptions(),
                     keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
@@ -190,7 +230,8 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                 Text(text = "Termin Start", style = MaterialTheme.typography.popupLabel)
                 Row(modifier = Modifier.padding(5.dp)) {
 
-                    Button(onClick = { datePickerActive = true },
+                    Button(
+                        onClick = { datePickerActive = true },
                         modifier = Modifier
                             .requiredWidth(200.dp)
                             .requiredHeight(50.dp)
@@ -202,16 +243,17 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                             fontSize = 15.sp
                         )
                     }
-                    Card(colors = UdoUnfocusableCardTheme(),
+                    Card(
+                        colors = UdoUnfocusableCardTheme(),
                         modifier = Modifier
                             .requiredWidth(width = 100.dp)
                             .requiredHeight(height = 50.dp)
                             .padding(5.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            if(dateChanged) {
+                            if (dateChanged) {
                                 Text(
-                                    text = dateChosen.date.toString() + "." + (dateChosen.month + 1).toString() + "." + dateChosen.year.toString(),
+                                    text = "${dateChosen.date}.${dateChosen.month + 1}.${dateChosen.year}",
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.align(Alignment.Center)
                                 )
@@ -220,7 +262,8 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                     }
                 }
                 Row(modifier = Modifier.padding(5.dp)) {
-                    Button(onClick = { timePickerActive = true },
+                    Button(
+                        onClick = { timePickerActive = true },
                         modifier = Modifier
                             .requiredWidth(200.dp)
                             .requiredHeight(50.dp)
@@ -230,18 +273,21 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                             "Zeitpunkt Auswählen",
                             color = UdoWhite,
                             fontSize = 15.sp,
-                        textAlign= TextAlign.Center)
+                            textAlign = TextAlign.Center
+                        )
                     }
-                    Card(colors = UdoUnfocusableCardTheme(),
+                    Card(
+                        colors = UdoUnfocusableCardTheme(),
                         modifier = Modifier
                             .requiredWidth(width = 100.dp)
                             .requiredHeight(height = 50.dp)
                             .padding(5.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
-                            if(timeChanged) {
+                            if (timeChanged) {
                                 Text(
-                                    text = timeChosen.hours.toString() + ":" + (timeChosen.minutes).toString()
+                                    text = timeChosen.hours.toString() + ":"
+                                            + (timeChosen.minutes).toString()
                                         .padStart(2, "0".single()),
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.align(Alignment.Center)
@@ -250,14 +296,21 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
                         }
                     }
                 }
-                Button(onClick = { val validChange=validateCalendarEntry(descriptionText,dateChosen, timeChosen)
-                                 if(validChange){ onDismiss(false)}},
+                Button(
+                    onClick = {
+                        val validChange =
+                            validateCalendarEntry(descriptionText, dateChosen, timeChosen)
+                        if (validChange) {
+                            onDismiss(false)
+                        }
+                    },
                     modifier = Modifier
                         .requiredWidth(290.dp)
                         .requiredHeight(75.dp)
-                        .padding(5.dp)){
-                            Text(text= "Termin Speichern")
-                        }
+                        .padding(5.dp)
+                ) {
+                    Text(text = "Termin Speichern")
+                }
             }
 
 
@@ -268,7 +321,11 @@ fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
 
 
 @Composable
-fun showDatePicker(dateVar: java.util.Date, onDateChange: (java.util.Date) -> Unit, onDismiss: (Boolean) -> Unit) {
+fun showDatePicker(
+    dateVar: java.util.Date,
+    onDateChange: (java.util.Date) -> Unit,
+    onDismiss: (Boolean) -> Unit
+) {
     //var dateChosen by remember { mutableStateOf(Timestamp(0,0)) }
     Card(
         colors = UdoPopupCardTheme(),
@@ -286,11 +343,12 @@ fun showDatePicker(dateVar: java.util.Date, onDateChange: (java.util.Date) -> Un
             update = { views ->
                 views.setOnDateChangeListener { calendarView, i, i2, i3 ->
                     //var tempTimeVar = Timestamp(java.util.Date(i,i2+1,i3+1))
-                    onDateChange(java.util.Date(i,i2,i3))
+                    onDateChange(java.util.Date(i, i2, i3))
                 }
             }
         )
-        Button(onClick = { onDismiss(false) },
+        Button(
+            onClick = { onDismiss(false) },
             modifier = Modifier
                 .requiredWidth(190.dp)
                 .requiredHeight(50.dp)
@@ -307,7 +365,11 @@ fun showDatePicker(dateVar: java.util.Date, onDateChange: (java.util.Date) -> Un
 }
 
 @Composable
-fun showTimePicker(timeVar: java.sql.Time, onTimeChange: (java.sql.Time) -> Unit, onDismiss: (Boolean) -> Unit) {
+fun showTimePicker(
+    timeVar: java.sql.Time,
+    onTimeChange: (java.sql.Time) -> Unit,
+    onDismiss: (Boolean) -> Unit
+) {
     Card(
         colors = UdoPopupCardTheme(),
         modifier = Modifier
@@ -317,8 +379,9 @@ fun showTimePicker(timeVar: java.sql.Time, onTimeChange: (java.sql.Time) -> Unit
         border = BorderStroke(2.dp, UdoDarkBlue)
     ) {
         AndroidView(
-            { var mTimePicker=TimePicker(it)
-            mTimePicker.setIs24HourView(true)
+            {
+                val mTimePicker = TimePicker(it)
+                mTimePicker.setIs24HourView(true)
                 return@AndroidView mTimePicker
             },
             modifier = Modifier
@@ -330,7 +393,8 @@ fun showTimePicker(timeVar: java.sql.Time, onTimeChange: (java.sql.Time) -> Unit
                 }
             }
         )
-        Button(onClick = { onDismiss(false) },
+        Button(
+            onClick = { onDismiss(false) },
             modifier = Modifier
                 .requiredWidth(190.dp)
                 .requiredHeight(50.dp)
@@ -356,7 +420,7 @@ fun CalendarFAB() {
                 onDismissRequest = { popupActive = false },
                 properties = UdoPopupProperties()
             ) {
-                CalendarPopup(onDismiss={popupActive=it})
+                CalendarPopup(onDismiss = { popupActive = it })
             }
         }
     } else {
@@ -366,7 +430,9 @@ fun CalendarFAB() {
             modifier = Modifier.padding(10.dp)
         ) {
             FloatingActionButton(
-                onClick = { popupActive = true },
+                onClick = {
+                  mainActivity.showCalendarAddFragment()
+                  },
                 modifier = Modifier
                     .requiredHeight(60.dp)
                     .requiredWidth(60.dp),
@@ -377,22 +443,22 @@ fun CalendarFAB() {
     }
 }
 
-fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Boolean{
-    Log.w( "validateCalendarEntry: ",message+ date.date.toString()+" "+date.month.toString()+" "+date.year.toString()+" "+time.hours.toString()+" "+time.minutes.toString()+" "+time.seconds.toString() )
-    val summedDate= Date(date.year,date.month,date.date,time.hours,time.minutes)
-    val summedTimestamp= Timestamp(summedDate)
-    if ((summedTimestamp.seconds>Timestamp.now().seconds) and (message!="")){
-        var dbw = DBWriter.getInstance()
+fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Boolean {
+    Log.w(
+        "validateCalendarEntry: ",
+        "$message ${date.date} ${date.month} ${date.year} ${time.hours} ${time.minutes} ${time.seconds}"
+    )
+    val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
+    val summedTimestamp = Timestamp(summedDate)
+    if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
+        val dbw = DBWriter.getInstance()
         dbw.createCalendarEntry(message, summedTimestamp)
         return true
-    }
-    else{
-    Log.w("Validation Error","Please enter a description and a time in the future!")
+    } else {
+        Log.w("Validation Error", "Please enter a description and a time in the future!")
         return false
     }
 }
-
-
 
 
 /*@Composable
@@ -406,7 +472,7 @@ fun UdosTheme(
 }
 */
 
-
+}
 
 
 

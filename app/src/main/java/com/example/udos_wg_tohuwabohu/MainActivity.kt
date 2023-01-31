@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.Calendar.CalendarAddFragment
+import com.example.udos_wg_tohuwabohu.Calendar.CalendarFragment
 import com.example.udos_wg_tohuwabohu.Finances.FinanceAddFragment
 import com.example.udos_wg_tohuwabohu.Finances.FinanceFragment
 import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
@@ -21,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     enum class FragmentTitle(val call: String) {
         WG("Eure WG"),
         Calendar("Kalender"),
+        CalendarAdd("Kalendareintrag hinzufügen"),
         Shoppinglist("Einkaufsliste"),
         Chat("Chat"),
         EditWG("WG bearbeiten"),
@@ -46,9 +49,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // get user values and show
+        // get user values id to load database
         val userID = intent.getStringExtra("user_id")
-        val emailID = intent.getStringExtra("email_id")
 
         // load database
         dbLoader.setMainActivity(this)
@@ -88,11 +90,7 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = FragmentTitle.Shoppinglist.call
                 }
                 R.id.nav_calender -> {
-                    replaceFragment(CalendarFragment())
-                    binding.textToolbar.text = FragmentTitle.Calendar.call
-                }
-                else -> {
-
+                    showCalendarFragment()
                 }
             }
             binding.homeEdit.visibility = View.INVISIBLE
@@ -106,6 +104,20 @@ class MainActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout,fragment)
         fragmentTransaction.commit()
+    }
+
+    private fun showCalendarFragment(){
+        val f = CalendarFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.Calendar.call
+    }
+
+    fun showCalendarAddFragment(){
+        val f = CalendarAddFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.CalendarAdd.call
     }
 
     fun openAddFinanceFragment(){
@@ -130,7 +142,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun reloadTaskFragment(){
-        if(binding.textToolbar.text == FragmentTitle.Tasks.call){// sorry for that again
+        if(binding.textToolbar.text == FragmentTitle.Tasks.call){
             val f = TasksFragment()
             f.setMainActivity(this)
             replaceFragment(f)
@@ -153,7 +165,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun showHome(){
-        // TODO Navbar aktuallisieren
         val f = HomeFragment()
         f.setMainActivity(this)
         replaceFragment(f)
