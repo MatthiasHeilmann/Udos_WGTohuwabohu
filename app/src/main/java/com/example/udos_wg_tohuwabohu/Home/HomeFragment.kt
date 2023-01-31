@@ -39,6 +39,7 @@ import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.auth.FirebaseAuth
 import java.util.ArrayList
+import kotlin.properties.Delegates
 
 //TODO reload on changes
 class HomeFragment : Fragment() {
@@ -126,9 +127,12 @@ class HomeFragment : Fragment() {
         composeView.setContent {
             AllRoommateCards()
         }
+        val permissionsGranted = ((mainActivity?.let { ContextCompat.checkSelfPermission(it.applicationContext, Manifest.permission.POST_NOTIFICATIONS) } == PackageManager.PERMISSION_GRANTED)
+        and (mainActivity?.let { ContextCompat.checkSelfPermission(it.applicationContext, Manifest.permission.SCHEDULE_EXACT_ALARM) } == PackageManager.PERMISSION_GRANTED))
+        Log.d("Permissions granted:", permissionsGranted.toString())
         composeButton = view.findViewById(R.id.compose_button)
         composeButton.setContent{
-            PermissionsButton()
+            PermissionsButton(permissionsGranted)
         }
         return view
     }
@@ -187,9 +191,8 @@ class HomeFragment : Fragment() {
         }
     }
     @Composable
-    fun PermissionsButton(){
-        if((ContextCompat.checkSelfPermission(LocalContext.current, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-        and (ContextCompat.checkSelfPermission(LocalContext.current, Manifest.permission.SCHEDULE_EXACT_ALARM) != PackageManager.PERMISSION_GRANTED)) {
+    fun PermissionsButton(permissionsGranted: Boolean){
+        if(!permissionsGranted){
             Button(onClick = {
                 requestMultiplePermissionsLauncher.launch(
                     arrayOf(
