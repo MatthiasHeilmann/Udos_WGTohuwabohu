@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
     }
     fun reloadCalendarFragment(){
         if(binding.textToolbar.text == FragmentTitle.Calendar.call){
-            replaceFragment(CalendarFragment())
+            showCalendarFragment()
         }
     }
     fun showHome(){
