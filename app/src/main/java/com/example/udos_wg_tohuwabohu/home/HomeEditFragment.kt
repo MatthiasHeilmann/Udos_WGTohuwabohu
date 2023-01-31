@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.MainActivity
+import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentHomeEditBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -45,7 +46,7 @@ class HomeEditFragment : Fragment() {
                 mainActivity?.showHome()
                 return@setOnClickListener
             }
-            val builder = AlertDialog.Builder(activity)
+            val builder = AlertDialog.Builder(activity, R.style.WarningDialogTheme)
             builder.setTitle("Änderungen speichern?")
             builder.setMessage("Bist Du sicher, dass Du die änderungen speichern willst?")
             builder.setPositiveButton("Ja") { _, _ ->
@@ -85,7 +86,6 @@ class HomeEditFragment : Fragment() {
                 mainActivity?.showHome()
             }
             builder.setNegativeButton("Abbrechen") { _, _ ->
-                Log.d("dsff", "NOO")
             }
             val alertDialog: AlertDialog = builder.create()
             alertDialog.setCancelable(false)
