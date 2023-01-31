@@ -103,7 +103,9 @@ class FinanceAddFragment : Fragment() {
                         fontSize = 20.sp
                     ),
                     colors = TextFieldDefaults.textFieldColors(
+                        focusedLabelColor = UdoWhite,
                         focusedIndicatorColor = UdoWhite,
+                        unfocusedLabelColor = UdoWhite,
                         unfocusedIndicatorColor = UdoWhite,
                         containerColor = Color.Transparent
                     )
