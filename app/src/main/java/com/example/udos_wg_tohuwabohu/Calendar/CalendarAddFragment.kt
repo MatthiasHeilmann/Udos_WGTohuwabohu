@@ -99,7 +99,7 @@ class CalendarAddFragment : Fragment() {
 
         composeView = view.findViewById(R.id.compose_view)
         composeView.setContent {
-            // Date and Time picker
+            DateAndTimePicker()
         }
         return view
     }
