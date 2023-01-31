@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
+import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.FinanceEntry
 import java.util.*
@@ -61,77 +62,74 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceView() {
-        Column {
-            Box(
-                modifier = Modifier.background(UdoDarkBlue)
-            ) {
-                BalanceList()
-            }
-            Column(
-                modifier = Modifier
-                    .padding(15.dp, 0.dp, 15.dp, 0.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Letzte Einträge:",
-                    modifier = Modifier.padding(10.dp),
-                    color = UdoWhite,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-                dataHandler.financeEntries.forEach { f ->
-                    Spacer(modifier = Modifier.height(10.dp))
-                    FinanceCard(financeEntry = f)
-                }
+        Column (modifier = Modifier
+            .padding(15.dp, 0.dp, 15.dp, 20.dp)
+            .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+        BalanceList()
+        Text(
+            text = "Letzte Einträge:",
+            modifier = Modifier.padding(10.dp),
+            color = UdoWhite,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+            dataHandler.financeEntries.forEach { f ->
+                Spacer(modifier = Modifier.height(10.dp))
+                FinanceCard(financeEntry = f)
             }
         }
     }
 
     @Composable
     fun FinanceCard(financeEntry: FinanceEntry) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-                .clip(RoundedCornerShape(10.dp))
-                .background(UdoLightBlue)
+        Box(modifier = Modifier.clip(shape = RoundedCornerShape(20.dp)),
         ) {
-            Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-                Box(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier
+                .background(UdoLightBlue)
+                .padding(all = 4.dp)
+                .clip(shape = RoundedCornerShape(10.dp))
+            ) {
+                Column(modifier = Modifier.padding(start = 5.dp)) {
+                    Text(text = financeEntry.description ?: "Unbekannt",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = UdoWhite
+                        )
                     Text(
-                        text = financeEntry.description ?: "unknown",
-                        style = UdoFinanceTextFieldTypographie(),
+                        text = "Für "+ Math.round(
+                            (financeEntry.price?.times(100) ?: 0.0)
+                        ).div(100).toString() + " €",
+                        color = UdoOrange,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Am " + (financeEntry.timestamp?.let { formatDate(it) } ?: "Unbekannt"),
                         color = UdoWhite
                     )
+//                    ListNamesSimpleRow(
+//                        description = "Bezahlt von ",
+//                        dataHandler.getRoommate(financeEntry.benefactor?.id)?.username
+//                            ?: "Unbekannt"
+//                    )
                     Text(
-                        text = (financeEntry.price?.times(100f) ?: 0.0).roundToInt()
-                            .div(100f).toString() + " €",
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        color = UdoOrange
+                        text = "Bezahlt von " + (dataHandler.getRoommate(financeEntry.benefactor?.id)?.username ?: "Unbekannt"),
+                        color = UdoWhite
                     )
                 }
-                Spacer(modifier = Modifier.height(5.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Spacer(modifier = Modifier.weight(0.5f))
+                Column(modifier = Modifier
+                    .padding(end = 5.dp)
+                    .widthIn(160.dp, 200.dp)) {
                     ListNamesSimpleRow(
-                        description = "Gönner",
-                        dataHandler.getRoommate(financeEntry.benefactor?.id)?.username
-                            ?: "unknown"
-                    )
-                    ListNamesSimpleRow(
-                        description = "Schnorrer",
+                        description = "Bezahlt für: ",
                         nameList = financeEntry.moucherList?.map { moucher ->
-                            dataHandler.getRoommate(moucher.id)?.username ?: "unknown"
-                        }?.toTypedArray() ?: arrayOf("unknown")
+                            dataHandler.getRoommate(moucher.id)?.username ?: "Unbekannt"
+                        }?.toTypedArray() ?: arrayOf("Unbekannt")
                     )
                 }
-                Text(
-                    text = financeEntry.timestamp?.let { formatDate(it) } ?: "unknown"
-                )
             }
         }
     }
@@ -139,7 +137,7 @@ class FinanceFragment : Fragment() {
     @Composable
     fun ListNamesSimpleRow(description: String, vararg nameList: String) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = description)
+            Text(text = description, color = UdoWhite)
             Spacer(modifier = Modifier.width(5.dp))
             Column {
                 nameList.forEach { name ->
