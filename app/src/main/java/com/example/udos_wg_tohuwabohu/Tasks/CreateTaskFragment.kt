@@ -15,7 +15,6 @@ import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
-import java.util.*
 
 
 class CreateTaskFragment : Fragment() {
@@ -32,7 +31,7 @@ class CreateTaskFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view: View = inflater!!.inflate(R.layout.fragment_create_task,container, false)
-        val createTaskButton:Button = view.findViewById(R.id.button_create_task)
+        val createTaskButton:Button = view.findViewById(R.id.button_create_appointment)
         val cancelButton:Button = view.findViewById(R.id.cancel_create_button)
         val nameOfTask:EditText = view.findViewById(R.id.nameOfTaskToCreate)
         val pointsOfTask:EditText = view.findViewById(R.id.pointsOfTaskToCreate)
