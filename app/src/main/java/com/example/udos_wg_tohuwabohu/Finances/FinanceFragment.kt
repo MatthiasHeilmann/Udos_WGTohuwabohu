@@ -4,12 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
-import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.FinanceEntry
 import java.util.*
@@ -31,7 +34,6 @@ class FinanceFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
 
     private val dataHandler = DataHandler.getInstance()
-    private val dbWriter = DBWriter.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -99,13 +101,13 @@ class FinanceFragment : Fragment() {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = financeEntry.description ?: "unknown",
-                        style = UdoFinanceTextFieldTypographie()
+                        style = UdoFinanceTextFieldTypographie(),
+                        color = UdoWhite
                     )
                     Text(
-                        text = Math.round(
-                            (financeEntry.price?.times(100) ?: 0.0)
-                        ).div(100).toString() + " €",
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterEnd),
+                        text = (financeEntry.price?.times(100f) ?: 0.0).roundToInt()
+                            .div(100f).toString() + " €",
+                        modifier = Modifier.align(Alignment.CenterEnd),
                         color = UdoOrange
                     )
                 }
