@@ -41,6 +41,10 @@ class DBLoader private constructor() {
     private val db = Firebase.firestore
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[DBLoader]"
+    private var initializedTask = false
+    private var initializedCalendar = false
+    private var initializedFinance = false
+
 
     /**
      * Fetches needed data for the currently logged in user and it's wg.
@@ -64,7 +68,7 @@ class DBLoader private constructor() {
         async { loadTaskData(wgRef) }.await()
         Log.d(TAG, "Loaded Task Data...")
 
-        Log.d(TAG, "Loading Database succesful")
+        Log.d(TAG, "Loading Database successful")
 
         // Then add snapshotListener
         roommateSnapshotListener()
@@ -271,8 +275,9 @@ class DBLoader private constructor() {
                     for(dc in snapshots!!.documentChanges){
                         // for new documents
                         if(dc.type == DocumentChange.Type.ADDED){
+                            Log.d("DC TYPE", dc.type.toString())
                             Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
-                            mainActivity?.setAlarmTask(dataHandler.getTask(dc.document.id), "new")
+
                             try{
                                 // get new document as DocumentSnapshot and add to dataHandler
                                 dataHandler.wg.first().let { it1 ->
@@ -284,11 +289,19 @@ class DBLoader private constructor() {
                                         .addOnSuccessListener { document ->
                                             dataHandler.addTask(Task(document))
                                             mainActivity?.reloadTaskFragment()
+                                            initializedTask=true
                                         }
                                 }
                             }catch (e: Exception){
                                 Log.d(TAG, "Error getting new task")
                                 dataLoadError()
+                            }
+                            try{
+                                if(initializedTask){
+                                    mainActivity?.setAlarmTask(dataHandler.getTask(dc.document.id), "new")
+                                }
+                            }catch(e: Exception){
+                                Log.d(TAG, "Error getting new task, but that's not an issue")
                             }
                             // for deleted documents
                         }else if(dc.type == DocumentChange.Type.REMOVED){
@@ -369,12 +382,16 @@ class DBLoader private constructor() {
                         // for new documents
                         if (dc.type == DocumentChange.Type.ADDED) {
                             dataHandler.addFinanceEntry(FinanceEntry(dc.document))
-                            mainActivity?.setAlarmFinance(FinanceEntry(dc.document))
+                            if(initializedFinance) {
+                                mainActivity?.setAlarmFinance(FinanceEntry(dc.document))
+                            }
                         }
                     }
+                    initializedFinance=true
                     // What happens if the database document gets changed
 
                 }
+
         }
         Log.d(TAG, "Added snapshotlistener to chat")
     }

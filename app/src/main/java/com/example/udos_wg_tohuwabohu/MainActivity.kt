@@ -291,7 +291,7 @@ class MainActivity : AppCompatActivity() {
         else if(newOrCompletedOrDue=="completed"){
             intent.putExtra("notification_type", "task_completed")
         }
-        else{
+        else if(newOrCompletedOrDue=="due"){
             intent.putExtra("notification_type", "task_due")
             NotifTimeInMillis= task.dueDate?.let { (Timestamp(it).seconds-3600)*1000 }!!
         }
@@ -307,7 +307,7 @@ class MainActivity : AppCompatActivity() {
         if((newOrCompletedOrDue!="new") or (binding.textToolbar.text!="Aufgaben")) {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                (System.currentTimeMillis()),
+                NotifTimeInMillis,
                 pendingIntent
             )
         }
