@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    private fun showCalendarFragment(){
+    fun showCalendarFragment(){
         val f = CalendarFragment()
         f.setMainActivity(this)
         replaceFragment(f)

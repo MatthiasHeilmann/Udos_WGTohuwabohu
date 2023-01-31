@@ -97,11 +97,11 @@ class CalendarAddFragment : Fragment() {
             else {
                 Log.w("Validation Error", "Please enter a description and a time in the future!")
             }
-            mainActivity.showFinanceFragment()
+            mainActivity.showCalendarFragment()
         }
 
         cancelButton.setOnClickListener {
-            mainActivity.showCalendarAddFragment()
+            mainActivity.showCalendarFragment()
         }
 
         composeView = view.findViewById(R.id.compose_view)
