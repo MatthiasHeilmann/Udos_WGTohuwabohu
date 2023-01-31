@@ -2,10 +2,6 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
-import android.util.Log
-import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.MutableSnapshot
-import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.google.firebase.Timestamp
@@ -20,10 +16,17 @@ data class DataHandler(
     var chat: SnapshotStateList<ChatMessage>
 ) {
     private constructor() : this(
-        mutableStateListOf<WG>(), null, null, mutableStateMapOf(), HashMap(), mutableStateListOf<FinanceEntry>(), mutableStateListOf<ChatMessage>() )
+        mutableStateListOf<WG>(),
+        null,
+        null,
+        mutableStateMapOf(),
+        HashMap(),
+        mutableStateListOf<FinanceEntry>(),
+        mutableStateListOf<ChatMessage>()
+    )
 
     companion object {
-        private var instance: DataHandler? = null;
+        private var instance: DataHandler? = null
 
         fun getInstance(): DataHandler = instance ?: synchronized(this) {
             instance ?: DataHandler().also { instance = it }
@@ -34,14 +37,14 @@ data class DataHandler(
         for (f in finances) {
             if (!financeEntries.contains(f)) {
                 financeEntries.add(0, f)
-            }
-            else{
+            } else {
                 val i = financeEntries.indexOf(f)
                 financeEntries.remove(f)
                 financeEntries.add(i, f)
             }
         }
     }
+
     fun addChatMessage(vararg messages: ChatMessage) {
         for (m in messages) {
             if (!chat.contains(m)) {
@@ -62,19 +65,6 @@ data class DataHandler(
         }
     }
 
-
-    fun getFinancesEntries(): Array<FinanceEntry>{
-        return financeEntries.toTypedArray()
-    }
-
-    fun getChat(): Array<ChatMessage> {
-        return chat.toTypedArray()
-    }
-
-    fun getAllRoommates(): Array<Roommate>{
-        return roommateList.values.toTypedArray()
-    }
-
     fun getRoommate(uid: String?): Roommate? {
         return roommateList[uid]
     }
@@ -83,7 +73,7 @@ data class DataHandler(
         return taskList[uid]!!
     }
 
-    fun getTasks(): HashMap<String, Task>? {
+    fun getTasks(): HashMap<String, Task> {
         return taskList
     }
 

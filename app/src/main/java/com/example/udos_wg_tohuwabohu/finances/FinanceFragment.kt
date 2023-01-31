@@ -1,4 +1,4 @@
-package com.example.udos_wg_tohuwabohu.Finances
+package com.example.udos_wg_tohuwabohu.finances
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
-import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.FinanceEntry
 import java.util.*
@@ -50,31 +49,32 @@ class FinanceFragment : Fragment() {
     }
 
 
-    fun formatDate(date: Date): String {
+    private fun formatDate(date: Date): String {
         return "" + formatNumber(date.date) + "." + formatNumber(date.month + 1) + "." + formatNumber(
             1900 + date.year
         )
     }
 
-    fun formatNumber(n: Int): String {
-        return if (n > 9) "" + n else "0" + n
+    private fun formatNumber(n: Int): String {
+        return if (n > 9) "$n" else "0$n"
     }
 
     @Composable
     fun FinanceView() {
-        Column (modifier = Modifier
-            .padding(15.dp, 0.dp, 15.dp, 20.dp)
-            .verticalScroll(rememberScrollState()),
+        Column(
+            modifier = Modifier
+                .padding(15.dp, 0.dp, 15.dp, 20.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        BalanceList()
-        Text(
-            text = "Letzte Einträge:",
-            modifier = Modifier.padding(10.dp),
-            color = UdoWhite,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
+            BalanceList()
+            Text(
+                text = "Letzte Einträge:",
+                modifier = Modifier.padding(10.dp),
+                color = UdoWhite,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
             dataHandler.financeEntries.forEach { f ->
                 Spacer(modifier = Modifier.height(10.dp))
                 FinanceCard(financeEntry = f)
@@ -84,29 +84,33 @@ class FinanceFragment : Fragment() {
 
     @Composable
     fun FinanceCard(financeEntry: FinanceEntry) {
-        Box(modifier = Modifier.clip(shape = RoundedCornerShape(20.dp)),
+        Box(
+            modifier = Modifier.clip(shape = RoundedCornerShape(20.dp)),
         ) {
-            Row(modifier = Modifier
-                .background(UdoLightBlue)
-                .padding(all = 4.dp)
-                .clip(shape = RoundedCornerShape(10.dp))
+            Row(
+                modifier = Modifier
+                    .background(UdoLightBlue)
+                    .padding(all = 4.dp)
+                    .clip(shape = RoundedCornerShape(10.dp))
             ) {
                 Column(modifier = Modifier.padding(start = 5.dp)) {
-                    Text(text = financeEntry.description ?: "Unbekannt",
+                    Text(
+                        text = financeEntry.description ?: "Unbekannt",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = UdoWhite
-                        )
+                    )
                     Text(
-                        text = "Für "+ Math.round(
-                            (financeEntry.price?.times(100) ?: 0.0)
-                        ).div(100).toString() + " €",
+                        text = "Für " + Math.round(
+                            (financeEntry.price?.times(100f) ?: 0.0)
+                        ).div(100f).toString() + " €",
                         color = UdoOrange,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Am " + (financeEntry.timestamp?.let { formatDate(it) } ?: "Unbekannt"),
+                        text = "Am " + (financeEntry.timestamp?.let { formatDate(it) }
+                            ?: "Unbekannt"),
                         color = UdoWhite
                     )
 //                    ListNamesSimpleRow(
@@ -115,14 +119,17 @@ class FinanceFragment : Fragment() {
 //                            ?: "Unbekannt"
 //                    )
                     Text(
-                        text = "Bezahlt von " + (dataHandler.getRoommate(financeEntry.benefactor?.id)?.username ?: "Unbekannt"),
+                        text = "Bezahlt von " + (dataHandler.getRoommate(financeEntry.benefactor?.id)?.username
+                            ?: "Unbekannt"),
                         color = UdoWhite
                     )
                 }
                 Spacer(modifier = Modifier.weight(0.5f))
-                Column(modifier = Modifier
-                    .padding(end = 5.dp)
-                    .widthIn(160.dp, 200.dp)) {
+                Column(
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                        .widthIn(160.dp, 200.dp)
+                ) {
                     ListNamesSimpleRow(
                         description = "Bezahlt für: ",
                         nameList = financeEntry.moucherList?.map { moucher ->
@@ -175,7 +182,7 @@ class FinanceFragment : Fragment() {
                         modifier = Modifier
                             .background(UdoLightBlue)
                     ) {
-                        Column() {
+                        Column {
                             Text(
                                 text = roommate.username ?: "unknown",
                                 modifier = Modifier.padding(14.dp, 7.dp),

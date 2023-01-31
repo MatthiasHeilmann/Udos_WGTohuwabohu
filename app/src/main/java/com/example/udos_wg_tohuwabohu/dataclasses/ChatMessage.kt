@@ -25,9 +25,9 @@ class ChatMessage(
 
     override fun equals(other: Any?): Boolean {
         return when (other) {
-            null            -> false
-            is ChatMessage  -> other.docID.equals(this.docID)
-            else            -> super.equals(other)
+            null -> false
+            is ChatMessage -> other.docID.equals(this.docID)
+            else -> super.equals(other)
         }
     }
 }

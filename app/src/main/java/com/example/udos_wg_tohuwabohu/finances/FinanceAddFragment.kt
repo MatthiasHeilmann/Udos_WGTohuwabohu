@@ -1,12 +1,12 @@
-package com.example.udos_wg_tohuwabohu.Finances
+package com.example.udos_wg_tohuwabohu.finances
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
@@ -58,12 +59,24 @@ class FinanceAddFragment : Fragment() {
         val descriptionText: EditText = _binding.entryDescription
 
         createFinanceButton.setOnClickListener {
-            val description = descriptionText.text.toString()
-            val price = priceText.text.toString().toDouble()
-            val moucherIDs = listCheckedNames.keys.toTypedArray()
+            try {
+                val description = descriptionText.text.toString()
+                val price = priceText.text.toString().toDouble()
+                val moucherIDs = listCheckedNames.keys.toTypedArray()
+                val valideInputs = validateInputs(description, price, moucherIDs)
+                if (valideInputs)
+                    dbWriter.createFinanceEntry(description, price, moucherIDs.toList())
+                else
+                    throw IllegalArgumentException("Invalid Numbers")
 
-            dbWriter.createFinanceEntry(description, price, moucherIDs.toList())
-            mainActivity.showFinanceFragment()
+                mainActivity.showFinanceFragment()
+            } catch (e: java.lang.IllegalArgumentException) {
+                Toast.makeText(
+                    mainActivity,
+                    "Invalide Daten eingegeben",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         cancelButton.setOnClickListener {
@@ -80,9 +93,9 @@ class FinanceAddFragment : Fragment() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MoucherDropdown() {
-        val listItems = dataHandler.roommateList.values.map { r ->
+        val listItems = dataHandler.roommateList.values.associate { r ->
             (r.docID) to (r.username ?: "unknown")
-        }.toMap()
+        }
         val checkedList = remember { listItems.map { false }.toMutableStateList() }
         var expanded by remember { mutableStateOf(false) }
 
@@ -147,7 +160,7 @@ class FinanceAddFragment : Fragment() {
                         },
                         modifier = Modifier.background(UdoLightBlue),
                         text = {
-                            Row() {
+                            Row {
                                 Checkbox(
                                     checked = checkedList[index],
                                     onCheckedChange = {
@@ -181,6 +194,14 @@ class FinanceAddFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun validateInputs(
+        description: String,
+        price: Double?,
+        moucherIDs: Array<String>
+    ): Boolean {
+        return (description.trim().isNotEmpty() && price != null && moucherIDs.isNotEmpty())
     }
 
     fun setMainActivity(mainActivity: MainActivity) {

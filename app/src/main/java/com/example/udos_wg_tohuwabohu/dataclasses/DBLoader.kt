@@ -1,27 +1,10 @@
 package com.example.udos_wg_tohuwabohu.dataclasses
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.ContextCompat.startActivity
-import androidx.fragment.app.Fragment
-import com.example.udos_wg_tohuwabohu.LonelyPageActivity
 import com.example.udos_wg_tohuwabohu.MainActivity
-import com.example.udos_wg_tohuwabohu.NoConnectionActivity
-import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.async
@@ -30,7 +13,7 @@ import kotlinx.coroutines.tasks.asDeferred
 
 class DBLoader private constructor() {
     companion object {
-        private var instance: DBLoader? = null;
+        private var instance: DBLoader? = null
 
         fun getInstance(): DBLoader = instance ?: synchronized(this) {
             instance ?: DBLoader().also { instance = it }
@@ -42,7 +25,6 @@ class DBLoader private constructor() {
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[DBLoader]"
     private var initializedTask = false
-    private var initializedCalendar = false
     private var initializedFinance = false
 
 
@@ -98,7 +80,7 @@ class DBLoader private constructor() {
         }
 
         Log.d(TAG, "Current User is: ${userRes!!.id} => ${userRes.data}")
-        dataHandler.user = Roommate(userRes);
+        dataHandler.user = Roommate(userRes)
         // wg reference
         wgRef = userRes["wg_id"] as DocumentReference
         return wgRef
@@ -109,7 +91,6 @@ class DBLoader private constructor() {
      * Call `loadContactPeronData` with that information
      */
     private suspend fun loadWGData(wgRef: DocumentReference): DocumentReference {
-        val wg: WG
         var wgRes: DocumentSnapshot? = null
         try {
             wgRes = db.collection(Collections.WG.call).document(wgRef.id)
@@ -120,20 +101,16 @@ class DBLoader private constructor() {
             e.printStackTrace()
         }
 
-        wg = WG(wgRes!!)
+        dataHandler.wg = mutableStateListOf(WG(wgRes!!))
 
-        dataHandler.wg = mutableStateListOf(wg)
-
-        // ansprechpartner reference
-        val anRef = wgRes.get("ansprechpartner") as DocumentReference
-        return anRef
+        return wgRes.get("ansprechpartner") as DocumentReference
     }
 
     private suspend fun loadContactPeronData(anRef: DocumentReference) {
         val an: ContactPerson?
         var anRes: DocumentSnapshot? = null
         try {
-            Log.d("[*******]",anRef.id)
+            Log.d("[*******]", anRef.id)
             anRes = db.collection(Collections.ContactPerson.call)
                 .document(anRef.id)
                 .get()
@@ -147,7 +124,7 @@ class DBLoader private constructor() {
         dataHandler.contactPerson = an
     }
 
-    private suspend fun loadFinanceData(wgRef: DocumentReference){
+    private suspend fun loadFinanceData(wgRef: DocumentReference) {
         var financeRes: QuerySnapshot? = null
         try {
             financeRes = db.collection(Collections.WG.call)
@@ -162,8 +139,8 @@ class DBLoader private constructor() {
             financeRes?.forEach { cost ->
                 dataHandler.addFinanceEntry(FinanceEntry(cost))
             }
-        }catch (e: Exception){
-            Log.d(TAG,"couldnt find finances. Not created yet?")
+        } catch (e: Exception) {
+            Log.d(TAG, "couldnt find finances. Not created yet?")
         }
     }
 
@@ -182,8 +159,8 @@ class DBLoader private constructor() {
             chatRes?.forEach { msg ->
                 dataHandler.addChatMessage(ChatMessage(msg))
             }
-        }catch(e:Exception){
-            Log.d(TAG,"couldnt find chatfiles. Not created yet?")
+        } catch (e: Exception) {
+            Log.d(TAG, "couldnt find chatfiles. Not created yet?")
         }
     }
 
@@ -221,8 +198,8 @@ class DBLoader private constructor() {
             tasksRes!!.forEach { task ->
                 dataHandler.addTask(Task(task))
             }
-        }catch (e: Exception){
-            Log.d(TAG,"couldnt find tasks. Not created yet?")
+        } catch (e: Exception) {
+            Log.d(TAG, "couldnt find tasks. Not created yet?")
         }
 
     }
@@ -246,7 +223,7 @@ class DBLoader private constructor() {
                         }
                         Log.d(
                             TAG,
-                            "RoommateList updated ${dataHandler.roommateList.toString()}"
+                            "RoommateList updated ${dataHandler.roommateList}"
                         )
                     }
                 }
@@ -262,23 +239,24 @@ class DBLoader private constructor() {
      * adds new tasks to dataHandler
      * deletes deleted tasks from dataHandler
      */
-    private fun addTaskCollectionSnapshotListener(){
-            db.collection(Collections.WG.call)
-                .document(dataHandler.wg.first().docID)
-                .collection(Collections.Task.call)
-                // Listener for collection
-                .addSnapshotListener{ snapshots,e ->
-                    if(e != null){
-                        Log.d(TAG,"listen:error",e)
-                        return@addSnapshotListener
-                    }
-                    for(dc in snapshots!!.documentChanges){
-                        // for new documents
-                        if(dc.type == DocumentChange.Type.ADDED){
+    private fun addTaskCollectionSnapshotListener() {
+        db.collection(Collections.WG.call)
+            .document(dataHandler.wg.first().docID)
+            .collection(Collections.Task.call)
+            // Listener for collection
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.d(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+                for (dc in snapshots!!.documentChanges) {
+                    // for new documents
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> {
                             Log.d("DC TYPE", dc.type.toString())
-                            Log.d("TAG","NEW TASK IN COLLECTION: " + dc.document.id)
+                            Log.d("TAG", "NEW TASK IN COLLECTION: " + dc.document.id)
 
-                            try{
+                            try {
                                 // get new document as DocumentSnapshot and add to dataHandler
                                 dataHandler.wg.first().let { it1 ->
                                     db.collection("wg")
@@ -289,28 +267,33 @@ class DBLoader private constructor() {
                                         .addOnSuccessListener { document ->
                                             dataHandler.addTask(Task(document))
                                             mainActivity?.reloadTaskFragment()
-                                            initializedTask=true
+                                            initializedTask = true
                                         }
                                 }
-                            }catch (e: Exception){
+                            } catch (e: Exception) {
                                 Log.d(TAG, "Error getting new task")
                                 dataLoadError()
                             }
-                            try{
-                                if(initializedTask){
-                                    mainActivity?.setAlarmTask(dataHandler.getTask(dc.document.id), "new")
+                            try {
+                                if (initializedTask) {
+                                    mainActivity?.setAlarmTask(
+                                        dataHandler.getTask(dc.document.id),
+                                        "new"
+                                    )
                                 }
-                            }catch(e: Exception){
+                            } catch (e: Exception) {
                                 Log.d(TAG, "Error getting new task, but that's not an issue")
                             }
                             // for deleted documents
-                        }else if(dc.type == DocumentChange.Type.REMOVED){
-                            Log.d(TAG,"TASK FROM COLLECTION REMOVED: " + dc.document.id)
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            Log.d(TAG, "TASK FROM COLLECTION REMOVED: " + dc.document.id)
                             dataHandler.taskList.remove(dc.document.id)
                             mainActivity?.reloadTaskFragment()
-                        }else if(dc.type == DocumentChange.Type.MODIFIED) {
-                            try{
-                                Log.d(TAG,"Updating task....")
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            try {
+                                Log.d(TAG, "Updating task....")
                                 // get new document as DocumentSnapshot and add to dataHandler
                                 dataHandler.wg.first().let { it1 ->
                                     db.collection("wg")
@@ -320,17 +303,21 @@ class DBLoader private constructor() {
                                         .get()
                                         .addOnSuccessListener { document ->
                                             dataHandler.getTask(document.id).update(document)
-                                            mainActivity?.setAlarmTask(dataHandler.getTask(document.id), "completed")
+                                            mainActivity?.setAlarmTask(
+                                                dataHandler.getTask(document.id),
+                                                "completed"
+                                            )
                                             mainActivity?.reloadTaskFragment()
                                         }
                                 }
-                            }catch (e: Exception){
+                            } catch (e: Exception) {
                                 Log.d(TAG, "Error updating new task")
                                 dataLoadError()
                             }
                         }
                     }
                 }
+            }
 
     }
 
@@ -339,30 +326,17 @@ class DBLoader private constructor() {
             db.collection(Collections.WG.call)
                 .document(it.docID).collection(Collections.CHAT.call)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    firebaseFirestoreException?.let {
-                        Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
+                    firebaseFirestoreException?.let { fse ->
+                        Toast.makeText(mainActivity, fse.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
-                    for(dc in querySnapshot!!.documentChanges){
-                        if(dc.type == DocumentChange.Type.ADDED){
+                    for (dc in querySnapshot!!.documentChanges) {
+                        if (dc.type == DocumentChange.Type.ADDED) {
                             val chatmsg = ChatMessage(dc.document)
                             dataHandler.addChatMessage(chatmsg)
                             mainActivity!!.setAlarmChat(chatmsg)
                         }
                     }
-                    // What happens if the database document gets changed
-                    /*querySnapshot?.let {
-                        it.forEach { msg ->
-                            Log.d("QuerySnapshot", ChatMessage(msg).toString())
-                            val chatmsg = ChatMessage(msg)
-                            dataHandler.addChatMessage(chatmsg)
-                            mainActivity!!.setAlarmChat(chatmsg)
-                        }
-                        Log.d(
-                            TAG,
-                            "chat updated $it"
-                        )
-                    }*/
                 }
         }
         Log.d(TAG, "Added snapshotlistener to chat")
@@ -378,16 +352,16 @@ class DBLoader private constructor() {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
                         return@addSnapshotListener
                     }
-                    for(dc in querySnapshot!!.documentChanges) {
+                    for (dc in querySnapshot!!.documentChanges) {
                         // for new documents
                         if (dc.type == DocumentChange.Type.ADDED) {
                             dataHandler.addFinanceEntry(FinanceEntry(dc.document))
-                            if(initializedFinance) {
+                            if (initializedFinance) {
                                 mainActivity?.setAlarmFinance(FinanceEntry(dc.document))
                             }
                         }
                     }
-                    initializedFinance=true
+                    initializedFinance = true
                     // What happens if the database document gets changed
 
                 }
@@ -410,8 +384,8 @@ class DBLoader private constructor() {
                         dataHandler.wg.first().update(it)
                         mainActivity!!.reloadHomeFragment()
                         mainActivity!!.reloadCalendarFragment()
-                        dataHandler.wg.first().calendar?.forEach{ appointment ->
-                            if(System.currentTimeMillis() < appointment.values.first().seconds*1000) {
+                        dataHandler.wg.first().calendar?.forEach { appointment ->
+                            if (System.currentTimeMillis() < appointment.values.first().seconds * 1000) {
                                 mainActivity!!.setAlarmCalendar(appointment)
                             }
                         }
@@ -458,13 +432,14 @@ class DBLoader private constructor() {
         this.mainActivity = mainActivity
     }
 
-    private fun dataLoadError(){
-        Toast.makeText(mainActivity,
+    private fun dataLoadError() {
+        Toast.makeText(
+            mainActivity,
             "Es gab einen Fehler beim Laden der Inhalte. Bitte versuche es erneut.",
-            Toast.LENGTH_LONG)
+            Toast.LENGTH_LONG
+        )
             .show()
     }
-
 
 
 }

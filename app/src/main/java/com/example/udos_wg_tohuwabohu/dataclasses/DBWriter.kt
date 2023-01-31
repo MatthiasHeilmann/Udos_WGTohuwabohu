@@ -2,9 +2,8 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import android.widget.Toast
-import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.compose.runtime.MutableState
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
@@ -15,7 +14,7 @@ import java.util.*
 class DBWriter private constructor() {
 
     companion object {
-        private var instance: DBWriter? = null;
+        private var instance: DBWriter? = null
 
         fun getInstance(): DBWriter = instance ?: synchronized(this) {
             instance ?: DBWriter().also { instance = it }
@@ -25,7 +24,7 @@ class DBWriter private constructor() {
     private val db = Firebase.firestore
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[MainActivity]"
-    val EmptyWG = db.collection(Collections.WG.call).document("EmptyWG")
+    private val emptyWG = db.collection(Collections.WG.call).document("EmptyWG")
     private var mainActivity: MainActivity? = null
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
@@ -47,7 +46,7 @@ class DBWriter private constructor() {
         // Update roommates with new balance
         updateBalance(dataHandler.user, price)
         moucherIDs.forEach { moucherID ->
-            updateBalance(dataHandler.getRoommate(moucherID), price/moucherIDs.size * -1)
+            updateBalance(dataHandler.getRoommate(moucherID), price / moucherIDs.size * -1)
         }
 
         // Upload finance entry to database
@@ -59,7 +58,7 @@ class DBWriter private constructor() {
         feMap["timestamp"] = Date()
 
 
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection("wg")
                 .document(it.docID)
                 .collection("finanzen")
@@ -80,13 +79,13 @@ class DBWriter private constructor() {
         c.add(Calendar.DATE, frequencyInDays)
         newDate = c.time
 
-        val wgDocRef = dataHandler.wg?.let {
+        val wgDocRef = dataHandler.wg.let {
             it.first().let { it1 ->
                 db.collection(Collections.WG.toString()).document(
                     it1.docID
                 )
             }
-        } ?: return
+        }
 
         val completerDocRef = completer?.let {
             db.collection("Mitbewohner").document(
@@ -102,7 +101,7 @@ class DBWriter private constructor() {
         myTask["punkte"] = points
         myTask["wg_id"] = wgDocRef
         myTask["erlediger"] = completerDocRef
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection("wg")
                 .document(it.docID)
                 .collection("tasks")
@@ -123,7 +122,7 @@ class DBWriter private constructor() {
         cmMap["timestamp"] = timestamp
         cmMap["user"] = userDocRef
 
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection("wg")
                 .document(it.docID)
                 .collection("chat_files")
@@ -155,7 +154,7 @@ class DBWriter private constructor() {
         val wgName: MutableMap<String, Any> = HashMap()
         wgName["bezeichnung"] = name
         db.collection(Collections.WG.call)
-            .document(dataHandler.wg!!.first().docID)
+            .document(dataHandler.wg.first().docID)
             .update(wgName)
         val contact: MutableMap<String, Any> = HashMap()
         contact["IBAN"] = contactIBAN
@@ -171,7 +170,7 @@ class DBWriter private constructor() {
     fun leaveWG(mainActivity: MainActivity) {
         if (!ConnectionCheck.getInstance().check(mainActivity)) return
         val userData: MutableMap<String, Any> = HashMap()
-        userData["wg_id"] = EmptyWG
+        userData["wg_id"] = emptyWG
         userData["kontostand"] = 0
         userData["coin_count"] = 0
         userData["guteNudel_count"] = 0
@@ -194,7 +193,7 @@ class DBWriter private constructor() {
      * finds the new completer, which has the lowest coin_count
      * @return roommate with the lowest coin_count
      */
-    fun getCompleter(): Roommate? {
+    private fun getCompleter(): Roommate? {
         val roommateList = dataHandler.roommateList
         var worstMate: Roommate? = null
         var worstCount: Long = Long.MAX_VALUE
@@ -222,7 +221,7 @@ class DBWriter private constructor() {
         newDate = c.time
         if (newCompleter != null) {
             val newCompleterRef = db.collection("mitbewohner").document(newCompleter.docID)
-            dataHandler.wg!!.first().let {
+            dataHandler.wg.first().let {
                 db.collection("wg")
                     .document(it.docID)
                     .collection("tasks")
@@ -242,7 +241,7 @@ class DBWriter private constructor() {
      */
     fun deleteTask(docId: String) {
         if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
-        dataHandler.wg!!.first().let {
+        dataHandler.wg.first().let {
             db.collection("wg")
                 .document(it.docID)
                 .collection("tasks")
@@ -266,7 +265,7 @@ class DBWriter private constructor() {
     /**
      * gives the roommate who checks the task the points in the database
      */
-    fun updateBalance(roommate: Roommate?, price: Double) {
+    private fun updateBalance(roommate: Roommate?, price: Double) {
         if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
 
         println("Update shit $roommate, $price")
@@ -298,7 +297,7 @@ class DBWriter private constructor() {
                 mapOf(
                     "einkaufsliste.${item.key}" to checkedState.value,
                 )
-            );
-        Log.d("[SHOPPING FRAGMENT]", item.key + " geändert zu " + checkedState.value);
+            )
+        Log.d("[SHOPPING FRAGMENT]", item.key + " geändert zu " + checkedState.value)
     }
 }

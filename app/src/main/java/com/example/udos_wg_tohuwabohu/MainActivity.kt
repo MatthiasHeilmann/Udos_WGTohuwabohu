@@ -10,31 +10,24 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Process
 import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.udos_wg_tohuwabohu.Calendar.CalendarAddFragment
-import com.example.udos_wg_tohuwabohu.Calendar.CalendarFragment
-import com.example.udos_wg_tohuwabohu.Finances.FinanceAddFragment
-import com.example.udos_wg_tohuwabohu.Finances.FinanceFragment
-import com.example.udos_wg_tohuwabohu.Home.HomeEditFragment
-import com.example.udos_wg_tohuwabohu.Home.HomeFragment
-import com.example.udos_wg_tohuwabohu.Tasks.CreateTaskFragment
-import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
+import com.example.udos_wg_tohuwabohu.calendar.CalendarAddFragment
+import com.example.udos_wg_tohuwabohu.calendar.CalendarFragment
+import com.example.udos_wg_tohuwabohu.finances.FinanceAddFragment
+import com.example.udos_wg_tohuwabohu.finances.FinanceFragment
+import com.example.udos_wg_tohuwabohu.home.HomeEditFragment
+import com.example.udos_wg_tohuwabohu.home.HomeFragment
+import com.example.udos_wg_tohuwabohu.tasks.CreateTaskFragment
+import com.example.udos_wg_tohuwabohu.tasks.TasksFragment
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
-import java.time.LocalDateTime
 
 class MainActivity : AppCompatActivity() {
 

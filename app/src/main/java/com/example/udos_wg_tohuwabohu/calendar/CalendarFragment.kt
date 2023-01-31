@@ -1,39 +1,26 @@
-package com.example.udos_wg_tohuwabohu.Calendar
+package com.example.udos_wg_tohuwabohu.calendar
 
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CalendarView
-import android.widget.TimePicker
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
-import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
-import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.google.firebase.Timestamp
-import java.sql.Time
 import java.text.DateFormatSymbols
 import java.util.*
 
@@ -44,11 +31,7 @@ class CalendarFragment : Fragment() {
     private lateinit var _binding: FragmentCalendarBinding
 
     //Get Calendar data from Data Handler
-    var calendarData = DataHandler.getInstance().getCalendar()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private var calendarData = DataHandler.getInstance().getCalendar()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,9 +65,8 @@ class CalendarFragment : Fragment() {
 // Inflate the layout for this fragment
 //return inflater.inflate(R.layout.fragment_calendar, container, false)
 
-    @OptIn(ExperimentalUnitApi::class)
     @Composable
-    fun CalendarCard(date: String, time: String, shape: Shape, cardText: String) {
+    fun CalendarCard(date: String, time: String, cardText: String) {
         UdosTheme {
             Card(
                 colors = UdoCardTheme(), modifier = Modifier
@@ -154,7 +136,6 @@ class CalendarFragment : Fragment() {
                     time = appointment.values.first()
                         .toDate().hours.toString() + ":" + appointment.values.first()
                         .toDate().minutes.toString().padStart(2, "0".single()),
-                    shape = MaterialTheme.shapes.large,
                     cardText = appointment.keys.first()
                 )
             }

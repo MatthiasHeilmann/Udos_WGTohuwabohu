@@ -1,52 +1,45 @@
-package com.example.udos_wg_tohuwabohu.Home
+package com.example.udos_wg_tohuwabohu.home
 
+//import androidx.compose.foundation.layout.RowScopeInstance.weight
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
-//import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentHome2Binding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
-import com.example.udos_wg_tohuwabohu.dataclasses.Task
 import com.google.firebase.auth.FirebaseAuth
-import java.util.ArrayList
-import kotlin.properties.Delegates
 
-//TODO reload on changes
 class HomeFragment : Fragment() {
-    lateinit var composeView: ComposeView
-    lateinit var composeButton: ComposeView
+    private  lateinit var composeView: ComposeView
+    private lateinit var composeButton: ComposeView
     private val dataHandler = DataHandler.getInstance()
-    val TAG = "[HOME FRAGMENT]"
+    private val TAG = "[HOME FRAGMENT]"
     private lateinit var _binding: FragmentHome2Binding
     private var mainActivity: MainActivity? = null
     private lateinit var requestMultiplePermissionsLauncher: ActivityResultLauncher<Array<String>>
@@ -56,13 +49,14 @@ class HomeFragment : Fragment() {
         requestMultiplePermissionsLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
-            ) {permissions ->
+            ) { permissions ->
                 permissions.entries.forEach {
                     Log.e("DEBUG", "${it.key} = ${it.value}")
                 }
             }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,10 +90,10 @@ class HomeFragment : Fragment() {
 
             builder.setTitle("WG wirklich verlassen?")
             builder.setMessage("Deine Coins, gute Nudel-Punkte und dein Kontostand werden zurückgesetzt.")
-            builder.setPositiveButton("Verlassen") { dialogInterface, which ->
+            builder.setPositiveButton("Verlassen") { _, _ ->
                 DBWriter.getInstance().leaveWG(mainActivity!!)
             }
-            builder.setNegativeButton("Abbrechen") { dialogInterface, which ->
+            builder.setNegativeButton("Abbrechen") { _, _ ->
                 Log.d(TAG, "Abgebrochen")
             }
             val alertDialog: AlertDialog = builder.create()
@@ -110,11 +104,11 @@ class HomeFragment : Fragment() {
             val builder = AlertDialog.Builder(activity, R.style.WarningDialogTheme)
             builder.setTitle("Wirklich abmelden?")
             builder.setMessage("Bist Du sicher, dass Du Dich abmelden willst?")
-            builder.setPositiveButton("Ja") { dialogInterface, which ->
+            builder.setPositiveButton("Ja") { _, _ ->
                 FirebaseAuth.getInstance().signOut()
                 mainActivity!!.restartApp()
             }
-            builder.setNegativeButton("Abbrechen") { dialogInterface, which ->
+            builder.setNegativeButton("Abbrechen") { _, _ ->
                 Log.d(TAG, "Abgebrochen")
             }
             val alertDialog: AlertDialog = builder.create()
@@ -125,11 +119,21 @@ class HomeFragment : Fragment() {
         composeView.setContent {
             AllRoommateCards()
         }
-        val permissionsGranted = ((mainActivity?.let { ContextCompat.checkSelfPermission(it.applicationContext, Manifest.permission.POST_NOTIFICATIONS) } == PackageManager.PERMISSION_GRANTED)
-        and (mainActivity?.let { ContextCompat.checkSelfPermission(it.applicationContext, Manifest.permission.SCHEDULE_EXACT_ALARM) } == PackageManager.PERMISSION_GRANTED))
+        val permissionsGranted = ((mainActivity?.let {
+            ContextCompat.checkSelfPermission(
+                it.applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        } == PackageManager.PERMISSION_GRANTED)
+                and (mainActivity?.let {
+            ContextCompat.checkSelfPermission(
+                it.applicationContext,
+                Manifest.permission.SCHEDULE_EXACT_ALARM
+            )
+        } == PackageManager.PERMISSION_GRANTED))
         Log.d("Permissions granted:", permissionsGranted.toString())
         composeButton = view.findViewById(R.id.compose_button)
-        composeButton.setContent{
+        composeButton.setContent {
             PermissionsButton(permissionsGranted)
         }
         return view
@@ -147,7 +151,7 @@ class HomeFragment : Fragment() {
         }
         val sortedMateList =
             unSortedMateList.sortedWith(compareBy { it.guteNudel_count }).reversed()
-        Column(horizontalAlignment = Alignment.CenterHorizontally){
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             sortedMateList.forEach { mate ->
                 Log.d(TAG, mate.toString())
                 RoommateCard(mate)
@@ -188,9 +192,11 @@ class HomeFragment : Fragment() {
             }
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
-    fun PermissionsButton(permissionsGranted: Boolean){
-        if(!permissionsGranted){
+    fun PermissionsButton(permissionsGranted: Boolean) {
+        if (!permissionsGranted) {
             Button(onClick = {
                 requestMultiplePermissionsLauncher.launch(
                     arrayOf(
