@@ -41,7 +41,7 @@ class LonelyPageActivity: AppCompatActivity() {
                 val wg_id = document.get("wg_id")
                 Log.d(TAG, "onCreate von Lonelypage: wg_id: $wg_id")
                 if (document.get("wg_id") != db.collection("wg").document("EmptyWG")) {
-                    var intent = createMainActivityIntent(this@LonelyPageActivity, email!!)
+                    val intent = createMainActivityIntent(this@LonelyPageActivity, email!!)
                     startActivity(intent)
                     return@addOnSuccessListener
                 }
@@ -103,7 +103,10 @@ class LonelyPageActivity: AppCompatActivity() {
                                 }
                             }
                     }catch (e:Exception){
-                        Toast.makeText(this@LonelyPageActivity,"Es gab einen Fehler beim Beitreten der WG. Stelle sicher, dass der Beitrittscode korrekt ist.",Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@LonelyPageActivity,
+                            "Es gab einen Fehler beim Beitreten der WG. Stelle sicher, dass der Beitrittscode korrekt ist.",
+                            Toast.LENGTH_LONG)
+                            .show()
                         e.printStackTrace()
                     }
                 }
@@ -118,11 +121,11 @@ class LonelyPageActivity: AppCompatActivity() {
             async {
                 newAnsprechpartner.set(
                     hashMapOf(
-                        "IBAN" to "tbd",
-                        "email" to "tbd",
+                        "IBAN" to "Noch nicht festgelegt",
+                        "email" to "Noch nicht festgelegt",
                         "nachname" to "",
-                        "tel_nr" to "tbd",
-                        "vorname" to "tbd"
+                        "tel_nr" to "Noch nicht festgelegt",
+                        "vorname" to "Noch nicht festgelegt"
                     )
                 )
             }.await()
@@ -146,8 +149,8 @@ class LonelyPageActivity: AppCompatActivity() {
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.d("[LONELY PAGE]", "[#############################]")
             Log.d("[LONELY PAGE]", e.toString())
+            Toast.makeText(this@LonelyPageActivity,"Es gab einen Fehler beim Erstellen der WG. Bitte versuche es erneut.",Toast.LENGTH_LONG).show()
         }
     }
 
