@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -39,12 +40,19 @@ class DBWriter private constructor() {
             )
         } ?: return
 
-        val moucherDocRefs = moucherIDs.map {
+        val moucherDocRefs :ArrayList<DocumentReference> = moucherIDs.map {
             db.collection("Mitbewohner").document(it)
+        } as ArrayList<DocumentReference>
+
+        var priceOffset = 0.0
+
+        if(moucherDocRefs.contains(userDocRef)){
+            priceOffset = price / moucherIDs.size
+            moucherDocRefs.remove(userDocRef)
         }
 
         // Update roommates with new balance
-        updateBalance(dataHandler.user, price)
+        updateBalance(dataHandler.user, price - priceOffset)
         moucherIDs.forEach { moucherID ->
             updateBalance(dataHandler.getRoommate(moucherID), price / moucherIDs.size * -1)
         }
@@ -268,12 +276,11 @@ class DBWriter private constructor() {
     private fun updateBalance(roommate: Roommate?, price: Double) {
         if (!ConnectionCheck.getInstance().check(mainActivity!!)) return
 
-        println("Update shit $roommate, $price")
 
         if (roommate != null) {
-            val newPoints = (roommate.balance ?: 0.0).plus(price)
+            val newBalance = (roommate.balance ?: 0.0).plus(price)
             db.collection(Collections.Roommate.call).document(roommate.docID)
-                .update("kontostand", newPoints)
+                .update("kontostand", newBalance)
         }
     }
 
