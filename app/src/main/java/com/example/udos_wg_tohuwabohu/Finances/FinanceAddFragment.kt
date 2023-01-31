@@ -53,7 +53,7 @@ class FinanceAddFragment : Fragment() {
         _binding = FragmentFinanceAddBinding.inflate(inflater, container, false)
         val view = _binding.root
 
-        val createTaskButton: Button = view.findViewById(R.id.button_create_task)
+        val createTaskButton: Button = _binding.buttonCreateTask
         val cancelButton: Button = view.findViewById(R.id.cancel_create_button)
         val priceText: EditText = view.findViewById(R.id.entry_price)
         val descriptionText: EditText = view.findViewById(R.id.entry_description)
