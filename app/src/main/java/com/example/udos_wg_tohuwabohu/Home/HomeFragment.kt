@@ -85,9 +85,7 @@ class HomeFragment : Fragment() {
             builder.setMessage("Bist Du sicher, dass Du Dich abmelden willst?")
             builder.setPositiveButton("Ja"){dialogInterface, which ->
                 FirebaseAuth.getInstance().signOut()
-                val activity: Activity = requireActivity()
-                startActivity(Intent(activity, LoginActivity::class.java))
-                activity.finish()
+                mainActivity!!.restartApp()
             }
             builder.setNegativeButton("Abbrechen"){dialogInterface,which->
                 Log.d(TAG,"Abgebrochen")
