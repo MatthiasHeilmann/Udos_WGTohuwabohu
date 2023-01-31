@@ -66,16 +66,16 @@ class HomeFragment : Fragment() {
 
         _binding.buttonLeaveWg.setOnClickListener{
             val builder = AlertDialog.Builder(activity)
-            builder.setTitle("WG verlassen?")
-            builder.setMessage("Bist Du sicher, dass Du die WG verlassen willst?")
-            builder.setPositiveButton("Ja"){dialogInterface, which ->
+            builder.setTitle("WG wirklich verlassen?")
+            builder.setMessage("Deine Coins, gute Nudel-Punkte und dein Kontostand werden zurückgesetzt.")
+            builder.setPositiveButton("Verlassen"){dialogInterface, which ->
                 DBWriter.getInstance().leaveWG(mainActivity!!)
             }
             builder.setNegativeButton("Abbrechen"){dialogInterface,which->
                 Log.d(TAG,"Abgebrochen")
             }
             val alertDialog: AlertDialog = builder.create()
-            alertDialog.setCancelable(false)
+            alertDialog.setCancelable(true)
             alertDialog.show()
         }
         _binding.buttonLogout2.setOnClickListener{
@@ -92,7 +92,7 @@ class HomeFragment : Fragment() {
                 Log.d(TAG,"Abgebrochen")
             }
             val alertDialog: AlertDialog = builder.create()
-            alertDialog.setCancelable(false)
+            alertDialog.setCancelable(true)
             alertDialog.show()
         }
         composeView = view.findViewById(R.id.compose_view)

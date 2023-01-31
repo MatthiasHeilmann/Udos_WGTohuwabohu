@@ -4,6 +4,7 @@ package com.example.udos_wg_tohuwabohu.dataclasses
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import android.widget.Toast
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.udos_wg_tohuwabohu.MainActivity
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
@@ -169,9 +170,14 @@ class DBWriter private constructor() {
 
     fun leaveWG(mainActivity: MainActivity) {
         if (!ConnectionCheck.getInstance().check(mainActivity)) return
+        val userData: MutableMap<String, Any> = HashMap()
+        userData["wg_id"] = EmptyWG
+        userData["kontostand"] = 0
+        userData["coin_count"] = 0
+        userData["guteNudel_count"] = 0
         db.collection("mitbewohner")
             .document(dataHandler.user!!.docID)
-            .update("wg_id", EmptyWG)
+            .update(userData)
             .addOnSuccessListener {
                 mainActivity.restartApp()
             }
