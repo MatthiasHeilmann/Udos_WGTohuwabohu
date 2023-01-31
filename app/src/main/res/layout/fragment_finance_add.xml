@@ -85,7 +85,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
             <Button
-                android:id="@+id/button_create_task"
+                android:id="@+id/button_create_finance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="64dp"
@@ -111,7 +111,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_create_task" />
+                app:layout_constraintTop_toBottomOf="@+id/button_create_finance" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

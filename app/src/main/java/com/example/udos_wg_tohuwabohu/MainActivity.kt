@@ -77,10 +77,7 @@ class MainActivity : AppCompatActivity() {
                     binding.textToolbar.text = FragmentTitle.Chat.call
                 }
                 R.id.nav_finance -> {
-                    val f = FinanceFragment()
-                    f.setMainActivity(this)
-                    replaceFragment(f)
-                    binding.textToolbar.text = FragmentTitle.Finances.call
+                    showFinanceFragment()
                 }
                 R.id.nav_task -> {
                     showTaskFragment()
@@ -112,7 +109,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openAddFinanceFragment(){
         val f = FinanceAddFragment()
-        //f.setMainActivity(this)
+        f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.FinancesAdd.call
     }
@@ -122,6 +119,13 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.CreateNewTask.call
+    }
+
+    fun showFinanceFragment(){
+        val f = FinanceFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.Finances.call
     }
 
     fun reloadTaskFragment(){

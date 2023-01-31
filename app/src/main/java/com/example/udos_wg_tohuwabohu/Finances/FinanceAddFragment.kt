@@ -33,6 +33,7 @@ import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 
 class FinanceAddFragment : Fragment() {
+    private lateinit var mainActivity: MainActivity
     private lateinit var _binding: FragmentFinanceAddBinding
     private lateinit var composeView: ComposeView
     val dataHandler = DataHandler.getInstance()
@@ -47,6 +48,15 @@ class FinanceAddFragment : Fragment() {
     ): View {
         _binding = FragmentFinanceAddBinding.inflate(inflater, container, false)
         val view = _binding.root
+
+        _binding.cancelCreateButton.setOnClickListener {
+            mainActivity.showFinanceFragment()
+        }
+
+        _binding.buttonCreateFinance.setOnClickListener {
+            // TODO create finance
+            mainActivity.showFinanceFragment()
+        }
 
         composeView = view.findViewById(R.id.compose_view)
         composeView.setContent {
@@ -172,5 +182,9 @@ class FinanceAddFragment : Fragment() {
     @Composable
     fun FinanceAddPreview() {
         TestDropdown()
+    }
+
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
     }
 }
