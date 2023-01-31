@@ -104,6 +104,7 @@ class HomeFragment : Fragment() {
             builder.setMessage("Bist Du sicher, dass Du Dich abmelden willst?")
             builder.setPositiveButton("Ja") { _, _ ->
                 FirebaseAuth.getInstance().signOut()
+                Thread.sleep(1000) // wait for signout
                 mainActivity!!.restartApp()
             }
             builder.setNegativeButton("Abbrechen") { _, _ ->
