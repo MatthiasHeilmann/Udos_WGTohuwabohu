@@ -22,4 +22,24 @@
     <style name="Theme.Udos_WGTohuwabohu.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.Udos_WGTohuwabohu.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="WarningDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:background">@color/udo_dark_blue</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+    </style>
+    <style name="NegativeButtonStyle" style="?android:attr/borderlessButtonStyle">
+        <item name="android:textColor">@color/udo_red</item>
+        <item name="android:backgroundTint">@color/udo_dark_blue</item>
+        <item name="android:borderlessButtonStyle">@color/udo_dark_blue</item>
+
+    </style>
+    <style name="PositiveButtonStyle" style="?android:attr/borderlessButtonStyle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:backgroundTint">@color/udo_dark_blue</item>
+        <item name="android:borderlessButtonStyle">@color/udo_dark_blue</item>
+
+    </style>
 </resources>

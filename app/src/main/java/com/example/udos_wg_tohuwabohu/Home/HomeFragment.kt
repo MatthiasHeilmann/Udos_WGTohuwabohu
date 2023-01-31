@@ -65,7 +65,8 @@ class HomeFragment : Fragment() {
         _binding.userUsername.text = "Nutzername: ${dataHandler.user?.username.toString()}"
 
         _binding.buttonLeaveWg.setOnClickListener{
-            val builder = AlertDialog.Builder(activity)
+            val builder = AlertDialog.Builder(activity,R.style.WarningDialogTheme)
+
             builder.setTitle("WG wirklich verlassen?")
             builder.setMessage("Deine Coins, gute Nudel-Punkte und dein Kontostand werden zurückgesetzt.")
             builder.setPositiveButton("Verlassen"){dialogInterface, which ->
@@ -79,7 +80,7 @@ class HomeFragment : Fragment() {
             alertDialog.show()
         }
         _binding.buttonLogout2.setOnClickListener{
-            val builder = AlertDialog.Builder(activity)
+            val builder = AlertDialog.Builder(activity,R.style.WarningDialogTheme)
             builder.setTitle("Wirklich abmelden?")
             builder.setMessage("Bist Du sicher, dass Du Dich abmelden willst?")
             builder.setPositiveButton("Ja"){dialogInterface, which ->
