@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     enum class FragmentTitle(val call: String) {
         WG("Eure WG"),
         Calendar("Kalender"),
-        CalendarAdd("Kalendareintrag hinzufügen"),
+        CalendarAdd("Kalendereintrag hinzufügen"),
         Shoppinglist("Einkaufsliste"),
         Chat("Chat"),
         EditWG("WG bearbeiten"),
@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    private fun showCalendarFragment(){
+    fun showCalendarFragment(){
         val f = CalendarFragment()
         f.setMainActivity(this)
         replaceFragment(f)

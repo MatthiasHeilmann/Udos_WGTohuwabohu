@@ -78,12 +78,17 @@ fun UdoCardTheme(): CardColors {
 //}
 
 @Composable
+fun UdoPopupButtonColors(): ButtonColors{
+    return ButtonDefaults.buttonColors(
+        containerColor = UdoOrange,
+        contentColor = UdoRed
+    )
+}
+
+@Composable
 fun UdoPopupCardTheme(): CardColors {
     val UdoPopupCardColors = cardColors(
         containerColor = UdoLightBlue,
-        contentColor = UdoWhite,
-        disabledContainerColor = Color.Black,
-        disabledContentColor = Color.Magenta
     )
     return UdoPopupCardColors
 }
