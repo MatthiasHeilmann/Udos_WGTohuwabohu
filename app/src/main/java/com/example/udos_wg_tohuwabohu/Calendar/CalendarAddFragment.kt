@@ -48,6 +48,7 @@ import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
+import com.example.udos_wg_tohuwabohu.databinding.FragmentAddCalendarBinding
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -59,7 +60,7 @@ import java.util.*
 
 class CalendarAddFragment : Fragment() {
     private lateinit var mainActivity: MainActivity
-    private lateinit var _binding: FragmentFinanceAddBinding
+    private lateinit var _binding: FragmentAddCalendarBinding
     private lateinit var composeView: ComposeView
     private val dataHandler = DataHandler.getInstance()
     private val dbWriter = DBWriter.getInstance()
@@ -75,14 +76,14 @@ class CalendarAddFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentFinanceAddBinding.inflate(inflater, container, false)
+        _binding = FragmentAddCalendarBinding.inflate(inflater, container, false)
         val view = _binding.root
 
-        val createFinanceButton: Button = _binding.buttonCreateFinance
         val cancelButton: Button = _binding.cancelCreateButton
+        val createAppointmentButton: Button = _binding.buttonCreateAppointment
         val descriptionText: EditText = _binding.entryDescription
 
-        createFinanceButton.setOnClickListener {
+        createAppointmentButton.setOnClickListener {
             val description = descriptionText.text.toString()
             val date = dateChosen.value
             val time = timeChosen.value
@@ -100,7 +101,7 @@ class CalendarAddFragment : Fragment() {
         }
 
         cancelButton.setOnClickListener {
-            mainActivity.showFinanceFragment()
+            mainActivity.showCalendarAddFragment()
         }
 
         composeView = view.findViewById(R.id.compose_view)
