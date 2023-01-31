@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.udos_wg_tohuwabohu.databinding.ActivityLonelypageBinding
 import com.example.udos_wg_tohuwabohu.databinding.ActivityMainBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.Collections
+import com.example.udos_wg_tohuwabohu.dataclasses.ContactPerson
 import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.example.udos_wg_tohuwabohu.dataclasses.WG
 import com.google.firebase.auth.FirebaseAuth
@@ -39,7 +40,7 @@ class LonelyPageActivity: AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 val wg_id = document.get("wg_id")
-                Log.d(TAG, "onCreate von Lonelypage: wg_id: $wg_id")
+                Log.d(TAG, "onCreate Lonelypage: wg_id: $wg_id")
                 if (document.get("wg_id") != db.collection("wg").document("EmptyWG")) {
                     val intent = createMainActivityIntent(this@LonelyPageActivity, email!!)
                     startActivity(intent)
@@ -55,6 +56,7 @@ class LonelyPageActivity: AppCompatActivity() {
 
         binding.buttonLogoutLonelypage.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
+            Log.d(TAG,"User logged out")
             startActivity(Intent(this@LonelyPageActivity, LoginActivity::class.java))
             finish()
         }
@@ -79,9 +81,10 @@ class LonelyPageActivity: AppCompatActivity() {
                     binding.textfieldWgEntryCode.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(
                         this@LonelyPageActivity,
-                        "Please enter your code to join a WG.",
+                        "Bitte gib einen Beitritts-Code ein.",
                         Toast.LENGTH_SHORT
                     ).show()
+                    Log.d(TAG,"Invalid code")
                 }
                 else -> {
                     val uid = FirebaseAuth.getInstance().currentUser!!.uid
@@ -93,10 +96,12 @@ class LonelyPageActivity: AppCompatActivity() {
                             .get()
                             //Update User Profile and start Main Activity
                             .addOnSuccessListener { WG_documents ->
+                                Log.d(TAG,"Found WG")
                                 WG_documents.forEach {
                                     db.collection("mitbewohner").document(uid)
                                         .update("wg_id",db.collection("wg").document(it.id))
                                         .addOnSuccessListener {
+                                            Log.d(TAG,"Joined WG")
                                             val intent= createMainActivityIntent(this@LonelyPageActivity, email!!)
                                             startActivity(intent)
                                         }
@@ -114,7 +119,7 @@ class LonelyPageActivity: AppCompatActivity() {
         }
     }
 
-    fun createWG(email: String) = runBlocking<Unit> {
+    private fun createWG(email: String) = runBlocking<Unit> {
         try {
             val newWG = async { db.collection("wg").document() }.await()
             val newAnsprechpartner = async { db.collection("ansprechpartner").document() }.await()
@@ -129,6 +134,7 @@ class LonelyPageActivity: AppCompatActivity() {
                     )
                 )
             }.await()
+            Log.d(TAG,"ContactPerson created")
             async {
                 newWG.set(
                     hashMapOf(
@@ -140,29 +146,28 @@ class LonelyPageActivity: AppCompatActivity() {
                     )
                 )
             }.await()
+            Log.d(TAG,"WG created")
             async {
                 db.collection("mitbewohner")
                     .document(Firebase.auth.currentUser!!.uid)
                     .update("wg_id", newWG)
             }.await()
+            Log.d(TAG,"Roommate updated")
             val intent = createMainActivityIntent(this@LonelyPageActivity, email!!)
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.d("[LONELY PAGE]", e.toString())
+            Log.d(TAG, e.toString())
             Toast.makeText(this@LonelyPageActivity,"Es gab einen Fehler beim Erstellen der WG. Bitte versuche es erneut.",Toast.LENGTH_LONG).show()
         }
     }
 
-    fun createEntryCode(): Int {
+    private fun createEntryCode(): Int {
         val wgEntryCode = Random.nextInt(100000, 999999)
-//        if(codeList.contains(wgEntryCode.toLong())){
-//            return createEntryCode(codeList)
-//        }
         return wgEntryCode
     }
 
-    fun displayDatabaseError(context: Context) {
+    private fun displayDatabaseError(context: Context) {
         Toast.makeText(
             context,
             "Database Query Failed, Please Try Again",
@@ -170,7 +175,7 @@ class LonelyPageActivity: AppCompatActivity() {
         ).show()
     }
 
-    fun createMainActivityIntent(context: Context, email: String): Intent {
+    private fun createMainActivityIntent(context: Context, email: String): Intent {
         val intent = Intent(context, MainActivity::class.java)
         intent.flags =
             Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

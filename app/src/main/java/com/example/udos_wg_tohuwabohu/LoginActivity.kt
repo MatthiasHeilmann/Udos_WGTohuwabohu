@@ -3,6 +3,7 @@ package com.example.udos_wg_tohuwabohu
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.udos_wg_tohuwabohu.databinding.ActivityLoginBinding
@@ -11,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+    val TAG = "[Login Activity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,14 +55,14 @@ class LoginActivity : AppCompatActivity() {
                 TextUtils.isEmpty(binding.textLoginEmail.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(
                         this@LoginActivity,
-                        "Please enter Email.",
+                        "Bitte Email eingeben.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 TextUtils.isEmpty(binding.textLoginPassword.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(
                         this@LoginActivity,
-                        "Please enter Password.",
+                        "Bitte Passwort eingeben.",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else -> {
@@ -95,13 +97,12 @@ class LoginActivity : AppCompatActivity() {
                                     task.exception!!.message.toString(),
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                Log.d(TAG,"Login failed")
+                                Log.d(TAG,task.exception!!.message.toString(),)
                             }
                         }
                 }
             }
         }
     }
-
-
-
 }

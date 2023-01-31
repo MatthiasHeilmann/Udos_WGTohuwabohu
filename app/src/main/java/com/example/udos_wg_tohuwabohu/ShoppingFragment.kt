@@ -71,7 +71,7 @@ class ShoppingFragment : Fragment() {
         // add items button
         addItemButton.setOnClickListener { v ->
             // test logs
-            Log.d(TAG,"Button geklickt")
+            Log.d(TAG,"Button clicked")
             Log.d(TAG,shoppingList.toString() )
 
             if(TextUtils.isEmpty(entryField.text.toString().trim{it <= ' '})
@@ -112,7 +112,7 @@ class ShoppingFragment : Fragment() {
         return v
     }
 
-    fun deleteItems(shoppingList: SnapshotStateMap<String, Boolean>?){
+    private fun deleteItems(shoppingList: SnapshotStateMap<String, Boolean>?){
         shoppingList?.forEach{ item ->
             if (item.value) {
                 db.collection("wg")
@@ -143,7 +143,6 @@ class ShoppingFragment : Fragment() {
                 checked = checkedState.value,
                 onCheckedChange = {
                     checkedState.value = it;
-                    /*checkShoppinglistItem(item, checkedState)*/
                     dbWriter.checkShoppinglistItem(item, checkedState)
                 },
                 Modifier.size(30.dp),
@@ -155,7 +154,6 @@ class ShoppingFragment : Fragment() {
                 modifier = Modifier
                     .clickable {
                         checkedState.value = !checkedState.value;
-                        /*checkShoppinglistItem(item, checkedState)*/
                         dbWriter.checkShoppinglistItem(item, checkedState)
                     }.padding(start = 10.dp),
                 text = item.key,

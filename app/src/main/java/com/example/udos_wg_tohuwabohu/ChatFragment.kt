@@ -42,12 +42,10 @@ import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import java.text.DateFormatSymbols
 import java.util.*
 
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_CHAT_LIST = "chatList"
 
 
 class ChatFragment : Fragment() {
-
+    private val TAG = "[Chat Fragment]"
     private val dataHandler = DataHandler.getInstance()
     private val dbWriter = DBWriter.getInstance()
 
@@ -161,6 +159,7 @@ class ChatFragment : Fragment() {
                     val message =textFieldValue.trim{it <= ' '}.trim{it <= '\n'}
                     Log.d("[CHAT]",message)
                     if (message != "") {
+                        Log.d(TAG,"Sending message " +message)
                         uploadMessage(message)
                     } else {
                         Toast.makeText(
@@ -210,10 +209,8 @@ class ChatFragment : Fragment() {
                             style = MaterialTheme.typography.subtitle2,
                         )
                     }
-//                    Spacer(modifier = Modifier.height(1.dp))
 
                     Surface(
-//                        modifier = Modifier.fillMaxWidth(),
                         modifier = cardPadding,
                         shape = MaterialTheme.shapes.medium,
                         elevation = 5.dp
@@ -240,49 +237,12 @@ class ChatFragment : Fragment() {
                             )
                         }
                     }
-
-
-
-
                 }
             }
         }
     }
 
-    fun uploadMessage(text: String) {
+    private fun uploadMessage(text: String) {
         dbWriter.createChatMessage(text, Date(), dataHandler.user)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    @Preview(showBackground = true)
-    @Composable
-    fun GreetingBoxPreview() {
-        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        fun randomString() = List(10) { charPool.random() }.joinToString("")
-        val msgArr = arrayOf(
-            ChatMessage(randomString(), "Hello there", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Jo was geht", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-            ChatMessage(randomString(), "Hehehehehehdddasdasd", Date(), null),
-        )
-
-        dataHandler.addChatMessage(*msgArr)
-
-        ChatBox()
     }
 }
