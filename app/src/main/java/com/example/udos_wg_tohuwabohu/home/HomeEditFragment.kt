@@ -47,11 +47,12 @@ class HomeEditFragment : Fragment() {
             builder.setTitle("Änderungen speichern?")
             builder.setMessage("Bist Du sicher, dass Du die änderungen speichern willst?")
             builder.setPositiveButton("Ja") { _, _ ->
-                val parts = _binding.contactName.text.toString().split(" ")
+                val text = _binding.contactName.text.toString().trim()
+
                 DBWriter.getInstance().updateWgData(
                     _binding.wgName.text.toString(),
-                    parts[1],
-                    parts[0],
+                    text,
+                    "",
                     _binding.contactEmail.text.toString(),
                     _binding.contactPhone.text.toString(),
                     _binding.contactIban.text.toString()
