@@ -163,6 +163,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/contact_phone" />
 
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/compose_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="64dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_email" />
+
             <TextView
                 android:id="@+id/user_firstname"
                 android:layout_width="0dp"
@@ -235,13 +247,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="64dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="64dp"
                 android:text="Ausloggen"
                 android:textColor="#FFDDDDDD"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/user_email" />
+                app:layout_constraintTop_toBottomOf="@+id/compose_button" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
