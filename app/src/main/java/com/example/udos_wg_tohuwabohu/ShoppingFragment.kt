@@ -138,7 +138,7 @@ class ShoppingFragment : Fragment() {
     fun createItemRow(item: Map.Entry<String, Boolean>) {
         val checkedState = remember { mutableStateOf(false) }
         boxStates.add(checkedState)
-        Row (modifier = Modifier.padding(15.dp,5.dp,15.dp,1.dp)){
+        Row (modifier = Modifier.padding(45.dp,5.dp,45.dp,1.dp)){
             Checkbox(
                 checked = checkedState.value,
                 onCheckedChange = {
@@ -160,7 +160,7 @@ class ShoppingFragment : Fragment() {
                     }.padding(start = 10.dp),
                 text = item.key,
                 style = TextStyle(
-                    color = Color.White,
+                    color = UdoWhite,
                     fontSize = 20.sp,
                 )
             )
