@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         binding.textToolbar.text = FragmentTitle.Calendar.call
     }
 
-    private fun showCalendarAddFragment(){
+    fun showCalendarAddFragment(){
         val f = CalendarAddFragment()
         f.setMainActivity(this)
         replaceFragment(f)

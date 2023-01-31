@@ -74,7 +74,7 @@ class CalendarFragment : Fragment() {
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
     }
-}
+
 
 
 // Inflate the layout for this fragment
@@ -380,7 +380,7 @@ fun showTimePicker(
     ) {
         AndroidView(
             {
-                var mTimePicker = TimePicker(it)
+                val mTimePicker = TimePicker(it)
                 mTimePicker.setIs24HourView(true)
                 return@AndroidView mTimePicker
             },
@@ -430,7 +430,9 @@ fun CalendarFAB() {
             modifier = Modifier.padding(10.dp)
         ) {
             FloatingActionButton(
-                onClick = { popupActive = true },
+                onClick = {
+                  mainActivity.showCalendarAddFragment()
+                  },
                 modifier = Modifier
                     .requiredHeight(60.dp)
                     .requiredWidth(60.dp),
@@ -449,7 +451,7 @@ fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Bo
     val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
     val summedTimestamp = Timestamp(summedDate)
     if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
-        var dbw = DBWriter.getInstance()
+        val dbw = DBWriter.getInstance()
         dbw.createCalendarEntry(message, summedTimestamp)
         return true
     } else {
@@ -470,7 +472,7 @@ fun UdosTheme(
 }
 */
 
-
+}
 
 
 
