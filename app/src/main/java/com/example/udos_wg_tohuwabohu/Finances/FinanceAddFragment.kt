@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -53,12 +52,12 @@ class FinanceAddFragment : Fragment() {
         _binding = FragmentFinanceAddBinding.inflate(inflater, container, false)
         val view = _binding.root
 
-        val createTaskButton: Button = _binding.buttonCreateTask
-        val cancelButton: Button = view.findViewById(R.id.cancel_create_button)
-        val priceText: EditText = view.findViewById(R.id.entry_price)
-        val descriptionText: EditText = view.findViewById(R.id.entry_description)
+        val createFinanceButton: Button = _binding.buttonCreateFinance
+        val cancelButton: Button = _binding.cancelCreateButton
+        val priceText: EditText = _binding.entryPrice
+        val descriptionText: EditText = _binding.entryDescription
 
-        createTaskButton.setOnClickListener {
+        createFinanceButton.setOnClickListener {
             val description = descriptionText.text.toString()
             val price = priceText.text.toString().toDouble()
             val moucherIDs = listCheckedNames.keys.toTypedArray()

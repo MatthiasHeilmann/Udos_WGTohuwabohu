@@ -128,13 +128,6 @@ class MainActivity : AppCompatActivity() {
         binding.textToolbar.text = FragmentTitle.CreateNewTask.call
     }
 
-    fun showFinanceFragment(){
-        val f = FinanceFragment()
-        f.setMainActivity(this)
-        replaceFragment(f)
-        binding.textToolbar.text = FragmentTitle.Finances.call
-    }
-
     fun reloadTaskFragment(){
         if(binding.textToolbar.text == FragmentTitle.Tasks.call){// sorry for that again
             val f = TasksFragment()
