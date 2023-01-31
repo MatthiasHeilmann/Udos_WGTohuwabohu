@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorSecondaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:timePickerMode">clock</item>
     </style>
 
     <style name="Theme.Udos_WGTohuwabohu.NoActionBar">

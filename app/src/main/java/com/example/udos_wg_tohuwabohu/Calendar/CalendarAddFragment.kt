@@ -1,9 +1,13 @@
 package com.example.udos_wg_tohuwabohu.Calendar
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
+import android.util.Xml
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +51,9 @@ import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
+import com.google.android.material.internal.ThemeEnforcement.obtainStyledAttributes
 import com.google.firebase.Timestamp
+import org.xmlpull.v1.XmlPullParser
 import java.sql.Time
 import java.util.*
 
@@ -58,8 +64,8 @@ class CalendarAddFragment : Fragment() {
     private val dataHandler = DataHandler.getInstance()
     private val dbWriter = DBWriter.getInstance()
 
-    var dateChosen = mutableStateOf(Date())
-    var timeChosen = mutableStateOf(Time(Date().time))
+    private var dateChosen = mutableStateOf(Date().apply { year += 1900 })
+    private var timeChosen = mutableStateOf(Time(Date().time))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,15 +85,15 @@ class CalendarAddFragment : Fragment() {
         createFinanceButton.setOnClickListener {
             val description = descriptionText.text.toString()
             val date = dateChosen.value
-            val time  = timeChosen.value
+            val time = timeChosen.value
             val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
             val summedTimestamp = Timestamp(summedDate)
 
             val validEntries = validateCalendarEntry(description, summedTimestamp)
 
-            if(validEntries)
+            if (validEntries)
                 dbWriter.createCalendarEntry(description, summedTimestamp)
-            else{
+            else {
                 Log.w("Validation Error", "Please enter a description and a time in the future!")
             }
             mainActivity.showFinanceFragment()
@@ -116,7 +122,7 @@ class CalendarAddFragment : Fragment() {
 
         if (timePickerActive.value) {
             Box(
-                contentAlignment = Alignment.Center, // you apply alignment to all children
+                contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Popup(
@@ -127,15 +133,21 @@ class CalendarAddFragment : Fragment() {
                     },
                     properties = UdoPopupProperties()
                 ) {
-                    showTimePicker(timeChosen.value, onTimeChange = {
-                        timeChosen.value = it
-                        timeChanged = true
-                    }, onDismiss = { timePickerActive.value = it })
+                    showTimePicker(
+                        onTimeChange = {
+                            timeChosen.value = it
+                            timeChanged = true
+                        },
+                        onDismiss = {
+                            focusManager.clearFocus(true)
+                            timePickerActive.value = it
+                        }
+                    )
                 }
             }
         } else if (datePickerActive.value) {
             Box(
-                contentAlignment = Alignment.Center, // you apply alignment to all children
+                contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Popup(
@@ -146,10 +158,12 @@ class CalendarAddFragment : Fragment() {
                     },
                     properties = UdoPopupProperties()
                 ) {
-                    showDatePicker(dateChosen.value, onDateChange = {
-                        dateChosen.value = it
-                        dateChanged = true
-                    }, onDismiss = { datePickerActive.value = it })
+                    showDatePicker(
+                        onDateChange = {
+                            dateChosen.value = it
+                            dateChanged = true
+                        },
+                        onDismiss = { datePickerActive.value = it })
                 }
             }
         }
@@ -157,7 +171,7 @@ class CalendarAddFragment : Fragment() {
         Column {
             Box(modifier = Modifier.padding(5.dp)) {
                 OutlinedTextFieldWithPopup(
-                    value = "${dateChosen.value.date}.${dateChosen.value.month + 1}.${dateChosen.value.year}",
+                    value = formatDate(dateChosen.value),
                     label = "Datum",
                     popupBinding = datePickerActive,
                     focusRequester = focusRequester,
@@ -167,8 +181,9 @@ class CalendarAddFragment : Fragment() {
 
             Box(modifier = Modifier.padding(5.dp)) {
                 OutlinedTextFieldWithPopup(
-                    value = "${timeChosen.value.hours}:${timeChosen.value.minutes}",
-                    label = "Zeitpunk",
+                    value = formatNumber(timeChosen.value.hours) +
+                            ":" + formatNumber(timeChosen.value.minutes),
+                    label = "Zeitpunkt",
                     popupBinding = timePickerActive,
                     focusRequester = focusRequester,
                     painter = painterResource(R.drawable.ic_baseline_access_time_24)
@@ -189,7 +204,7 @@ class CalendarAddFragment : Fragment() {
     ) {
 
         OutlinedTextField(
-            value = value, // "${dateChosen.date}.${dateChosen.month + 1}.${dateChosen.year}",
+            value = value,
             onValueChange = { },
             readOnly = true,
             modifier = Modifier
@@ -224,7 +239,6 @@ class CalendarAddFragment : Fragment() {
 
     @Composable
     fun showDatePicker(
-        dateVar: Date,
         onDateChange: (Date) -> Unit,
         onDismiss: (Boolean) -> Unit
     ) {
@@ -240,10 +254,9 @@ class CalendarAddFragment : Fragment() {
                 { CalendarView(it) },
                 modifier = Modifier
                     .wrapContentWidth()
-                    .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
+                    .background(Color.Transparent, shape = RoundedCornerShape(4.dp)),
                 update = { views ->
-                    views.setOnDateChangeListener { calendarView, i, i2, i3 ->
-                        //var tempTimeVar = Timestamp(java.util.Date(i,i2+1,i3+1))
+                    views.setOnDateChangeListener { _, i, i2, i3 ->
                         onDateChange(Date(i, i2, i3))
                     }
                 }
@@ -254,7 +267,8 @@ class CalendarAddFragment : Fragment() {
                     .requiredWidth(190.dp)
                     .requiredHeight(50.dp)
                     .padding(5.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally),
+                colors  = UdoPopupButtonColors()
             ) {
                 Text(
                     "Speichern",
@@ -267,8 +281,7 @@ class CalendarAddFragment : Fragment() {
 
     @Composable
     fun showTimePicker(
-        timeVar: java.sql.Time,
-        onTimeChange: (java.sql.Time) -> Unit,
+        onTimeChange: (Time) -> Unit,
         onDismiss: (Boolean) -> Unit
     ) {
         Card(
@@ -281,13 +294,18 @@ class CalendarAddFragment : Fragment() {
         ) {
             AndroidView(
                 {
-                    var mTimePicker = TimePicker(it)
+
+                    val mTimePicker = TimePicker(
+                        it,
+                        null,
+                        R.style.Theme_Udos_WGTohuwabohu
+                    )
                     mTimePicker.setIs24HourView(true)
                     return@AndroidView mTimePicker
                 },
                 modifier = Modifier
                     .wrapContentWidth()
-                    .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
+                    .background(Color.Transparent, shape = RoundedCornerShape(4.dp)),
                 update = { views ->
                     views.setOnTimeChangedListener { timePicker, hour, minute ->
                         onTimeChange(Time(hour, minute, 0))
@@ -300,7 +318,8 @@ class CalendarAddFragment : Fragment() {
                     .requiredWidth(190.dp)
                     .requiredHeight(50.dp)
                     .padding(5.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally),
+                colors  = UdoPopupButtonColors()
             ) {
                 Text(
                     "Speichern",
@@ -311,8 +330,17 @@ class CalendarAddFragment : Fragment() {
         }
     }
 
-    fun validateCalendarEntry(message: String, summedTimestamp: Timestamp): Boolean {
-        return  (summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")
+    private fun formatDate(date: Date): String {
+        return "${formatNumber(date.date)}.${formatNumber(date.month + 1)}." +
+                formatNumber(date.year)
+    }
+
+    private fun formatNumber(n: Int): String {
+        return if (n > 9) "" + n else "0" + n
+    }
+
+    private fun validateCalendarEntry(message: String, summedTimestamp: Timestamp): Boolean {
+        return (summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")
     }
 
     fun setMainActivity(mainActivity: MainActivity) {
