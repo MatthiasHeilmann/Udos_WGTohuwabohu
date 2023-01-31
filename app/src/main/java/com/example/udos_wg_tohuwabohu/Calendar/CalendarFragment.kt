@@ -28,7 +28,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
 import com.example.udos_wg_tohuwabohu.*
-import com.example.udos_wg_tohuwabohu.R
 import com.example.udos_wg_tohuwabohu.databinding.FragmentCalendarBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
@@ -42,6 +41,7 @@ class CalendarFragment : Fragment() {
     private lateinit var composeView: ComposeView
     private lateinit var mainActivity: MainActivity
     private lateinit var _binding: FragmentCalendarBinding
+
     //Get Calendar data from Data Handler
     var calendarData = DataHandler.getInstance().getCalendar()
 
@@ -54,7 +54,7 @@ class CalendarFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCalendarBinding.inflate(inflater,container,false)
+        _binding = FragmentCalendarBinding.inflate(inflater, container, false)
         // This property is only valid between onCreateView and onDestroyView.
         val v: View = _binding.root
         // Dispose of the Composition when the view's LifecycleOwner
@@ -71,394 +71,395 @@ class CalendarFragment : Fragment() {
         }
         return v
     }
+
     fun setMainActivity(mainActivity: MainActivity) {
         this.mainActivity = mainActivity
     }
 
 
-
 // Inflate the layout for this fragment
 //return inflater.inflate(R.layout.fragment_calendar, container, false)
 
-@OptIn(ExperimentalUnitApi::class)
-@Composable
-fun CalendarCard(date: String, time: String, shape: Shape, cardText: String) {
-    UdosTheme {
-        Card(
-            colors = UdoCardTheme(), modifier = Modifier
-                .fillMaxWidth()
+    @OptIn(ExperimentalUnitApi::class)
+    @Composable
+    fun CalendarCard(date: String, time: String, shape: Shape, cardText: String) {
+        UdosTheme {
+            Card(
+                colors = UdoCardTheme(), modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(colors = UdoDateCardTheme()) {
+                        Text(
+                            text = date.padStart(2, "0".single()),
+                            style = MaterialTheme.typography.displaySmall,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Text(
+                            text = "Ab $time Uhr",
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = cardText,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(35.dp, 5.dp, 5.dp, 10.dp)
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>) {
+        val sortedCalendarData =
+            calendarData.sortedWith(compareBy { it.get(key = it.keys.first()) })
+        var currentMonth = 100
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .padding(5.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Card(colors = UdoDateCardTheme()) {
+            sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
+                val month = appointment.values.first().toDate().month
+                if (currentMonth != month) {
+                    currentMonth = month
                     Text(
-                        text = date.padStart(2, "0".single()),
-                        style = MaterialTheme.typography.displaySmall,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Text(
-                        text = "Ab $time Uhr",
+                        text = DateFormatSymbols.getInstance().months[month],
                         textAlign = TextAlign.End,
-                        modifier = Modifier.padding(5.dp)
+                        color = UdoWhite
+                    )
+                    Divider(
+                        thickness = 2.dp,
+                        color = UdoWhite,
+                        modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 5.dp)
                     )
                 }
+                Log.d("Calendar Date:", appointment.values.first().toDate().toString())
+                CalendarCard(
+                    date = appointment.values.first().toDate().date.toString(),
+                    time = appointment.values.first()
+                        .toDate().hours.toString() + ":" + appointment.values.first()
+                        .toDate().minutes.toString().padStart(2, "0".single()),
+                    shape = MaterialTheme.shapes.large,
+                    cardText = appointment.keys.first()
+                )
             }
-            Text(
-                text = cardText,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(35.dp, 5.dp, 5.dp, 10.dp)
-            )
         }
     }
-}
 
-@Composable
-fun FullCalendar(calendarData: ArrayList<HashMap<String, Timestamp>>) {
-    val sortedCalendarData = calendarData.sortedWith(compareBy { it.get(key = it.keys.first()) })
-    var currentMonth = 100
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(5.dp)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+    @Composable
+    fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
+        var descriptionText by remember { mutableStateOf("") }
+        var datePickerActive by rememberSaveable { mutableStateOf(false) }
+        var timePickerActive by rememberSaveable { mutableStateOf(false) }
+        var dateChanged by rememberSaveable { mutableStateOf(false) }
+        var timeChanged by rememberSaveable { mutableStateOf(false) }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        var dateChosen by rememberSaveable { mutableStateOf(java.util.Date(0)) }
+        var timeChosen by rememberSaveable { mutableStateOf(java.sql.Time(0, 0, 0)) }
+
+        if (timePickerActive) {
+            Box(
+                contentAlignment = Alignment.Center, // you apply alignment to all children
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Popup(
+                    alignment = Alignment.Center,
+                    onDismissRequest = { timePickerActive = false },
+                    properties = UdoPopupProperties()
+                ) {
+                    showTimePicker(timeChosen, onTimeChange = {
+                        timeChosen = it
+                        timeChanged = true
+                    }, onDismiss = { timePickerActive = it })
+                }
+            }
+        } else if (datePickerActive) {
+            Box(
+                contentAlignment = Alignment.Center, // you apply alignment to all children
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Popup(
+                    alignment = Alignment.Center,
+                    onDismissRequest = { datePickerActive = false },
+                    properties = UdoPopupProperties()
+                ) {
+                    showDatePicker(dateChosen, onDateChange = {
+                        dateChosen = it
+                        dateChanged = true
+                    }, onDismiss = { datePickerActive = it })
+                }
+            }
+        } else {
+            Card(
+                colors = UdoPopupCardTheme(),
+                modifier = Modifier
+                    .requiredHeight(height = 450.dp)
+                    .requiredWidth(width = 300.dp)
+                    .padding(2.dp),
+                border = BorderStroke(2.dp, UdoDarkBlue)
+            ) {
+                Column(modifier = Modifier.padding(5.dp)) {
+                    Text(text = "Termin Hinzufügen", style = MaterialTheme.typography.popupLabel)
+                    Text(text = "Termin Beschreibung", style = MaterialTheme.typography.popupLabel)
+                    OutlinedTextField(
+                        value = descriptionText,
+                        onValueChange = { text: String -> descriptionText = text },
+                        modifier = Modifier
+                            .requiredHeight(height = 100.dp)
+                            .requiredWidth(width = 300.dp),
+                        enabled = true,
+                        readOnly = false,
+                        placeholder = { Text(text = "Hallo") },
+                        colors = UdoPopupTextfieldColors(),
+                        keyboardOptions = UdoKeyboardOptions(),
+                        keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+                    )
+                    Text(text = "Termin Start", style = MaterialTheme.typography.popupLabel)
+                    Row(modifier = Modifier.padding(5.dp)) {
+
+                        Button(
+                            onClick = { datePickerActive = true },
+                            modifier = Modifier
+                                .requiredWidth(200.dp)
+                                .requiredHeight(50.dp)
+                                .padding(5.dp)
+                        ) {
+                            Text(
+                                "  Datum Auswählen  ",
+                                color = UdoWhite,
+                                fontSize = 15.sp
+                            )
+                        }
+                        Card(
+                            colors = UdoUnfocusableCardTheme(),
+                            modifier = Modifier
+                                .requiredWidth(width = 100.dp)
+                                .requiredHeight(height = 50.dp)
+                                .padding(5.dp)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                if (dateChanged) {
+                                    Text(
+                                        text = "${dateChosen.date}.${dateChosen.month + 1}.${dateChosen.year}",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Row(modifier = Modifier.padding(5.dp)) {
+                        Button(
+                            onClick = { timePickerActive = true },
+                            modifier = Modifier
+                                .requiredWidth(200.dp)
+                                .requiredHeight(50.dp)
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                "Zeitpunkt Auswählen",
+                                color = UdoWhite,
+                                fontSize = 15.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Card(
+                            colors = UdoUnfocusableCardTheme(),
+                            modifier = Modifier
+                                .requiredWidth(width = 100.dp)
+                                .requiredHeight(height = 50.dp)
+                                .padding(5.dp)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                if (timeChanged) {
+                                    Text(
+                                        text = timeChosen.hours.toString() + ":"
+                                                + (timeChosen.minutes).toString()
+                                            .padStart(2, "0".single()),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Button(
+                        onClick = {
+                            val validChange =
+                                validateCalendarEntry(descriptionText, dateChosen, timeChosen)
+                            if (validChange) {
+                                onDismiss(false)
+                            }
+                        },
+                        modifier = Modifier
+                            .requiredWidth(290.dp)
+                            .requiredHeight(75.dp)
+                            .padding(5.dp)
+                    ) {
+                        Text(text = "Termin Speichern")
+                    }
+                }
+
+
+                //DatePickerDialog(LocalContext.current)
+            }
+        }
+    }
+
+
+    @Composable
+    fun showDatePicker(
+        dateVar: java.util.Date,
+        onDateChange: (java.util.Date) -> Unit,
+        onDismiss: (Boolean) -> Unit
     ) {
-        sortedCalendarData.forEach { appointment: MutableMap<String, Timestamp> ->
-            val month = appointment.values.first().toDate().month
-            if (currentMonth != month) {
-                currentMonth = month
-                Text(
-                    text = DateFormatSymbols.getInstance().months[month],
-                    textAlign = TextAlign.End,
-                    color = UdoWhite
-                )
-                Divider(
-                    thickness = 2.dp,
-                    color = UdoWhite,
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 5.dp)
-                )
-            }
-            Log.d("Calendar Date:", appointment.values.first().toDate().toString())
-            CalendarCard(
-                date = appointment.values.first().toDate().date.toString(),
-                time = appointment.values.first()
-                    .toDate().hours.toString() + ":" + appointment.values.first()
-                    .toDate().minutes.toString().padStart(2, "0".single()),
-                shape = MaterialTheme.shapes.large,
-                cardText = appointment.keys.first()
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-@Composable
-fun CalendarPopup(onDismiss: (Boolean) -> Unit) {
-    var descriptionText by remember { mutableStateOf("") }
-    var datePickerActive by rememberSaveable { mutableStateOf(false) }
-    var timePickerActive by rememberSaveable { mutableStateOf(false) }
-    var dateChanged by rememberSaveable { mutableStateOf(false) }
-    var timeChanged by rememberSaveable { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    var dateChosen by rememberSaveable { mutableStateOf(java.util.Date(0)) }
-    var timeChosen by rememberSaveable { mutableStateOf(java.sql.Time(0, 0, 0)) }
-
-    if (timePickerActive) {
-        Box(
-            contentAlignment = Alignment.Center, // you apply alignment to all children
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Popup(
-                alignment = Alignment.Center,
-                onDismissRequest = { timePickerActive = false },
-                properties = UdoPopupProperties()
-            ) {
-                showTimePicker(timeChosen, onTimeChange = {
-                    timeChosen = it
-                    timeChanged = true
-                }, onDismiss = { timePickerActive = it })
-            }
-        }
-    } else if (datePickerActive) {
-        Box(
-            contentAlignment = Alignment.Center, // you apply alignment to all children
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Popup(
-                alignment = Alignment.Center,
-                onDismissRequest = { datePickerActive = false },
-                properties = UdoPopupProperties()
-            ) {
-                showDatePicker(dateChosen, onDateChange = {
-                    dateChosen = it
-                    dateChanged = true
-                }, onDismiss = { datePickerActive = it })
-            }
-        }
-    } else {
+        //var dateChosen by remember { mutableStateOf(Timestamp(0,0)) }
         Card(
             colors = UdoPopupCardTheme(),
             modifier = Modifier
                 .requiredHeight(height = 450.dp)
                 .requiredWidth(width = 300.dp)
-                .padding(2.dp),
+                .padding(30.dp),
             border = BorderStroke(2.dp, UdoDarkBlue)
         ) {
-            Column(modifier = Modifier.padding(5.dp)) {
-                Text(text = "Termin Hinzufügen", style = MaterialTheme.typography.popupLabel)
-                Text(text = "Termin Beschreibung", style = MaterialTheme.typography.popupLabel)
-                OutlinedTextField(
-                    value = descriptionText,
-                    onValueChange = { text: String -> descriptionText = text },
-                    modifier = Modifier
-                        .requiredHeight(height = 100.dp)
-                        .requiredWidth(width = 300.dp),
-                    enabled = true,
-                    readOnly = false,
-                    placeholder = { Text(text = "Hallo") },
-                    colors = UdoPopupTextfieldColors(),
-                    keyboardOptions = UdoKeyboardOptions(),
-                    keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+            AndroidView(
+                { CalendarView(it) },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
+                update = { views ->
+                    views.setOnDateChangeListener { calendarView, i, i2, i3 ->
+                        //var tempTimeVar = Timestamp(java.util.Date(i,i2+1,i3+1))
+                        onDateChange(java.util.Date(i, i2, i3))
+                    }
+                }
+            )
+            Button(
+                onClick = { onDismiss(false) },
+                modifier = Modifier
+                    .requiredWidth(190.dp)
+                    .requiredHeight(50.dp)
+                    .padding(5.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    "Speichern",
+                    color = UdoWhite,
+                    fontSize = 15.sp
                 )
-                Text(text = "Termin Start", style = MaterialTheme.typography.popupLabel)
-                Row(modifier = Modifier.padding(5.dp)) {
+            }
+        }
+    }
 
-                    Button(
-                        onClick = { datePickerActive = true },
-                        modifier = Modifier
-                            .requiredWidth(200.dp)
-                            .requiredHeight(50.dp)
-                            .padding(5.dp)
-                    ) {
-                        Text(
-                            "  Datum Auswählen  ",
-                            color = UdoWhite,
-                            fontSize = 15.sp
-                        )
-                    }
-                    Card(
-                        colors = UdoUnfocusableCardTheme(),
-                        modifier = Modifier
-                            .requiredWidth(width = 100.dp)
-                            .requiredHeight(height = 50.dp)
-                            .padding(5.dp)
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            if (dateChanged) {
-                                Text(
-                                    text = "${dateChosen.date}.${dateChosen.month + 1}.${dateChosen.year}",
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        }
+    @Composable
+    fun showTimePicker(
+        timeVar: java.sql.Time,
+        onTimeChange: (java.sql.Time) -> Unit,
+        onDismiss: (Boolean) -> Unit
+    ) {
+        Card(
+            colors = UdoPopupCardTheme(),
+            modifier = Modifier
+                .requiredHeight(height = 500.dp)
+                .requiredWidth(width = 300.dp)
+                .padding(30.dp),
+            border = BorderStroke(2.dp, UdoDarkBlue)
+        ) {
+            AndroidView(
+                {
+                    val mTimePicker = TimePicker(it)
+                    mTimePicker.setIs24HourView(true)
+                    return@AndroidView mTimePicker
+                },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
+                update = { views ->
+                    views.setOnTimeChangedListener { timePicker, hour, minute ->
+                        onTimeChange(java.sql.Time(hour, minute, 0))
                     }
                 }
-                Row(modifier = Modifier.padding(5.dp)) {
-                    Button(
-                        onClick = { timePickerActive = true },
-                        modifier = Modifier
-                            .requiredWidth(200.dp)
-                            .requiredHeight(50.dp)
-                            .padding(4.dp)
-                    ) {
-                        Text(
-                            "Zeitpunkt Auswählen",
-                            color = UdoWhite,
-                            fontSize = 15.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Card(
-                        colors = UdoUnfocusableCardTheme(),
-                        modifier = Modifier
-                            .requiredWidth(width = 100.dp)
-                            .requiredHeight(height = 50.dp)
-                            .padding(5.dp)
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            if (timeChanged) {
-                                Text(
-                                    text = timeChosen.hours.toString() + ":"
-                                            + (timeChosen.minutes).toString()
-                                        .padStart(2, "0".single()),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        }
-                    }
+            )
+            Button(
+                onClick = { onDismiss(false) },
+                modifier = Modifier
+                    .requiredWidth(190.dp)
+                    .requiredHeight(50.dp)
+                    .padding(5.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    "Speichern",
+                    color = UdoWhite,
+                    fontSize = 15.sp
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun CalendarFAB() {
+        var popupActive by remember { mutableStateOf(false) }
+        if (popupActive) {
+            UdosTheme {
+                Popup(
+                    alignment = Alignment.Center,
+                    onDismissRequest = { popupActive = false },
+                    properties = UdoPopupProperties()
+                ) {
+                    CalendarPopup(onDismiss = { popupActive = it })
                 }
-                Button(
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.padding(10.dp)
+            ) {
+                FloatingActionButton(
                     onClick = {
-                        val validChange =
-                            validateCalendarEntry(descriptionText, dateChosen, timeChosen)
-                        if (validChange) {
-                            onDismiss(false)
-                        }
+                        mainActivity?.showCalendarAddFragment()
                     },
                     modifier = Modifier
-                        .requiredWidth(290.dp)
-                        .requiredHeight(75.dp)
-                        .padding(5.dp)
-                ) {
-                    Text(text = "Termin Speichern")
-                }
+                        .requiredHeight(60.dp)
+                        .requiredWidth(60.dp),
+                    shape = CircleShape,
+                    containerColor = UdoOrange
+                ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
             }
-
-
-            //DatePickerDialog(LocalContext.current)
         }
     }
-}
 
-
-@Composable
-fun showDatePicker(
-    dateVar: java.util.Date,
-    onDateChange: (java.util.Date) -> Unit,
-    onDismiss: (Boolean) -> Unit
-) {
-    //var dateChosen by remember { mutableStateOf(Timestamp(0,0)) }
-    Card(
-        colors = UdoPopupCardTheme(),
-        modifier = Modifier
-            .requiredHeight(height = 450.dp)
-            .requiredWidth(width = 300.dp)
-            .padding(30.dp),
-        border = BorderStroke(2.dp, UdoDarkBlue)
-    ) {
-        AndroidView(
-            { CalendarView(it) },
-            modifier = Modifier
-                .wrapContentWidth()
-                .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
-            update = { views ->
-                views.setOnDateChangeListener { calendarView, i, i2, i3 ->
-                    //var tempTimeVar = Timestamp(java.util.Date(i,i2+1,i3+1))
-                    onDateChange(java.util.Date(i, i2, i3))
-                }
-            }
+    fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Boolean {
+        Log.w(
+            "validateCalendarEntry: ",
+            "$message ${date.date} ${date.month} ${date.year} ${time.hours} ${time.minutes} ${time.seconds}"
         )
-        Button(
-            onClick = { onDismiss(false) },
-            modifier = Modifier
-                .requiredWidth(190.dp)
-                .requiredHeight(50.dp)
-                .padding(5.dp)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                "Speichern",
-                color = UdoWhite,
-                fontSize = 15.sp
-            )
+        val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
+        val summedTimestamp = Timestamp(summedDate)
+        if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
+            val dbw = DBWriter.getInstance()
+            dbw.createCalendarEntry(message, summedTimestamp)
+            return true
+        } else {
+            Log.w("Validation Error", "Please enter a description and a time in the future!")
+            return false
         }
     }
-}
-
-@Composable
-fun showTimePicker(
-    timeVar: java.sql.Time,
-    onTimeChange: (java.sql.Time) -> Unit,
-    onDismiss: (Boolean) -> Unit
-) {
-    Card(
-        colors = UdoPopupCardTheme(),
-        modifier = Modifier
-            .requiredHeight(height = 500.dp)
-            .requiredWidth(width = 300.dp)
-            .padding(30.dp),
-        border = BorderStroke(2.dp, UdoDarkBlue)
-    ) {
-        AndroidView(
-            {
-                val mTimePicker = TimePicker(it)
-                mTimePicker.setIs24HourView(true)
-                return@AndroidView mTimePicker
-            },
-            modifier = Modifier
-                .wrapContentWidth()
-                .background(UdoWhite, shape = RoundedCornerShape(4.dp)),
-            update = { views ->
-                views.setOnTimeChangedListener { timePicker, hour, minute ->
-                    onTimeChange(java.sql.Time(hour, minute, 0))
-                }
-            }
-        )
-        Button(
-            onClick = { onDismiss(false) },
-            modifier = Modifier
-                .requiredWidth(190.dp)
-                .requiredHeight(50.dp)
-                .padding(5.dp)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                "Speichern",
-                color = UdoWhite,
-                fontSize = 15.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun CalendarFAB() {
-    var popupActive by remember { mutableStateOf(false) }
-    if (popupActive) {
-        UdosTheme {
-            Popup(
-                alignment = Alignment.Center,
-                onDismissRequest = { popupActive = false },
-                properties = UdoPopupProperties()
-            ) {
-                CalendarPopup(onDismiss = { popupActive = it })
-            }
-        }
-    } else {
-        Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.padding(10.dp)
-        ) {
-            FloatingActionButton(
-                onClick = {
-                  mainActivity.showCalendarAddFragment()
-                  },
-                modifier = Modifier
-                    .requiredHeight(60.dp)
-                    .requiredWidth(60.dp),
-                shape = CircleShape,
-                containerColor = UdoOrange
-            ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
-        }
-    }
-}
-
-fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Boolean {
-    Log.w(
-        "validateCalendarEntry: ",
-        "$message ${date.date} ${date.month} ${date.year} ${time.hours} ${time.minutes} ${time.seconds}"
-    )
-    val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
-    val summedTimestamp = Timestamp(summedDate)
-    if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
-        val dbw = DBWriter.getInstance()
-        dbw.createCalendarEntry(message, summedTimestamp)
-        return true
-    } else {
-        Log.w("Validation Error", "Please enter a description and a time in the future!")
-        return false
-    }
-}
 
 
 /*@Composable
