@@ -61,7 +61,7 @@ class DBWriter private constructor() {
         val feMap: MutableMap<String, Any> = HashMap()
         feMap["bezeichnung"] = description
         feMap["goenner"] = userDocRef
-        feMap["preis"] = price
+        feMap["preis"] = priceOffset
         feMap["schnorrer"] = moucherDocRefs
         feMap["timestamp"] = Date()
 
