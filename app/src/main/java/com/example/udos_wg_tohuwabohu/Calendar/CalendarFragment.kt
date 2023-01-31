@@ -39,8 +39,9 @@ import java.util.*
 
 
 class CalendarFragment : Fragment() {
-    lateinit var composeView: ComposeView
-
+    private lateinit var composeView: ComposeView
+    private lateinit var mainActivity: MainActivity
+    private lateinit var _binding: FragmentCalendarBinding
     //Get Calendar data from Data Handler
     var calendarData = DataHandler.getInstance().getCalendar()
 
@@ -52,15 +53,15 @@ class CalendarFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        var _binding: FragmentCalendarBinding? = null
+    ): View {
+        _binding = FragmentCalendarBinding.inflate(inflater,container,false)
         // This property is only valid between onCreateView and onDestroyView.
-        var v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+        val v: View = _binding.root
         // Dispose of the Composition when the view's LifecycleOwner
         // is destroyed
         //setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-        composeView = v.findViewById(R.id.compose_view)
+        composeView = _binding.composeView
         composeView.setContent {
             // In  Compose world
             calendarData?.let { FullCalendar(it) }
@@ -69,6 +70,9 @@ class CalendarFragment : Fragment() {
             //    .build().show(supportFragmentManager, "DATE_PICKER")
         }
         return v
+    }
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
     }
 }
 
