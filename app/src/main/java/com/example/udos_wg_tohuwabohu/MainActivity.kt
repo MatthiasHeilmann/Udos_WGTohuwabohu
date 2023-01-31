@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
             showHome()
         }
         binding.homeEdit.setOnClickListener{
+            Log.d(TAG,"Displaying HomeEdit...")
             val f = HomeEditFragment()
             f.setMainActivity(this)
             replaceFragment(f)
@@ -101,6 +102,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_chat -> {
                     replaceFragment(ChatFragment())
                     binding.textToolbar.text = FragmentTitle.Chat.call
+                    Log.d(TAG,"Displaying Chat...")
                 }
                 R.id.nav_finance -> {
                     showFinanceFragment()
@@ -111,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_shopping -> {
                     replaceFragment(ShoppingFragment())
                     binding.textToolbar.text = FragmentTitle.Shoppinglist.call
+                    Log.d(TAG,"Displaying Shopping...")
                 }
                 R.id.nav_calender -> {
                     showCalendarFragment()
@@ -162,6 +165,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.Calendar.call
+        Log.d(TAG,"Displaying Calendar...")
     }
 
     fun showCalendarAddFragment(){
@@ -169,6 +173,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.CalendarAdd.call
+        Log.d(TAG,"Displaying CalendarAdd...")
     }
 
     fun openAddFinanceFragment(){
@@ -176,6 +181,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.FinancesAdd.call
+        Log.d(TAG,"Displaying FinancesAdd...")
     }
 
     fun showFinanceFragment(){
@@ -183,6 +189,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.Finances.call
+        Log.d(TAG,"Displaying Finances...")
     }
 
     fun openCreateTaskFragment(){
@@ -190,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.CreateNewTask.call
+        Log.d(TAG,"Displaying TasksAdd...")
     }
 
     fun reloadTaskFragment(){
@@ -204,6 +212,7 @@ class MainActivity : AppCompatActivity() {
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.Tasks.call
+        Log.d(TAG,"Displaying Tasks...")
     }
     fun reloadHomeFragment(){
         if(binding.textToolbar.text == FragmentTitle.WG.call){
@@ -222,6 +231,7 @@ class MainActivity : AppCompatActivity() {
         binding.textToolbar.text = FragmentTitle.WG.call
         binding.homeEdit.visibility = View.VISIBLE
         binding.homeButton.visibility = View.INVISIBLE
+        Log.d(TAG,"Displaying Home...")
     }
     fun restartApp() {
         val context = this@MainActivity
@@ -351,7 +361,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun convertRoommateArrayToString(referenceList: java.util.ArrayList<DocumentReference>): String{
+    private fun convertRoommateArrayToString(referenceList: java.util.ArrayList<DocumentReference>): String{
         var roommate_string = ""
         referenceList.forEach{
             reference ->
@@ -362,11 +372,4 @@ class MainActivity : AppCompatActivity() {
         roommate_string= roommate_string.dropLast(2)
         return roommate_string
     }
-    /*private class MyAlarm : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            Log.d("Alarm Bell", "Alarm just fired")
-        }*/
 }

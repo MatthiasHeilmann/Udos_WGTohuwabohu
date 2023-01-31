@@ -11,6 +11,7 @@ import com.example.udos_wg_tohuwabohu.dataclasses.ConnectionCheck
 
 class NoConnectionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNoConnectionBinding
+    private var TAG = "[NoConnectionActivity]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +22,8 @@ class NoConnectionActivity : AppCompatActivity() {
             retry()
         }
     }
+
+    // Try reconnecting every 5 seconds
     var handler: Handler = Handler()
     var runnable: Runnable? = null
     var delay = 5000
@@ -32,18 +35,22 @@ class NoConnectionActivity : AppCompatActivity() {
         }.also { runnable = it }, delay.toLong())
         super.onResume()
     }
+    // stop reconnecting
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(runnable!!)
     }
     fun retry(){
         if(ConnectionCheck.getInstance().checkConnection(this)){
+            Log.d(TAG,"Reconnecting successfull")
             onPause()
             val intent = Intent(this@NoConnectionActivity, LoginActivity::class.java)
             intent.flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
+        }else{
+            Log.d(TAG,"Reconnecting failed")
         }
     }
 }

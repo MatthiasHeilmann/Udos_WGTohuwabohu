@@ -5,7 +5,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,11 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +32,7 @@ import com.example.udos_wg_tohuwabohu.dataclasses.Roommate
 import com.google.firebase.auth.FirebaseAuth
 
 class HomeFragment : Fragment() {
-    private  lateinit var composeView: ComposeView
+    private lateinit var composeView: ComposeView
     private lateinit var composeButton: ComposeView
     private val dataHandler = DataHandler.getInstance()
     private val TAG = "[HOME FRAGMENT]"
@@ -197,14 +193,25 @@ class HomeFragment : Fragment() {
     @Composable
     fun PermissionsButton(permissionsGranted: Boolean) {
         if (!permissionsGranted) {
-            Button(onClick = {
-                requestMultiplePermissionsLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.POST_NOTIFICATIONS,
-                        Manifest.permission.SCHEDULE_EXACT_ALARM
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = UdoLightBlue,
+                    contentColor = UdoWhite
+                ), onClick = {
+                    requestMultiplePermissionsLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.POST_NOTIFICATIONS,
+                            Manifest.permission.SCHEDULE_EXACT_ALARM
+                        )
                     )
-                )
-            }) {
+                    Toast.makeText(
+                        mainActivity!!.applicationContext,
+                        "Diese Einstellung ist zukünftig evtl. nur in den App Einstellungen änderbar!",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                })
+            {
                 Text("Benachrichtigungen zulassen")
             }
         }
