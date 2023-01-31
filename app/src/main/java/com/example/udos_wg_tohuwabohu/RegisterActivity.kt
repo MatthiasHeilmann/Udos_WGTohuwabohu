@@ -16,7 +16,7 @@ import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-
+    private val TAG = "[Register Activity]"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
@@ -35,16 +35,19 @@ class RegisterActivity : AppCompatActivity() {
                     Toast.makeText(this@RegisterActivity,
                     "Bitte gib alle Informationen an!",
                     Toast.LENGTH_SHORT).show()
+                    Log.d(TAG,"Input error")
                 }
                 !isEmailValid(binding.textfieldRegisterEmail.text.toString().trim{it <= ' '}) -> {
                     Toast.makeText(this@RegisterActivity,
                         "Bitte gib eine gültige Emailadresse an!",
                         Toast.LENGTH_SHORT).show()
+                    Log.d(TAG,"Input error")
                 }
                 binding.textfieldRegisterPassword.text.toString().trim{it <= ' '}.length<6 -> {
                     Toast.makeText(this@RegisterActivity,
                         "Dein Passwort ist zu kurz!",
                         Toast.LENGTH_SHORT).show()
+                    Log.d(TAG,"Input error")
                 }
                 else -> {
                     // get email and password
@@ -63,9 +66,10 @@ class RegisterActivity : AppCompatActivity() {
                                     val firebaseUser: FirebaseUser = task.result!!.user!!
                                     Toast.makeText(
                                         this@RegisterActivity,
-                                        "You are registered successfully.",
+                                        "Registrierung erfolgreich!",
                                         Toast.LENGTH_SHORT
                                         ).show()
+                                    Log.d(TAG,"Successfully registered")
                                     // go to main activity with uid and email
                                     val intent = Intent(this@RegisterActivity,LonelyPageActivity::class.java)
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -83,6 +87,8 @@ class RegisterActivity : AppCompatActivity() {
                                         task.exception!!.message.toString(),
                                         Toast.LENGTH_SHORT
                                         ).show()
+                                    Log.d(TAG,"Error at registration")
+                                    Log.d(TAG,task.exception!!.message.toString())
                                 }
                             }
                         )
@@ -95,11 +101,11 @@ class RegisterActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         val emptyWG = db.collection("wg").document("EmptyWG")
         val user: MutableMap<String, Any> = HashMap()
-        user["vorname"] = firstname                         // ["feldbezeichnung aus collection"]
+        user["vorname"] = firstname
         user["nachname"] = lastname
         user["username"] = username
         user["emailID"] = email
-        user["wg_id"] = emptyWG                                  // evtl ändern wegen referenz
+        user["wg_id"] = emptyWG
         user["coin_count"] = 0
         user["guteNudel_count"] = 0
         user["kontostand"] = 0
@@ -108,7 +114,6 @@ class RegisterActivity : AppCompatActivity() {
             .document(Firebase.auth.currentUser!!.uid)
             .set(user)
     }
-    // TODo: permission on logout: GETTING PERMISSION DENIED?
 
     val EMAIL_REGEX = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})";
     fun isEmailValid(email: String): Boolean {
