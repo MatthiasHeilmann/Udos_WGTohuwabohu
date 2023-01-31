@@ -53,7 +53,7 @@ class DBWriter private constructor() {
         // Update roommates with new balance
         updateBalance(dataHandler.user, price - priceOffset)
         moucherIDs.forEach { moucherID ->
-            if(isMoucher) return@forEach
+            if(moucherID == dataHandler.user!!.docID) return@forEach
             updateBalance(dataHandler.getRoommate(moucherID), price / moucherIDs.size * -1)
         }
 
