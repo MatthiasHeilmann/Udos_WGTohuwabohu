@@ -14,6 +14,7 @@ import com.example.udos_wg_tohuwabohu.Tasks.TasksFragment
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -133,7 +134,7 @@ class DBLoader private constructor() {
         try {
             financeRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.FINANCES.call)
-                .orderBy("timestamp").limit(50)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             dataLoadError()
@@ -332,6 +333,7 @@ class DBLoader private constructor() {
         dataHandler.wg.first().let {
             db.collection(Collections.WG.call)
                 .document(it.docID).collection(Collections.FINANCES.call)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()

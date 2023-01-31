@@ -114,18 +114,18 @@ class MainActivity : AppCompatActivity() {
         binding.textToolbar.text = FragmentTitle.FinancesAdd.call
     }
 
-    fun openCreateTaskFragment(){
-        val f = CreateTaskFragment()
-        f.setMainActivity(this)
-        replaceFragment(f)
-        binding.textToolbar.text = FragmentTitle.CreateNewTask.call
-    }
-
     fun showFinanceFragment(){
         val f = FinanceFragment()
         f.setMainActivity(this)
         replaceFragment(f)
         binding.textToolbar.text = FragmentTitle.Finances.call
+    }
+
+    fun openCreateTaskFragment(){
+        val f = CreateTaskFragment()
+        f.setMainActivity(this)
+        replaceFragment(f)
+        binding.textToolbar.text = FragmentTitle.CreateNewTask.call
     }
 
     fun reloadTaskFragment(){
