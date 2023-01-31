@@ -85,8 +85,9 @@ class CalendarAddFragment : Fragment() {
 
         createAppointmentButton.setOnClickListener {
             val description = descriptionText.text.toString()
-            val date = dateChosen.value
+            val date = dateChosen.value.apply { year -= 1900 }
             val time = timeChosen.value
+
             val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
             val summedTimestamp = Timestamp(summedDate)
 
@@ -97,6 +98,7 @@ class CalendarAddFragment : Fragment() {
             else {
                 Log.w("Validation Error", "Please enter a description and a time in the future!")
             }
+
             mainActivity.showCalendarFragment()
         }
 
@@ -269,7 +271,7 @@ class CalendarAddFragment : Fragment() {
                     .requiredHeight(50.dp)
                     .padding(5.dp)
                     .align(Alignment.CenterHorizontally),
-                colors  = UdoPopupButtonColors()
+                colors = UdoPopupButtonColors()
             ) {
                 Text(
                     "Speichern",
@@ -297,9 +299,7 @@ class CalendarAddFragment : Fragment() {
                 {
 
                     val mTimePicker = TimePicker(
-                        it,
-                        null,
-                        R.style.Theme_Udos_WGTohuwabohu
+                        it
                     )
                     mTimePicker.setIs24HourView(true)
                     return@AndroidView mTimePicker
@@ -320,7 +320,7 @@ class CalendarAddFragment : Fragment() {
                     .requiredHeight(50.dp)
                     .padding(5.dp)
                     .align(Alignment.CenterHorizontally),
-                colors  = UdoPopupButtonColors()
+                colors = UdoPopupButtonColors()
             ) {
                 Text(
                     "Speichern",
