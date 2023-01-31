@@ -44,24 +44,24 @@ class DBWriter private constructor() {
             db.collection("Mitbewohner").document(it)
         } as ArrayList<DocumentReference>
 
-        var priceOffset = price
-
-        if(moucherDocRefs.contains(userDocRef)){
-            priceOffset = price - (price / moucherIDs.size)
-            moucherDocRefs.remove(userDocRef)
+        var priceOffset = 0.0
+        val isMoucher = moucherDocRefs.contains(userDocRef)
+        if(isMoucher){
+            priceOffset = price / moucherIDs.size
         }
 
         // Update roommates with new balance
-        updateBalance(dataHandler.user, priceOffset)
+        updateBalance(dataHandler.user, price - priceOffset)
         moucherIDs.forEach { moucherID ->
-            updateBalance(dataHandler.getRoommate(moucherID), priceOffset / moucherIDs.size * -1)
+            if(isMoucher) return@forEach
+            updateBalance(dataHandler.getRoommate(moucherID), price / moucherIDs.size * -1)
         }
 
         // Upload finance entry to database
         val feMap: MutableMap<String, Any> = HashMap()
         feMap["bezeichnung"] = description
         feMap["goenner"] = userDocRef
-        feMap["preis"] = priceOffset
+        feMap["preis"] = price
         feMap["schnorrer"] = moucherDocRefs
         feMap["timestamp"] = Date()
 
