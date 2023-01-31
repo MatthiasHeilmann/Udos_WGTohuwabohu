@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.TextFieldColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -17,12 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.R
-import com.example.udos_wg_tohuwabohu.UdoLightBlue
-import com.example.udos_wg_tohuwabohu.UdoOrange
-import com.example.udos_wg_tohuwabohu.UdoWhite
 import com.example.udos_wg_tohuwabohu.databinding.FragmentFinanceAddBinding
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 
@@ -74,7 +75,7 @@ class FinanceAddFragment : Fragment() {
                     onValueChange = { },
                     readOnly = true,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .padding(64.dp,10.dp),
                     label = { Text("Schnorrer") },
                     trailingIcon = {
                         Icon(icon, "contentDescription",
@@ -84,14 +85,17 @@ class FinanceAddFragment : Fragment() {
                         color = UdoWhite,
                         fontSize = 20.sp
                     ),
-                    //colors = TextFieldColors(focusedLabelColor= UdoOrange, focusedIndicatorColor= UdoWhite, containerColor = UdoLightBlue)
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = UdoOrange,
+                        focusedLabelColor = UdoOrange
+                    )
                 )
 
-                // Create a drop-down menu with list of cities,
-                // when clicked, set the Text Field text as the city selected
+                // Create a drop-down menu
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(UdoLightBlue)
                 ) {
                     listItems.forEachIndexed { index, name ->
                         println("making for: $name ($index)")
@@ -103,6 +107,7 @@ class FinanceAddFragment : Fragment() {
                                 else
                                     listCheckedNames.remove(name)
                             },
+                            modifier = Modifier.background(UdoLightBlue),
                             text = {
                                 Row() {
                                     Checkbox(
@@ -114,6 +119,9 @@ class FinanceAddFragment : Fragment() {
                                             else
                                                 listCheckedNames.remove(name)
                                         },
+                                        colors = CheckboxDefaults.colors(
+                                            checkedColor = UdoOrange
+                                        )
                                     )
                                     Text(
                                         modifier = Modifier
@@ -126,7 +134,8 @@ class FinanceAddFragment : Fragment() {
                                                 else
                                                     listCheckedNames.remove(name)
                                             },
-                                        text = name
+                                        text = name,
+                                        color = UdoWhite
                                     )
                                 }
                             }

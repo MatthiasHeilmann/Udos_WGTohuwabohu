@@ -147,6 +147,9 @@ class ShoppingFragment : Fragment() {
                     dbWriter.checkShoppinglistItem(item, checkedState)
                 },
                 Modifier.size(30.dp),
+                colors = CheckboxDefaults.colors(
+                    checkedColor = UdoOrange
+                )
             )
             Text(
                 modifier = Modifier
