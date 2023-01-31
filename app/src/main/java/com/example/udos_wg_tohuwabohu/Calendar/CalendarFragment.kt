@@ -39,8 +39,9 @@ import java.util.*
 
 
 class CalendarFragment : Fragment() {
-    lateinit var composeView: ComposeView
-
+    private lateinit var composeView: ComposeView
+    private lateinit var mainActivity: MainActivity
+    private lateinit var _binding: FragmentCalendarBinding
     //Get Calendar data from Data Handler
     var calendarData = DataHandler.getInstance().getCalendar()
 
@@ -52,15 +53,15 @@ class CalendarFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        var _binding: FragmentCalendarBinding? = null
+    ): View {
+        _binding = FragmentCalendarBinding.inflate(inflater,container,false)
         // This property is only valid between onCreateView and onDestroyView.
-        var v: View = inflater.inflate(R.layout.fragment_calendar, container, false)
+        val v: View = _binding.root
         // Dispose of the Composition when the view's LifecycleOwner
         // is destroyed
         //setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-        composeView = v.findViewById(R.id.compose_view)
+        composeView = _binding.composeView
         composeView.setContent {
             // In  Compose world
             calendarData?.let { FullCalendar(it) }
@@ -70,7 +71,10 @@ class CalendarFragment : Fragment() {
         }
         return v
     }
-}
+    fun setMainActivity(mainActivity: MainActivity) {
+        this.mainActivity = mainActivity
+    }
+
 
 
 // Inflate the layout for this fragment
@@ -376,7 +380,7 @@ fun showTimePicker(
     ) {
         AndroidView(
             {
-                var mTimePicker = TimePicker(it)
+                val mTimePicker = TimePicker(it)
                 mTimePicker.setIs24HourView(true)
                 return@AndroidView mTimePicker
             },
@@ -426,7 +430,9 @@ fun CalendarFAB() {
             modifier = Modifier.padding(10.dp)
         ) {
             FloatingActionButton(
-                onClick = { popupActive = true },
+                onClick = {
+                  mainActivity.showCalendarAddFragment()
+                  },
                 modifier = Modifier
                     .requiredHeight(60.dp)
                     .requiredWidth(60.dp),
@@ -445,7 +451,7 @@ fun validateCalendarEntry(message: String, date: java.util.Date, time: Time): Bo
     val summedDate = Date(date.year, date.month, date.date, time.hours, time.minutes)
     val summedTimestamp = Timestamp(summedDate)
     if ((summedTimestamp.seconds > Timestamp.now().seconds) and (message != "")) {
-        var dbw = DBWriter.getInstance()
+        val dbw = DBWriter.getInstance()
         dbw.createCalendarEntry(message, summedTimestamp)
         return true
     } else {
@@ -466,7 +472,7 @@ fun UdosTheme(
 }
 */
 
-
+}
 
 
 
