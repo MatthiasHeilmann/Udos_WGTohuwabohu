@@ -1,15 +1,12 @@
 package com.example.udos_wg_tohuwabohu
 
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.PendingIntent.*
-import android.app.TaskInfo
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.google.firebase.Timestamp
 
 class AlarmReceiver : BroadcastReceiver() {
     private var notificationManager: NotificationManagerCompat? = null
