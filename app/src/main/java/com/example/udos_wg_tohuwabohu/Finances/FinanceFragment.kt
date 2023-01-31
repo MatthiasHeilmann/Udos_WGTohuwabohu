@@ -1,4 +1,4 @@
-package com.example.udos_wg_tohuwabohu
+package com.example.udos_wg_tohuwabohu.Finances
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,23 +8,17 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
 import androidx.fragment.app.Fragment
+import com.example.udos_wg_tohuwabohu.*
 import com.example.udos_wg_tohuwabohu.dataclasses.DBWriter
 import com.example.udos_wg_tohuwabohu.dataclasses.DataHandler
 import com.example.udos_wg_tohuwabohu.dataclasses.FinanceEntry
@@ -172,7 +166,7 @@ class FinanceFragment : Fragment() {
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-            sortedList.forEach { listElement ->
+            sortedList.forEach { roommate ->
                 Card(
                     modifier = Modifier
                         .padding(60.dp, 5.dp)
@@ -183,7 +177,7 @@ class FinanceFragment : Fragment() {
                     ) {
                         Column() {
                             Text(
-                                text = listElement.username ?: "Unbekannt",
+                                text = roommate.username ?: "unknown",
                                 modifier = Modifier.padding(14.dp, 7.dp),
                                 color = UdoWhite,
                                 fontWeight = FontWeight.Bold
@@ -191,10 +185,10 @@ class FinanceFragment : Fragment() {
                         }
                         Spacer(modifier = Modifier.weight(0.5f))
                         Column {
-                            val b = (listElement.balance ?: 0f).toFloat()
+                            val b = (roommate.balance ?: 0f).toFloat()
                             val color = if (b > 0f) UdoGreen else if (b == 0f) UdoWhite else UdoRed
                             Text(
-                                text = "" + ((listElement.balance?.times(100) ?: 0f) as Double)
+                                text = "" + ((roommate.balance?.times(100) ?: 0f) as Double)
                                     .roundToInt().div(100f) + "€",
                                 color = color,
                                 modifier = Modifier.padding(14.dp, 7.dp),
@@ -222,36 +216,6 @@ class FinanceFragment : Fragment() {
                 shape = CircleShape,
                 containerColor = UdoOrange
             ) { Text("+", color = UdoDarkBlue, fontSize = 30.sp) }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-    @Composable
-    fun FinancePopup(onDismiss: (Boolean) -> Unit) {
-
-
-        Card(
-            colors = UdoPopupCardTheme(),
-            modifier = Modifier
-                .requiredHeight(height = 450.dp)
-                .requiredWidth(width = 300.dp)
-                .padding(2.dp),
-            border = BorderStroke(2.dp, UdoDarkBlue)
-        ) {
-            Column(modifier = Modifier.padding(5.dp)) {
-                Text(text = "Ausgabe hinzufügen", style = MaterialTheme.typography.popupLabel)
-            }
-        }
-    }
-
-    @Composable
-    fun SimpleSpaceAroundColoumn(content: @Composable() (ColumnScope.() -> Unit)) {
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceAround
-        )
-        {
-            content()
         }
     }
 
