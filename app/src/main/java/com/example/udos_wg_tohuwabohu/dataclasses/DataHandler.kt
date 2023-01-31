@@ -33,7 +33,7 @@ data class DataHandler(
     fun addFinanceEntry(vararg finances: FinanceEntry) {
         for (f in finances) {
             if (!financeEntries.contains(f)) {
-                financeEntries.add(f)
+                financeEntries.add(0, f)
             }
             else{
                 val i = financeEntries.indexOf(f)

@@ -134,7 +134,7 @@ class DBLoader private constructor() {
         try {
             financeRes = db.collection(Collections.WG.call)
                 .document(wgRef.id).collection(Collections.FINANCES.call)
-                .orderBy("timestamp", Query.Direction.DESCENDING).limit(50)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .get().asDeferred().await()
         } catch (e: Exception) {
             dataLoadError()
@@ -333,6 +333,7 @@ class DBLoader private constructor() {
         dataHandler.wg.first().let {
             db.collection(Collections.WG.call)
                 .document(it.docID).collection(Collections.FINANCES.call)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     firebaseFirestoreException?.let {
                         Toast.makeText(mainActivity, it.message, Toast.LENGTH_LONG).show()
