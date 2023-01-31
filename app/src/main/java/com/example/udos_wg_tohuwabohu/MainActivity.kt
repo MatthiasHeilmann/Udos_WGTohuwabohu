@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     private companion object{
         private const val CHANNEL_ID= "UdosChannel"
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         val emailID = intent.getStringExtra("email_id")
 
         createNotificationChannel()
+
 
         // load database
         dbLoader.setMainActivity(this)
@@ -125,14 +127,6 @@ class MainActivity : AppCompatActivity() {
             binding.homeButton.visibility = View.VISIBLE
             true
         }
-        val requestMultiplePermissionsLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestMultiplePermissions()
-            ) { permissions ->
-                permissions.entries.forEach {
-                    Log.e("DEBUG", "${it.key} = ${it.value}")
-                }
-            }
 
         when {
             (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
@@ -155,9 +149,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             else -> {
-                requestMultiplePermissionsLauncher.launch(
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS,Manifest.permission.SCHEDULE_EXACT_ALARM)
-                )
 
             }
         }
