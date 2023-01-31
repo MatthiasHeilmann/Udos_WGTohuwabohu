@@ -81,7 +81,7 @@ class CalendarAddFragment : Fragment() {
 
         val cancelButton: Button = _binding.cancelCreateButton
         val createAppointmentButton: Button = _binding.buttonCreateAppointment
-        val descriptionText: EditText = _binding.entryDescription
+        val descriptionText: EditText = _binding.nameOfTaskToCreate
 
         createAppointmentButton.setOnClickListener {
             val description = descriptionText.text.toString()
