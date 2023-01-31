@@ -44,17 +44,17 @@ class DBWriter private constructor() {
             db.collection("Mitbewohner").document(it)
         } as ArrayList<DocumentReference>
 
-        var priceOffset = 0.0
+        var priceOffset = price
 
         if(moucherDocRefs.contains(userDocRef)){
-            priceOffset = price / moucherIDs.size
+            priceOffset = price - (price / moucherIDs.size)
             moucherDocRefs.remove(userDocRef)
         }
 
         // Update roommates with new balance
-        updateBalance(dataHandler.user, price - priceOffset)
+        updateBalance(dataHandler.user, priceOffset)
         moucherIDs.forEach { moucherID ->
-            updateBalance(dataHandler.getRoommate(moucherID), price / moucherIDs.size * -1)
+            updateBalance(dataHandler.getRoommate(moucherID), priceOffset / moucherIDs.size * -1)
         }
 
         // Upload finance entry to database
